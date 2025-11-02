@@ -13,6 +13,30 @@ body {
     overflow: hidden;
 }
 
+/* Hero Header */
+.hero-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+.hero-header h1 {
+    color: #00d4ff;
+    margin-bottom: 0.5rem;
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #00d4ff 0%, #00ff88 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-subtitle {
+    color: #888;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
 /* Sidebar Navigation */
 .sidebar {
     width: 260px;
@@ -26,6 +50,13 @@ body {
 .logo {
     padding: 0 1.5rem 2rem;
     border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+    text-align: center;
+}
+
+.logo-mark {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
 }
 
 .logo h2 {
@@ -34,9 +65,25 @@ body {
     margin-bottom: 0.25rem;
 }
 
+.brand-name {
+    color: #00d4ff;
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
 .logo .version {
     color: #888;
     font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+}
+
+.tagline {
+    color: #00ff88;
+    font-size: 0.7rem;
+    margin: 0;
+    font-style: italic;
 }
 
 .nav-menu {
@@ -460,4 +507,41 @@ code {
 
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(0, 212, 255, 0.5);
+}
+
+/* CCOIN Financial Styles */
+.financial-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+}
+
+.financial-row:last-of-type {
+    border-bottom: none;
+}
+
+/* ARSS Metering Styles */
+.meter-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.arss-progress {
+    width: 100%;
+    height: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 1rem 0 0.5rem;
+}
+
+.arss-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #00d4ff 0%, #00ff88 100%);
+    transition: width 0.3s ease;
 }

@@ -1,0 +1,2 @@
+This is a placeholder WASM file for the zkSnark circuit.
+In production, this should be a compiled zkSnark circuit for zero-knowledge proofs.

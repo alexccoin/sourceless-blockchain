@@ -10,8 +10,16 @@
     <!-- Sidebar Navigation -->
     <nav class="sidebar">
         <div class="logo">
-            <h2>🔷 SOURCELESS</h2>
+            <div class="logo-mark">
+                <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M24 4L44 14V34L24 44L4 34V14L24 4Z" stroke="#00d4ff" stroke-width="2" fill="rgba(0, 212, 255, 0.1)"/>
+                    <path d="M24 12L36 18V30L24 36L12 30V18L24 12Z" stroke="#00ff88" stroke-width="2" fill="rgba(0, 255, 136, 0.1)"/>
+                    <circle cx="24" cy="24" r="4" fill="#00d4ff"/>
+                </svg>
+            </div>
+            <h2 class="brand-name">SOURCELESS</h2>
             <p class="version">v0.13 STARW Node</p>
+            <p class="tagline">Zero-Knowledge Future</p>
         </div>
         
         <div class="nav-menu">
@@ -88,7 +96,10 @@
 
         <!-- Dashboard Page -->
         <section id="page-dashboard" class="page active">
-            <h1>Dashboard</h1>
+            <div class="hero-header">
+                <h1>Dashboard</h1>
+                <p class="hero-subtitle">Real-time insights across Fuel • Financial • VM • Identity ledgers</p>
+            </div>
             
             <div class="stats-grid">
                 <div class="stat-card">
@@ -107,6 +118,16 @@
                     <small class="stat-change">Delegated nodes active</small>
                 </div>
                 <div class="stat-card">
+                    <h3>ARSS Balance</h3>
+                    <p class="stat-value" id="arssBalance">0</p>
+                    <small class="stat-change">VM hosting credits</small>
+                </div>
+                <div class="stat-card">
+                    <h3>CCOIN Balance</h3>
+                    <p class="stat-value" id="ccoinBalance">0</p>
+                    <small class="stat-change">Financial network</small>
+                </div>
+                <div class="stat-card">
                     <h3>Your Domains</h3>
                     <p class="stat-value" id="domainCount">0</p>
                     <small class="stat-change">STR.domains owned</small>
@@ -117,6 +138,48 @@
                 <div class="card">
                     <h3>Multi-Ledger Status</h3>
                     <div id="ledgerStatus"></div>
+                </div>
+                <div class="card">
+                    <h3>CCOIN Financial Network</h3>
+                    <div id="ccoinFinancial">
+                        <div class="financial-row">
+                            <span>Balance:</span>
+                            <strong id="ccoin-balance">0 CCOIN</strong>
+                        </div>
+                        <div class="financial-row">
+                            <span>Pending Txs:</span>
+                            <strong id="ccoin-pending">0</strong>
+                        </div>
+                        <div class="financial-row">
+                            <span>Cross-Chain:</span>
+                            <strong id="ccoin-bridges">5 networks</strong>
+                        </div>
+                        <button class="btn-secondary" onclick="openBridge()">Open Bridge</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h3>ARSS VM Metering</h3>
+                    <div id="arssMetering">
+                        <div class="meter-row">
+                            <span>Total ARSS:</span>
+                            <strong id="arss-total">1000 ARSS</strong>
+                        </div>
+                        <div class="meter-row">
+                            <span>Used (Hosting):</span>
+                            <strong id="arss-used">250 ARSS</strong>
+                        </div>
+                        <div class="meter-row">
+                            <span>Available:</span>
+                            <strong id="arss-available">750 ARSS</strong>
+                        </div>
+                        <div class="arss-progress">
+                            <div class="arss-bar" style="width: 25%"></div>
+                        </div>
+                        <small>Hosting 5 contracts • 250 ARSS/month</small>
+                    </div>
                 </div>
                 <div class="card">
                     <h3>Recent Transactions</h3>
