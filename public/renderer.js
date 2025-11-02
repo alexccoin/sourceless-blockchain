@@ -127,19 +127,19 @@ async function loadDashboard() {
     const ledgerStatus = document.getElementById('ledgerStatus');
     ledgerStatus.innerHTML = `
         <div style="margin-bottom: 1rem;">
-            <strong>Main Ledger (STR Transfers)</strong><br>
+            <strong>Fuel Ledger (STR Fuel)</strong><br>
             <small>Height: 12,345 | Mining Reward: 100 STR</small>
         </div>
         <div style="margin-bottom: 1rem;">
-            <strong>Asset Ledger (Domains & NFTs)</strong><br>
+            <strong>STR.Domains (Identity & Library)</strong><br>
             <small>Height: 8,234 | Mining Reward: 50 STR</small>
         </div>
         <div style="margin-bottom: 1rem;">
-            <strong>Contract Ledger (Smart Contracts)</strong><br>
+            <strong>STARW VM (Contracts & ARSS)</strong><br>
             <small>Height: 5,678 | Mining Reward: 50 STR</small>
         </div>
         <div>
-            <strong>Governance Ledger (DAO & Voting)</strong><br>
+            <strong>Governance DAO</strong><br>
             <small>Height: 1,234 | Mining Reward: 25 STR</small>
         </div>
     `;

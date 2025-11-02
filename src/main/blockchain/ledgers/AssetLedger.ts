@@ -133,7 +133,8 @@ export class AssetLedger extends Blockchain {
       ...baseStats,
       totalDomains: this.domains.size,
       totalNFTs: this.nfts.size,
-      ledgerType: 'Asset Ledger (Domains & NFTs)'
+      // Rebranded: STR.Domains as database library and identity validation
+      ledgerType: 'STR.Domains (Identity & Library)'
     };
   }
 }

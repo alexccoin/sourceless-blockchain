@@ -64,7 +64,8 @@ export class MainLedger extends Blockchain {
       ...baseStats,
       totalSupply: this.getTotalSupply(),
       circulatingSupply: this.getCirculatingSupply(),
-      ledgerType: 'Main Ledger (STR Transfers)'
+      // Rebranded: SourceLess Main Ledger is the STR Fuel of the ecosystem
+      ledgerType: 'Fuel Ledger (STR Fuel)'
     };
   }
 }

@@ -41,13 +41,13 @@ export function autoRunAll(): Systems {
   console.log(`   ✅ KYC Status: Verified`);
 
   // 2. Initialize Multi-Ledger System
-  console.log('\n📍 Step 2: Initializing Multi-Ledger System...');
+  console.log('\n📍 Step 2: Initializing Multi-Ledger System (Fuel • Financial • VM • Identity)...');
   const ledgerManager = new LedgerManager();
 
   // 3. Mine initial blocks on all ledgers
   console.log('\n📍 Step 3: Mining initial blocks...');
   ledgerManager.mainLedger.minePendingTransactions(defaultWallet.address);
-  console.log('   ✅ Main Ledger genesis block mined');
+  console.log('   ✅ Fuel Ledger (STR Fuel) genesis block mined');
 
   // 4. Start P2P network
   console.log('\n📍 Step 4: Starting P2P Network...');

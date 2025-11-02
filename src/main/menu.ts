@@ -63,31 +63,31 @@ const createMenu = () => {
             label: 'Blockchain',
             submenu: [
                 {
-                    label: 'Main Ledger',
+                    label: 'Fuel Ledger (STR)',
                     accelerator: 'CmdOrCtrl+1',
                     click: () => {
-                        // Switch to Main Ledger
+                        // Switch to Fuel Ledger
                     }
                 },
                 {
-                    label: 'Asset Ledger',
+                    label: 'STR.Domains (Identity)',
                     accelerator: 'CmdOrCtrl+2',
                     click: () => {
-                        // Switch to Asset Ledger
+                        // Switch to STR.Domains
                     }
                 },
                 {
-                    label: 'Contract Ledger',
+                    label: 'STARW VM (ARSS)',
                     accelerator: 'CmdOrCtrl+3',
                     click: () => {
-                        // Switch to Contract Ledger
+                        // Switch to STARW VM
                     }
                 },
                 {
-                    label: 'Governance Ledger',
+                    label: 'Governance DAO',
                     accelerator: 'CmdOrCtrl+4',
                     click: () => {
-                        // Switch to Governance Ledger
+                        // Switch to Governance DAO
                     }
                 },
                 {

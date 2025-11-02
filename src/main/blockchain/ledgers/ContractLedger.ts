@@ -132,7 +132,8 @@ export class ContractLedger extends Blockchain {
       ...baseStats,
       totalContracts: this.contracts.size,
       totalContractBalance,
-      ledgerType: 'Contract Ledger (Smart Contracts)'
+      // Rebranded: STARW VM executes contracts; ARSS token powers hosting space
+      ledgerType: 'STARW VM (Contracts & ARSS)'
     };
   }
 }
