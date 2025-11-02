@@ -1,0 +1,44 @@
+# Node & Electron
+node_modules/
+dist/
+out/
+build/
+release/
+coverage/
+.parcel-cache/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# OS/Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Env/Secrets
+.env
+.env.*
+
+# Electron Builder
+*.map
+*.dmp
+*.pid
+*.pid.lock
+*-unpacked/
+**/*.asar
+**/*.asar.unpacked
+**/*.snap
+
+# Cache
+.cache/
+tmp/
+temp/
+
+# TypeScript build
+tsbuildinfo.tsbuildinfo
+*.tsbuildinfo

@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sourceless Blockchain v0.13 - STARW Personal Node</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar">
+        <div class="logo">
+            <h2>🔷 SOURCELESS</h2>
+            <p class="version">v0.13 STARW Node</p>
+        </div>
+        
+        <div class="nav-menu">
+            <button class="nav-item active" data-page="dashboard">
+                <span class="icon">📊</span>
+                <span>Dashboard</span>
+            </button>
+            <button class="nav-item" data-page="wallet">
+                <span class="icon">💳</span>
+                <span>Wallet</span>
+            </button>
+            <button class="nav-item" data-page="explorer">
+                <span class="icon">🔍</span>
+                <span>Block Explorer</span>
+            </button>
+            <button class="nav-item" data-page="contracts">
+                <span class="icon">📝</span>
+                <span>Smart Contracts</span>
+            </button>
+            <button class="nav-item" data-page="domains">
+                <span class="icon">🌐</span>
+                <span>STR.Domains</span>
+            </button>
+            <button class="nav-item" data-page="ares">
+                <span class="icon">🤖</span>
+                <span>ARES AI</span>
+            </button>
+            <button class="nav-item" data-page="appless">
+                <span class="icon">⚡</span>
+                <span>AppLess</span>
+            </button>
+            <button class="nav-item" data-page="governance">
+                <span class="icon">🗳️</span>
+                <span>Governance</span>
+            </button>
+            <button class="nav-item" data-page="bridge">
+                <span class="icon">🌉</span>
+                <span>Cross-Chain</span>
+            </button>
+            <button class="nav-item" data-page="settings">
+                <span class="icon">⚙️</span>
+                <span>Settings</span>
+            </button>
+        </div>
+
+        <div class="node-status">
+            <div class="status-indicator">
+                <span class="dot"></span>
+                <span id="nodeStatus">Syncing...</span>
+            </div>
+            <div class="status-info">
+                <small>Peers: <span id="peerCount">0</span></small>
+                <small>Block: <span id="blockHeight">0</span></small>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="content">
+        <!-- Header -->
+        <header class="top-bar">
+            <div class="search-bar">
+                <input type="text" id="globalSearch" placeholder="Search blocks, transactions, addresses, domains..." />
+                <button class="search-btn">🔍</button>
+            </div>
+            <div class="header-actions">
+                <button class="btn-icon" title="Notifications">🔔</button>
+                <button class="btn-icon" title="Help">❓</button>
+                <div class="wallet-indicator">
+                    <span id="walletAddress">No Wallet</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Page -->
+        <section id="page-dashboard" class="page active">
+            <h1>Dashboard</h1>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Balance</h3>
+                    <p class="stat-value" id="totalBalance">0 STR</p>
+                    <small class="stat-change">≈ $0.00 USD</small>
+                </div>
+                <div class="stat-card">
+                    <h3>Staked</h3>
+                    <p class="stat-value" id="stakedAmount">0 STR</p>
+                    <small class="stat-change">Earning rewards</small>
+                </div>
+                <div class="stat-card">
+                    <h3>Network TPS</h3>
+                    <p class="stat-value" id="networkTPS">100,000</p>
+                    <small class="stat-change">Delegated nodes active</small>
+                </div>
+                <div class="stat-card">
+                    <h3>Your Domains</h3>
+                    <p class="stat-value" id="domainCount">0</p>
+                    <small class="stat-change">STR.domains owned</small>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h3>Multi-Ledger Status</h3>
+                    <div id="ledgerStatus"></div>
+                </div>
+                <div class="card">
+                    <h3>Recent Transactions</h3>
+                    <div id="recentTransactions"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Wallet Page -->
+        <section id="page-wallet" class="page">
+            <h1>Wallet Manager</h1>
+            
+            <div class="card wallet-info">
+                <h3>Your Wallet</h3>
+                <div class="wallet-details">
+                    <div class="detail-row">
+                        <span>ZK13STR Address:</span>
+                        <code id="wallet-address"></code>
+                        <button class="btn-copy" onclick="copyAddress()">📋 Copy</button>
+                    </div>
+                    <div class="detail-row">
+                        <span>STR.Domain:</span>
+                        <strong id="wallet-domain"></strong>
+                    </div>
+                    <div class="detail-row">
+                        <span>KYC Status:</span>
+                        <span id="wallet-kyc"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Balance:</span>
+                        <strong id="wallet-balance"></strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h3>Send STR</h3>
+                    <form id="sendForm">
+                        <input type="text" placeholder="Recipient (ZK13STR or STR.domain)" required />
+                        <input type="number" placeholder="Amount (STR)" step="0.01" required />
+                        <input type="number" placeholder="Fee (optional)" step="0.001" />
+                        <textarea placeholder="Memo (optional)"></textarea>
+                        <button type="submit" class="btn-primary">Send Transaction</button>
+                    </form>
+                </div>
+                <div class="card">
+                    <h3>Receive STR</h3>
+                    <div id="qrCode" style="text-align: center;">
+                        <div class="qr-placeholder">QR Code</div>
+                        <p>Share your address to receive STR tokens</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Transaction History</h3>
+                <div id="transactionHistory"></div>
+            </div>
+        </section>
+
+        <!-- Block Explorer Page -->
+        <section id="page-explorer" class="page">
+            <h1>Block Explorer</h1>
+            
+            <div class="explorer-tabs">
+                <button class="tab-btn active" data-tab="blocks">Blocks</button>
+                <button class="tab-btn" data-tab="transactions">Transactions</button>
+                <button class="tab-btn" data-tab="addresses">Addresses</button>
+            </div>
+
+            <div id="explorer-blocks" class="explorer-content active">
+                <div class="ledger-selector">
+                    <button class="ledger-btn active" data-ledger="main">Main</button>
+                    <button class="ledger-btn" data-ledger="asset">Asset</button>
+                    <button class="ledger-btn" data-ledger="contract">Contract</button>
+                    <button class="ledger-btn" data-ledger="governance">Governance</button>
+                </div>
+                <div id="blockList"></div>
+            </div>
+
+            <div id="explorer-transactions" class="explorer-content">
+                <div id="transactionList"></div>
+            </div>
+
+            <div id="explorer-addresses" class="explorer-content">
+                <div id="addressList"></div>
+            </div>
+        </section>
+
+        <!-- Smart Contracts Page -->
+        <section id="page-contracts" class="page">
+            <h1>Smart Contracts</h1>
+            
+            <div class="grid-2">
+                <div class="card">
+                    <h3>Deploy Contract</h3>
+                    <form id="deployContractForm">
+                        <input type="text" placeholder="Contract Name" required />
+                        <textarea id="contractCode" placeholder="Contract Code (JavaScript, WASM, ARESLang)" rows="10" required></textarea>
+                        <input type="number" placeholder="Initial Balance (STR)" step="0.01" />
+                        <button type="submit" class="btn-primary">Deploy Contract</button>
+                    </form>
+                </div>
+                <div class="card">
+                    <h3>Execute Contract</h3>
+                    <form id="executeContractForm">
+                        <input type="text" placeholder="Contract Address" required />
+                        <input type="text" placeholder="Method Name" required />
+                        <textarea placeholder='Parameters (JSON array, e.g., ["arg1", "arg2"])' rows="3"></textarea>
+                        <input type="number" placeholder="Value (STR)" step="0.01" />
+                        <button type="submit" class="btn-primary">Execute</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Your Contracts</h3>
+                <div id="contractList"></div>
+            </div>
+        </section>
+
+        <!-- STR.Domains Page -->
+        <section id="page-domains" class="page">
+            <h1>STR.Domain Manager</h1>
+            
+            <div class="grid-2">
+                <div class="card">
+                    <h3>Register Domain</h3>
+                    <form id="registerDomainForm">
+                        <div class="domain-input">
+                            <span class="prefix">STR.</span>
+                            <input type="text" placeholder="username" pattern="[a-zA-Z0-9\-_]{1,128}" required />
+                        </div>
+                        <small>Max 128 characters (a-z, A-Z, 0-9, -, _)</small>
+                        <input type="text" placeholder="Title" />
+                        <textarea placeholder="Description"></textarea>
+                        <label>
+                            <input type="checkbox" /> I agree to KYC/AML verification
+                        </label>
+                        <button type="submit" class="btn-primary">Register (10 STR)</button>
+                    </form>
+                </div>
+                <div class="card">
+                    <h3>Domain Marketplace</h3>
+                    <div id="domainMarketplace">
+                        <p>Browse available STR.domains</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>My Domains</h3>
+                <div id="myDomains"></div>
+            </div>
+        </section>
+
+        <!-- ARES AI Page -->
+        <section id="page-ares" class="page">
+            <h1>ARES AI - Intelligent Development</h1>
+            
+            <div class="card">
+                <h3>AI Code Generator</h3>
+                <textarea id="aiPrompt" placeholder="Describe what you want to build... (e.g., 'Create a voting smart contract')" rows="4"></textarea>
+                <button class="btn-primary" onclick="generateCode()">🤖 Generate Code</button>
+            </div>
+
+            <div class="card">
+                <h3>Generated Code</h3>
+                <pre id="generatedCode"><code>// AI-generated code will appear here...</code></pre>
+                <button class="btn-secondary" onclick="copyCode()">📋 Copy Code</button>
+                <button class="btn-secondary" onclick="deployGenerated()">🚀 Deploy</button>
+            </div>
+        </section>
+
+        <!-- AppLess Page -->
+        <section id="page-appless" class="page">
+            <h1>AppLess - Execute & Verify</h1>
+            
+            <div class="grid-2">
+                <div class="card">
+                    <h3>Execute AppLess</h3>
+                    <form id="applessForm">
+                        <input type="text" placeholder="AppLess Name" required />
+                        <textarea id="applessCode" placeholder="Code to execute" rows="8" required></textarea>
+                        <textarea placeholder="Input Data (JSON)" rows="3"></textarea>
+                        <button type="submit" class="btn-primary">⚡ Execute with zk-SNARK</button>
+                    </form>
+                </div>
+                <div class="card">
+                    <h3>Execution Result</h3>
+                    <div id="applessResult">
+                        <p>No execution yet</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Governance Page -->
+        <section id="page-governance" class="page">
+            <h1>DAO Governance</h1>
+            
+            <div class="card">
+                <h3>Create Proposal</h3>
+                <form id="proposalForm">
+                    <input type="text" placeholder="Proposal Title" required />
+                    <textarea placeholder="Description" rows="4" required /></textarea>
+                    <input type="number" placeholder="Voting Period (days)" value="7" min="1" />
+                    <button type="submit" class="btn-primary">Submit Proposal</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3>Active Proposals</h3>
+                <div id="proposalList"></div>
+            </div>
+        </section>
+
+        <!-- Cross-Chain Bridge Page -->
+        <section id="page-bridge" class="page">
+            <h1>Cross-Chain Bridge</h1>
+            
+            <div class="card">
+                <h3>Bridge Assets</h3>
+                <form id="bridgeForm">
+                    <select id="fromChain" required>
+                        <option value="">Select Source Chain</option>
+                        <option value="Bitcoin">Bitcoin</option>
+                        <option value="Ethereum">Ethereum</option>
+                        <option value="Cardano">Cardano</option>
+                        <option value="Stellar">Stellar</option>
+                        <option value="Ripple">Ripple</option>
+                    </select>
+                    <select id="toChain" required>
+                        <option value="SourceLess">SourceLess</option>
+                    </select>
+                    <input type="text" placeholder="From Address" required />
+                    <input type="text" placeholder="To Address (ZK13STR)" required />
+                    <input type="text" placeholder="Asset (e.g., BTC, ETH)" required />
+                    <input type="number" placeholder="Amount" step="0.00000001" required />
+                    <label>
+                        <input type="checkbox" id="useStrFuel" /> Use STR as fuel (Zero fees)
+                    </label>
+                    <button type="submit" class="btn-primary">🌉 Bridge Assets</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3>Bridge History</h3>
+                <div id="bridgeHistory"></div>
+            </div>
+        </section>
+
+        <!-- Settings Page -->
+        <section id="page-settings" class="page">
+            <h1>Settings</h1>
+            
+            <div class="card">
+                <h3>Node Settings</h3>
+                <form id="settingsForm">
+                    <label>Network Mode</label>
+                    <select>
+                        <option value="mainnet">Mainnet</option>
+                        <option value="testnet">Testnet</option>
+                    </select>
+
+                    <label>Auto-Sync</label>
+                    <input type="checkbox" checked /> Enable automatic blockchain sync
+
+                    <label>Mining</label>
+                    <input type="checkbox" /> Enable mining on this node
+
+                    <label>P2P Port</label>
+                    <input type="number" value="20000" />
+
+                    <button type="submit" class="btn-primary">Save Settings</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3>Backup & Security</h3>
+                <button class="btn-secondary">📥 Export Wallet</button>
+                <button class="btn-secondary">📤 Import Wallet</button>
+                <button class="btn-secondary">🔐 Change Password</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="renderer.js"></script>
+</body>
+</html>
