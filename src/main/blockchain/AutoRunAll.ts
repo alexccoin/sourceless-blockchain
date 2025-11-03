@@ -15,6 +15,8 @@ import { CcoinBridge } from './CcoinBridge';
 import { DelegatedNodeNetwork } from './DelegatedNodeNetwork';
 import SupabaseClient from '../supabase/SupabaseClient';
 import SpacelessBridge from '../bridge/SpacelessBridge';
+import AresForgeEngine from '../contracts/AresForgeEngine';
+import ContractIDE from '../contracts/ContractIDE';
 import * as path from 'path';
 import * as os from 'os';
 
@@ -26,6 +28,8 @@ export type Systems = {
   starwVM: StarwVM;
   workerNode: StarwWorkerNode;
   hostingEngine: StarwHostingEngine;
+  contractEngine: AresForgeEngine;
+  contractIDE: ContractIDE;
   supabase: SupabaseClient;
   spacelessBridge: SpacelessBridge;
   registry: STRDomainRegistry;
@@ -134,8 +138,21 @@ export function autoRunAll(): Systems {
   
   console.log('   ✅ STARW Hosting Engine: 10GB committed (10 ARSS/day)');
 
-  // 13. Initialize Spaceless (Web2 Mirror)
-  console.log('\n📍 Step 13: Initializing Spaceless Web2 Mirror...');
+  // 13. Initialize ARES Forge Contract Engine
+  console.log('\n📍 Step 13: Initializing ARES Forge Contract Engine...');
+  const contractEngine = new AresForgeEngine();
+  console.log('   ✅ ARES Forge Engine: Full smart contract system ready');
+
+  // 14. Initialize Contract IDE
+  console.log('\n📍 Step 14: Initializing Contract IDE...');
+  const contractIDE = new ContractIDE(contractEngine);
+  
+  // Create sample contract project
+  const sampleProject = contractIDE.createProject('Token Contract', 'ERC20-style token');
+  console.log(`   ✅ Contract IDE ready with sample project: ${sampleProject.name}`);
+
+  // 15. Initialize Spaceless (Web2 Mirror)
+  console.log('\n📍 Step 15: Initializing Spaceless Web2 Mirror...');
   const supabase = new SupabaseClient({
     url: process.env.SUPABASE_URL || 'https://your-project.supabase.co',
     anonKey: process.env.SUPABASE_ANON_KEY || 'your-anon-key'
@@ -143,8 +160,8 @@ export function autoRunAll(): Systems {
   
   console.log('   ✅ Spaceless configured (cold wallet + STR.Domains mirror)');
 
-  // 14. Initialize Spaceless Bridge (Web2 ↔ Web3 sync)
-  console.log('\n📍 Step 14: Initializing Spaceless Bridge...');
+  // 16. Initialize Spaceless Bridge (Web2 ↔ Web3 sync)
+  console.log('\n📍 Step 16: Initializing Spaceless Bridge...');
   const spacelessBridge = new SpacelessBridge(
     supabase,
     ledgerManager,
@@ -171,6 +188,8 @@ export function autoRunAll(): Systems {
     starwVM: { version: '1.0.0', running: true },
     workerNode: { version: '1.0.0', running: true },
     hosting: hostingEngine.getNetworkStats(),
+    contractEngine: contractEngine.getStats(),
+    contractIDE: contractIDE.getStats(),
     spaceless: { configured: true, bridgeActive: true },
     registry: { domains: [defaultWallet.strDomain] },
     bridge: { status: 'active', supportedChains: 5 },
@@ -185,6 +204,8 @@ export function autoRunAll(): Systems {
     starwVM, 
     workerNode, 
     hostingEngine,
+    contractEngine,
+    contractIDE,
     supabase,
     spacelessBridge,
     registry, 
