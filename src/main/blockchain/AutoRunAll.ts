@@ -6,12 +6,17 @@ import { LedgerManager } from './LedgerManager';
 import { AppLessEngine } from '../appless/AppLessEngine';
 import { StarwVM } from '../starw/StarwVM';
 import { StarwWorkerNode } from '../starw/StarwWorkerNode';
+import { StarwHostingEngine } from '../starw/StarwHostingEngine';
 import { PersonalNode } from '../starw/PersonalNode';
 import { P2PNetwork } from '../p2p/P2PNetwork';
 import { AresAI } from '../ares/AresAI';
 import { STRDomainRegistry } from './STRDomainRegistry';
 import { CcoinBridge } from './CcoinBridge';
 import { DelegatedNodeNetwork } from './DelegatedNodeNetwork';
+import SupabaseClient from '../supabase/SupabaseClient';
+import SpacelessBridge from '../bridge/SpacelessBridge';
+import * as path from 'path';
+import * as os from 'os';
 
 export type Systems = {
   p2p: P2PNetwork;
@@ -20,6 +25,9 @@ export type Systems = {
   personalNode: PersonalNode;
   starwVM: StarwVM;
   workerNode: StarwWorkerNode;
+  hostingEngine: StarwHostingEngine;
+  supabase: SupabaseClient;
+  spacelessBridge: SpacelessBridge;
   registry: STRDomainRegistry;
   bridge: CcoinBridge;
   nodeNet: DelegatedNodeNetwork;
@@ -112,6 +120,40 @@ export function autoRunAll(): Systems {
   nodeNet.addNode({ id: 'node2', strDomain: 'STR.node2', tpsCapacity: 50000, isActive: true, uptime: 99, reputation: 100 });
   console.log('   ✅ Delegated Node Network: 2 nodes (100,000 TPS capacity)');
 
+  // 12. Initialize STARW Hosting Engine (ARSS rewards)
+  console.log('\n📍 Step 12: Initializing STARW Hosting Engine...');
+  const storagePath = path.join(os.homedir(), '.sourceless', 'hosting');
+  const hostingEngine = new StarwHostingEngine(storagePath);
+  
+  // Create example hosting commitment (10GB for 30 days)
+  hostingEngine.createCommitment(defaultWallet.address, 10, 30);
+  
+  // Start reward distribution and validation
+  hostingEngine.startRewardDistribution();
+  hostingEngine.startStorageValidation();
+  
+  console.log('   ✅ STARW Hosting Engine: 10GB committed (10 ARSS/day)');
+
+  // 13. Initialize Spaceless (Web2 Mirror)
+  console.log('\n📍 Step 13: Initializing Spaceless Web2 Mirror...');
+  const supabase = new SupabaseClient({
+    url: process.env.SUPABASE_URL || 'https://your-project.supabase.co',
+    anonKey: process.env.SUPABASE_ANON_KEY || 'your-anon-key'
+  });
+  
+  console.log('   ✅ Spaceless configured (cold wallet + STR.Domains mirror)');
+
+  // 14. Initialize Spaceless Bridge (Web2 ↔ Web3 sync)
+  console.log('\n📍 Step 14: Initializing Spaceless Bridge...');
+  const spacelessBridge = new SpacelessBridge(
+    supabase,
+    ledgerManager,
+    walletManager,
+    { autoSync: true, syncInterval: 300000 } // 5 minutes
+  );
+  
+  console.log('   ✅ Spaceless Bridge ready (auto-sync enabled)');
+
   console.log('\n=========================================================');
   console.log('✅ ALL SYSTEMS OPERATIONAL - SOURCELESS BLOCKCHAIN v0.13');
   console.log('=========================================================\n');
@@ -128,10 +170,26 @@ export function autoRunAll(): Systems {
     personalNode: { running: true, strDomain: defaultWallet.strDomain },
     starwVM: { version: '1.0.0', running: true },
     workerNode: { version: '1.0.0', running: true },
+    hosting: hostingEngine.getNetworkStats(),
+    spaceless: { configured: true, bridgeActive: true },
     registry: { domains: [defaultWallet.strDomain] },
     bridge: { status: 'active', supportedChains: 5 },
     nodeNet: { nodes: 2, totalTPS: nodeNet.getTotalTPS() }
   });
 
-  return { p2p, walletManager, ledgerManager, personalNode, starwVM, workerNode, registry, bridge, nodeNet, getStatus };
+  return { 
+    p2p, 
+    walletManager, 
+    ledgerManager, 
+    personalNode, 
+    starwVM, 
+    workerNode, 
+    hostingEngine,
+    supabase,
+    spacelessBridge,
+    registry, 
+    bridge, 
+    nodeNet, 
+    getStatus 
+  };
 }

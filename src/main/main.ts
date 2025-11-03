@@ -150,6 +150,146 @@ function setupIPCHandlers(systems: Systems, window: BrowserWindow) {
         );
         return { success: !!txId, txId };
     });
+    
+    // ==================== STARW HOSTING ENGINE ====================
+    
+    // Create storage commitment
+    ipcMain.handle('hosting:createCommitment', async (event, data) => {
+        const { storageGB, durationDays } = data;
+        const wallets = systems.walletManager.getAllWallets();
+        const defaultWallet = wallets.length > 0 ? wallets[0] : null;
+        if (!defaultWallet) {
+            return { success: false, error: 'No wallet available' };
+        }
+        
+        try {
+            const commitment = await systems.hostingEngine.createCommitment(
+                defaultWallet.address,
+                storageGB,
+                durationDays || 30
+            );
+            return { success: true, commitment };
+        } catch (error: any) {
+            return { success: false, error: error.message };
+        }
+    });
+    
+    // Get storage stats
+    ipcMain.handle('hosting:getStats', async () => {
+        const wallets = systems.walletManager.getAllWallets();
+        const defaultWallet = wallets.length > 0 ? wallets[0] : null;
+        if (!defaultWallet) {
+            return null;
+        }
+        
+        return systems.hostingEngine.getStorageStats(defaultWallet.address);
+    });
+    
+    // Get network stats
+    ipcMain.handle('hosting:getNetworkStats', async () => {
+        return systems.hostingEngine.getNetworkStats();
+    });
+    
+    // Cancel commitment
+    ipcMain.handle('hosting:cancelCommitment', async (event, { commitmentId }) => {
+        try {
+            await systems.hostingEngine.cancelCommitment(commitmentId);
+            return { success: true };
+        } catch (error: any) {
+            return { success: false, error: error.message };
+        }
+    });
+    
+    // ==================== SPACELESS WEB2 MIRROR ====================
+    
+    // Get Spaceless health status
+    ipcMain.handle('spaceless:health', async () => {
+        return await systems.spacelessBridge.getHealthStatus();
+    });
+    
+    // Get sync stats
+    ipcMain.handle('spaceless:getSyncStats', async () => {
+        return systems.spacelessBridge.getStats();
+    });
+    
+    // Create cold wallet transaction
+    ipcMain.handle('spaceless:createColdTx', async (event, data) => {
+        const { to, amount, memo } = data;
+        const wallets = systems.walletManager.getAllWallets();
+        const defaultWallet = wallets.length > 0 ? wallets[0] : null;
+        if (!defaultWallet) {
+            return { success: false, error: 'No wallet available' };
+        }
+        
+        try {
+            const operationId = await systems.spacelessBridge.createColdWalletTransaction(
+                'user_' + defaultWallet.address,
+                to,
+                amount,
+                memo
+            );
+            return { success: true, operationId };
+        } catch (error: any) {
+            return { success: false, error: error.message };
+        }
+    });
+    
+    // Broadcast cold wallet transaction
+    ipcMain.handle('spaceless:broadcastColdTx', async (event, { operationId }) => {
+        try {
+            const txId = await systems.spacelessBridge.broadcastColdWalletTransaction(operationId);
+            return { success: true, txId };
+        } catch (error: any) {
+            return { success: false, error: error.message };
+        }
+    });
+    
+    // Import domain from blockchain
+    ipcMain.handle('spaceless:importDomain', async (event, { domainName }) => {
+        try {
+            await systems.spacelessBridge.importDomainFromBlockchain(domainName);
+            return { success: true };
+        } catch (error: any) {
+            return { success: false, error: error.message };
+        }
+    });
+    
+    // Link email to wallet
+    ipcMain.handle('spaceless:linkEmail', async (event, { email }) => {
+        const wallets = systems.walletManager.getAllWallets();
+        const defaultWallet = wallets.length > 0 ? wallets[0] : null;
+        if (!defaultWallet) {
+            return { success: false, error: 'No wallet available' };
+        }
+        
+        try {
+            await systems.spacelessBridge.linkEmailToWallet(email, defaultWallet.address);
+            return { success: true };
+        } catch (error: any) {
+            return { success: false, error: error.message };
+        }
+    });
+}
+
+// Listen for hosting rewards and update renderer
+function setupRealtimeUpdates(systems: Systems, window: BrowserWindow) {
+    // STARW Hosting rewards
+    systems.hostingEngine.on('reward:distributed', (data) => {
+        window.webContents.send('hosting:rewardDistributed', data);
+    });
+    
+    systems.hostingEngine.on('commitment:created', (data) => {
+        window.webContents.send('hosting:commitmentCreated', data);
+    });
+    
+    // Spaceless Bridge sync events
+    systems.spacelessBridge.on('sync:complete', (stats) => {
+        window.webContents.send('spaceless:syncComplete', stats);
+    });
+    
+    systems.spacelessBridge.on('domain:synced', (data) => {
+        window.webContents.send('spaceless:domainSynced', data);
+    });
 }
 
 app.whenReady().then(() => {
@@ -163,6 +303,7 @@ app.whenReady().then(() => {
     // Setup IPC handlers with systems reference
     if (systems && mainWindow) {
         setupIPCHandlers(systems, mainWindow);
+        setupRealtimeUpdates(systems, mainWindow);
     }
     
     // Send initial data to renderer after window loads
@@ -171,6 +312,8 @@ app.whenReady().then(() => {
             const status = systems.getStatus();
             mainWindow?.webContents.send('wallet:update', status.wallet);
             mainWindow?.webContents.send('ledger:update', status.ledgers);
+            mainWindow?.webContents.send('hosting:stats', status.hosting);
+            mainWindow?.webContents.send('spaceless:status', status.spaceless);
         }
     });
 

@@ -33,6 +33,46 @@ contextBridge.exposeInMainWorld('sourcelessAPI', {
   // Bridge operations
   bridgeAssets: (data: any) => ipcRenderer.invoke('bridge:transfer', data),
   
+  // ==================== STARW HOSTING ====================
+  
+  // Create storage commitment (earn ARSS tokens)
+  createHostingCommitment: (data: { storageGB: number; durationDays?: number }) => 
+    ipcRenderer.invoke('hosting:createCommitment', data),
+  
+  // Get user's storage stats
+  getHostingStats: () => ipcRenderer.invoke('hosting:getStats'),
+  
+  // Get network-wide hosting stats
+  getHostingNetworkStats: () => ipcRenderer.invoke('hosting:getNetworkStats'),
+  
+  // Cancel hosting commitment
+  cancelHostingCommitment: (commitmentId: string) => 
+    ipcRenderer.invoke('hosting:cancelCommitment', { commitmentId }),
+  
+  // ==================== SPACELESS WEB2 MIRROR ====================
+  
+  // Get Spaceless health status
+  getSpacelessHealth: () => ipcRenderer.invoke('spaceless:health'),
+  
+  // Get sync statistics
+  getSpacelessSyncStats: () => ipcRenderer.invoke('spaceless:getSyncStats'),
+  
+  // Create cold wallet transaction (offline signing)
+  createColdWalletTx: (data: { to: string; amount: number; memo?: string }) => 
+    ipcRenderer.invoke('spaceless:createColdTx', data),
+  
+  // Broadcast pre-signed cold wallet transaction
+  broadcastColdWalletTx: (operationId: string) => 
+    ipcRenderer.invoke('spaceless:broadcastColdTx', { operationId }),
+  
+  // Import blockchain domain to Spaceless
+  importDomain: (domainName: string) => 
+    ipcRenderer.invoke('spaceless:importDomain', { domainName }),
+  
+  // Link email to Web3 wallet
+  linkEmail: (email: string) => 
+    ipcRenderer.invoke('spaceless:linkEmail', { email }),
+  
   // Real-time updates
   onWalletUpdate: (callback: Function) => {
     ipcRenderer.on('wallet:update', (_, data) => callback(data));
@@ -45,5 +85,17 @@ contextBridge.exposeInMainWorld('sourcelessAPI', {
   },
   onCCOINUpdate: (callback: Function) => {
     ipcRenderer.on('ccoin:update', (_, data) => callback(data));
+  },
+  onHostingReward: (callback: Function) => {
+    ipcRenderer.on('hosting:rewardDistributed', (_, data) => callback(data));
+  },
+  onHostingCommitment: (callback: Function) => {
+    ipcRenderer.on('hosting:commitmentCreated', (_, data) => callback(data));
+  },
+  onSpacelessSync: (callback: Function) => {
+    ipcRenderer.on('spaceless:syncComplete', (_, data) => callback(data));
+  },
+  onDomainSynced: (callback: Function) => {
+    ipcRenderer.on('spaceless:domainSynced', (_, data) => callback(data));
   }
 });
