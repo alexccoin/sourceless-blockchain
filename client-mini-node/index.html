@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sourceless Mini-Node Client</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <h1>⚡ Sourceless Mini-Node</h1>
+                <p class="tagline">Your Personal Blockchain Validator</p>
+            </div>
+            <div class="status-bar">
+                <div class="status-item">
+                    <span class="label">Network:</span>
+                    <span id="network-status" class="value connected">Connected</span>
+                </div>
+                <div class="status-item">
+                    <span class="label">Peers:</span>
+                    <span id="peer-count" class="value">12</span>
+                </div>
+                <div class="status-item">
+                    <span class="label">Sync:</span>
+                    <span id="sync-status" class="value">100%</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav-tabs">
+            <button class="tab-btn active" data-tab="wallet">💳 Wallet</button>
+            <button class="tab-btn" data-tab="validator">⚡ Validator</button>
+            <button class="tab-btn" data-tab="explorer">🔍 Explorer</button>
+            <button class="tab-btn" data-tab="settings">⚙️ Settings</button>
+        </nav>
+
+        <!-- Wallet Tab -->
+        <div id="wallet-tab" class="tab-content active">
+            <div class="wallet-section">
+                <div class="wallet-header">
+                    <h2>My Wallet</h2>
+                    <div class="wallet-actions">
+                        <button id="create-wallet-btn" class="btn-primary">+ Create Wallet</button>
+                        <button id="import-wallet-btn" class="btn-secondary">📥 Import</button>
+                        <button id="export-wallet-btn" class="btn-secondary">📤 Export</button>
+                    </div>
+                </div>
+
+                <div id="wallet-info" class="wallet-info" style="display:none;">
+                    <div class="wallet-card">
+                        <div class="wallet-address">
+                            <label>Address:</label>
+                            <div class="address-display">
+                                <code id="wallet-address"></code>
+                                <button id="copy-address-btn" class="btn-icon">📋</button>
+                            </div>
+                        </div>
+                        <div class="wallet-balance">
+                            <div class="balance-item">
+                                <span class="token-name">STR</span>
+                                <span id="str-balance" class="balance">0.00</span>
+                            </div>
+                            <div class="balance-item">
+                                <span class="token-name">CCOS</span>
+                                <span id="ccos-balance" class="balance">0.00</span>
+                            </div>
+                            <div class="balance-item">
+                                <span class="token-name">ARSS</span>
+                                <span id="arss-balance" class="balance">0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="transaction-panel">
+                        <div class="panel-header">
+                            <h3>Send Transaction</h3>
+                        </div>
+                        <form id="send-tx-form">
+                            <div class="form-group">
+                                <label>Recipient Address:</label>
+                                <input type="text" id="recipient-address" placeholder="zk13str_..." required>
+                            </div>
+                            <div class="form-group">
+                                <label>Amount:</label>
+                                <input type="number" id="send-amount" placeholder="0.00" step="0.01" min="0" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Token:</label>
+                                <select id="send-token">
+                                    <option value="STR">STR (Sourceless)</option>
+                                    <option value="CCOS">CCOS (CCOIN Network)</option>
+                                    <option value="ARSS">ARSS (Storage Token)</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn-primary">Send Transaction</button>
+                        </form>
+                    </div>
+
+                    <div class="transaction-history">
+                        <div class="panel-header">
+                            <h3>Recent Transactions</h3>
+                            <button id="refresh-tx-btn" class="btn-icon">🔄</button>
+                        </div>
+                        <div id="tx-list"></div>
+                    </div>
+                </div>
+
+                <div id="wallet-setup" class="wallet-setup">
+                    <div class="empty-state">
+                        <div class="icon">💼</div>
+                        <h3>No Wallet Found</h3>
+                        <p>Create a new wallet or import an existing one to get started</p>
+                        <div class="setup-actions">
+                            <button id="setup-create-btn" class="btn-primary btn-large">Create New Wallet</button>
+                            <button id="setup-import-btn" class="btn-secondary btn-large">Import Wallet</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Validator Tab -->
+        <div id="validator-tab" class="tab-content">
+            <div class="validator-section">
+                <div class="validator-header">
+                    <h2>Mini Validator Node</h2>
+                    <div class="validator-status">
+                        <span id="validator-status" class="status-badge inactive">Inactive</span>
+                    </div>
+                </div>
+
+                <div class="validator-card">
+                    <div class="validator-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Staked Amount:</span>
+                            <span id="staked-amount" class="stat-value">0 STR</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Total Rewards:</span>
+                            <span id="total-rewards" class="stat-value">0 CCOS</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Blocks Validated:</span>
+                            <span id="blocks-validated" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Uptime:</span>
+                            <span id="validator-uptime" class="stat-value">0%</span>
+                        </div>
+                    </div>
+
+                    <div class="validator-actions">
+                        <div class="staking-form">
+                            <h3>Stake STR to Become Validator</h3>
+                            <p class="info-text">Minimum: 1,000 STR • Lock Period: 7 days • APY: 5-15%</p>
+                            <form id="stake-form">
+                                <div class="form-group">
+                                    <label>Stake Amount (STR):</label>
+                                    <input type="number" id="stake-amount" placeholder="1000" min="1000" step="100" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Lock Period (days):</label>
+                                    <select id="lock-period">
+                                        <option value="7">7 days (5% APY)</option>
+                                        <option value="30">30 days (10% APY)</option>
+                                        <option value="90">90 days (15% APY)</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn-primary">Start Validating</button>
+                            </form>
+                        </div>
+
+                        <div id="validator-controls" class="validator-controls" style="display:none;">
+                            <button id="stop-validator-btn" class="btn-danger">Stop Validator</button>
+                            <button id="claim-rewards-btn" class="btn-success">Claim Rewards</button>
+                            <button id="unstake-btn" class="btn-secondary">Unstake</button>
+                        </div>
+                    </div>
+
+                    <div class="validation-log">
+                        <h3>Validation Log</h3>
+                        <div id="validation-log-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Explorer Tab -->
+        <div id="explorer-tab" class="tab-content">
+            <div class="explorer-section">
+                <h2>Block Explorer</h2>
+                <div class="explorer-stats">
+                    <div class="stat-card">
+                        <div class="stat-label">Latest Block</div>
+                        <div id="latest-block" class="stat-value">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Transactions (24h)</div>
+                        <div id="tx-24h" class="stat-value">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Network TPS</div>
+                        <div id="network-tps" class="stat-value">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Active Validators</div>
+                        <div id="active-validators" class="stat-value">0</div>
+                    </div>
+                </div>
+
+                <div class="recent-blocks">
+                    <h3>Recent Blocks</h3>
+                    <div id="recent-blocks-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings-tab" class="tab-content">
+            <div class="settings-section">
+                <h2>Settings</h2>
+                
+                <div class="settings-group">
+                    <h3>Network Configuration</h3>
+                    <div class="form-group">
+                        <label>Network Endpoint:</label>
+                        <input type="text" id="network-endpoint" value="http://localhost:3002">
+                    </div>
+                    <div class="form-group">
+                        <label>Chain ID:</label>
+                        <input type="number" id="chain-id" value="1313" readonly>
+                    </div>
+                    <button id="save-network-btn" class="btn-primary">Save Network Settings</button>
+                </div>
+
+                <div class="settings-group">
+                    <h3>Performance</h3>
+                    <div class="form-group">
+                        <label>Max Peers:</label>
+                        <input type="number" id="max-peers" value="50" min="1" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Sync Batch Size:</label>
+                        <input type="number" id="sync-batch-size" value="100" min="10" max="1000">
+                    </div>
+                    <button id="save-performance-btn" class="btn-primary">Save Performance Settings</button>
+                </div>
+
+                <div class="settings-group">
+                    <h3>Security</h3>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="auto-lock" checked>
+                            Auto-lock after 5 minutes of inactivity
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="require-password" checked>
+                            Require password for transactions
+                        </label>
+                    </div>
+                    <button id="change-password-btn" class="btn-secondary">Change Password</button>
+                </div>
+
+                <div class="settings-group">
+                    <h3>About</h3>
+                    <p><strong>Version:</strong> 1.0.0</p>
+                    <p><strong>Build:</strong> 2025.11.11</p>
+                    <p><strong>License:</strong> MIT</p>
+                    <button id="check-updates-btn" class="btn-secondary">Check for Updates</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Wallet Creation -->
+    <div id="create-wallet-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Create New Wallet</h2>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Set Wallet Password:</label>
+                    <input type="password" id="new-wallet-password" placeholder="Enter strong password" required>
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password:</label>
+                    <input type="password" id="confirm-wallet-password" placeholder="Confirm password" required>
+                </div>
+                <div class="seed-phrase-display" id="seed-phrase-display" style="display:none;">
+                    <h3>⚠️ Save Your Seed Phrase</h3>
+                    <p class="warning">Write these 12 words down and store them safely. This is the ONLY way to recover your wallet!</p>
+                    <div id="seed-phrase" class="seed-phrase"></div>
+                    <label>
+                        <input type="checkbox" id="seed-confirmed">
+                        I have saved my seed phrase in a safe place
+                    </label>
+                </div>
+                <button id="generate-wallet-btn" class="btn-primary">Generate Wallet</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="wallet.js"></script>
+    <script src="validator.js"></script>
+    <script src="client.js"></script>
+</body>
+</html>

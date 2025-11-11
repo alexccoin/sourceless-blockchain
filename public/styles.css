@@ -684,3 +684,167 @@ code {
     color: #00ff88;
     word-break: break-all;
 }
+
+/* Dashboard Ledger Status */
+.ledger-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    border: 1px solid rgba(0, 212, 255, 0.1);
+}
+
+.ledger-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-right: 0.75rem;
+}
+
+.tx-row {
+    transition: background 0.2s;
+}
+
+.tx-row:hover {
+    background: rgba(0, 212, 255, 0.05);
+}
+
+.meter-row, .financial-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+}
+
+.meter-row:last-child, .financial-row:last-child {
+    border-bottom: none;
+}
+
+/* Explorer Styles */
+.explorer-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+    padding-bottom: 0.5rem;
+}
+
+.tab-btn {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    color: rgba(0, 212, 255, 0.7);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+}
+
+.tab-btn:hover {
+    background: rgba(0, 212, 255, 0.1);
+    border-color: rgba(0, 212, 255, 0.5);
+    color: #00d4ff;
+}
+
+.tab-btn.active {
+    background: rgba(0, 212, 255, 0.2);
+    border-color: #00d4ff;
+    color: #00d4ff;
+    font-weight: 600;
+}
+
+.explorer-content {
+    display: none;
+}
+
+.explorer-content.active {
+    display: block;
+}
+
+.ledger-selector {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.ledger-btn {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    color: rgba(0, 212, 255, 0.7);
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.85rem;
+}
+
+.ledger-btn:hover {
+    background: rgba(0, 212, 255, 0.1);
+    border-color: rgba(0, 212, 255, 0.5);
+    color: #00d4ff;
+}
+
+.ledger-btn.active {
+    background: rgba(0, 212, 255, 0.2);
+    border-color: #00d4ff;
+    color: #00d4ff;
+    font-weight: 600;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    border: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+.explorer-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.explorer-table thead {
+    background: rgba(0, 212, 255, 0.1);
+    border-bottom: 2px solid rgba(0, 212, 255, 0.3);
+}
+
+.explorer-table th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    color: #00d4ff;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.explorer-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.explorer-table tbody tr {
+    transition: background 0.2s;
+}
+
+.explorer-table tbody tr:hover {
+    background: rgba(0, 212, 255, 0.05);
+}
+
+.explorer-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.explorer-table code {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+}

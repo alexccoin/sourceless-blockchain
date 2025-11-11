@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sourceless Blockchain v0.13 - STARW Personal Node</title>
+    <title>Sourceless Blockchain v0.21 - STARW Personal Node</title>
     <link rel="stylesheet" href="styles.css">
+    <!-- Component and API Libraries -->
+    <script src="components.js"></script>
+    <script src="api-layer.js"></script>
+    <script src="page-init.js"></script>
 </head>
 <body>
     <!-- Sidebar Navigation -->
@@ -33,11 +37,7 @@
             </button>
             <button class="nav-item" data-page="explorer">
                 <span class="icon">🔍</span>
-                <span>Block Explorer</span>
-            </button>
-            <button class="nav-item" id="strxplorer-link">
-                <span class="icon">🌌</span>
-                <span>STRXplorer</span>
+                <span>Explorer</span>
             </button>
             <button class="nav-item" data-page="contracts">
                 <span class="icon">📝</span>
@@ -525,7 +525,7 @@
                 <div style="margin-bottom: 1rem; padding: 1rem; background: rgba(0, 212, 255, 0.1); border-radius: 8px;">
                     <strong>📊 Full Blockchain History: <span id="blockchain-history">6,000 blocks</span> per ledger</strong><br>
                     <small style="color: rgba(0, 212, 255, 0.7);">Showing last 99 most recent blocks (most recent first)</small>
-                    <button onclick="loadBlocks('main', null, 99)" style="float: right; padding: 4px 8px; background: rgba(0, 212, 255, 0.2); border: 1px solid #00d4ff; color: #00d4ff; border-radius: 4px; cursor: pointer;">🔄 Refresh Blocks</button>
+                    <button id="blockRefreshBtn" style="float: right; padding: 4px 8px; background: rgba(0, 212, 255, 0.2); border: 1px solid #00d4ff; color: #00d4ff; border-radius: 4px; cursor: pointer;">🔄 Refresh Blocks</button>
                 </div>
                 <div class="ledger-selector">
                     <button class="ledger-btn active" data-ledger="main">Fuel (STR)</button>

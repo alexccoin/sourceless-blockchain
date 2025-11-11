@@ -13,6 +13,11 @@ const Joi = require('joi');
 const HostlessDatabase = require('./src/database/HostlessDatabase');
 console.log('🌐 Using HOSTLESS Database (Pure Blockchain + DLT + STARW Storage)');
 
+// Import security systems
+const { SuperAdminController, ROLES, PERMISSIONS } = require('./src/security/SuperAdminController');
+const ZKSNARKEngine = require('./src/security/ZKSNARKEngine');
+const SecurityValidator = require('./src/security/SecurityValidator');
+
 // Import blockchain systems
 let autoRunAll;
 let systems = null;
@@ -233,6 +238,12 @@ class StratusProductionServer {
 
             // AresLang endpoints
             this.setupAresLangRoutes();
+
+            // Validator expansion endpoints
+            this.setupValidatorRoutes();
+
+            // Security & SuperAdmin endpoints
+            this.setupSecurityRoutes();
 
             console.log('✅ Routes configured successfully');
         } catch (error) {
@@ -560,6 +571,661 @@ class StratusProductionServer {
         });
     }
 
+    setupValidatorRoutes() {
+        // Import validator registry (singleton pattern)
+        let validatorRegistry;
+        try {
+            const { ValidatorRegistry } = require('./dist/validators/ValidatorRegistry');
+            validatorRegistry = new ValidatorRegistry();
+            console.log('✅ Validator Registry initialized');
+        } catch (error) {
+            console.warn('⚠️ Validator Registry not available:', error.message);
+            return; // Skip validator routes if module not available
+        }
+
+        const { ValidatorRewards } = require('./dist/validators/ValidatorRewards');
+
+        // Validation schema for validator registration
+        const validatorRegistrationSchema = Joi.object({
+            domain: Joi.string().pattern(/^STR\.[a-z0-9]{3,32}$/).required(),
+            wallet: Joi.string().pattern(/^zk13str_[a-zA-Z0-9]+$/).required(),
+            signature: Joi.string().required().min(64),
+            message: Joi.string().required(),
+            stake: Joi.number().min(1000).required(),
+            resources: Joi.object({
+                storage: Joi.number().min(1).required(),
+                cpu: Joi.number().min(1).required(),
+                bandwidth: Joi.object({
+                    upload: Joi.number().min(10).required(),
+                    download: Joi.number().min(10).required()
+                }).required(),
+                uptime: Joi.number().min(95).max(100).required()
+            }).required()
+        });
+
+        // Register new validator
+        this.app.post('/api/validator/register', async (req, res) => {
+            try {
+                // Validate request body
+                const { error, value } = validatorRegistrationSchema.validate(req.body);
+                if (error) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Invalid registration data',
+                        details: error.details[0].message
+                    });
+                }
+
+                // Register validator
+                const result = await validatorRegistry.register(value);
+
+                if (result.success) {
+                    return res.status(201).json({
+                        success: true,
+                        validatorId: result.validatorId,
+                        message: result.message,
+                        monthlyReward: result.monthlyReward,
+                        nextSteps: [
+                            'Keep your node online 24/7 for maximum rewards',
+                            `Monitor rewards at /api/validator/${result.validatorId}/rewards`,
+                            `Check status at /api/validator/${result.validatorId}`
+                        ]
+                    });
+                } else {
+                    return res.status(400).json({
+                        success: false,
+                        error: result.message
+                    });
+                }
+            } catch (error) {
+                console.error('❌ Validator registration error:', error);
+                res.status(500).json({
+                    success: false,
+                    error: 'Internal server error during registration',
+                    message: error.message
+                });
+            }
+        });
+
+        // Get validator by ID
+        this.app.get('/api/validator/:validatorId', (req, res) => {
+            try {
+                const { validatorId } = req.params;
+                const validator = validatorRegistry.getValidator(validatorId);
+                
+                if (!validator) {
+                    return res.status(404).json({
+                        success: false,
+                        error: 'Validator not found'
+                    });
+                }
+
+                const status = validator.validator.getStatus();
+                const stats = validator.validator.getStatistics();
+
+                res.json({
+                    success: true,
+                    validator: {
+                        id: validator.validatorId,
+                        domain: validator.domain,
+                        wallet: validator.wallet,
+                        status: validator.status,
+                        registrationDate: validator.registrationDate,
+                        lastActive: validator.lastActive,
+                        stake: status.stake,
+                        resources: status.resources,
+                        reputation: status.reputation,
+                        statistics: stats
+                    }
+                });
+            } catch (error) {
+                console.error('❌ Get validator error:', error);
+                res.status(500).json({
+                    success: false,
+                    error: 'Internal server error',
+                    message: error.message
+                });
+            }
+        });
+
+        // Get validator rewards
+        this.app.get('/api/validator/:validatorId/rewards', (req, res) => {
+            try {
+                const { validatorId } = req.params;
+                const { period = 'monthly' } = req.query;
+
+                const validator = validatorRegistry.getValidator(validatorId);
+                
+                if (!validator) {
+                    return res.status(404).json({
+                        success: false,
+                        error: 'Validator not found'
+                    });
+                }
+
+                const status = validator.validator.getStatus();
+                
+                // Build metrics
+                const metrics = {
+                    storageGB: status.resources.storage.allocated,
+                    cpuCores: status.resources.cpu.cores,
+                    cpuUsagePercent: status.resources.cpu.currentUsage,
+                    bandwidthMbps: {
+                        upload: status.resources.bandwidth.upload,
+                        download: status.resources.bandwidth.download
+                    },
+                    uptimePercent: status.resources.uptime.current,
+                    contractsHosted: status.reputation.contractsHosted,
+                    contractGasEarnings: 0
+                };
+
+                // Calculate rewards
+                let calculation;
+                if (period === 'daily') {
+                    calculation = ValidatorRewards.calculateDailyRewards(metrics);
+                } else if (period === 'yearly') {
+                    calculation = ValidatorRewards.calculateAnnualRewards(metrics);
+                } else {
+                    calculation = ValidatorRewards.calculateMonthlyRewards(metrics);
+                }
+
+                res.json({
+                    success: true,
+                    validatorId,
+                    period,
+                    rewards: {
+                        ...calculation,
+                        accumulated: status.rewards.accumulated,
+                        lastPayout: status.rewards.lastPayout,
+                        breakdown: status.rewards.breakdown
+                    },
+                    metrics,
+                    summary: ValidatorRewards.generateRewardSummary(metrics, period)
+                });
+            } catch (error) {
+                console.error('❌ Get rewards error:', error);
+                res.status(500).json({
+                    success: false,
+                    error: 'Internal server error',
+                    message: error.message
+                });
+            }
+        });
+
+        // Get active validators
+        this.app.get('/api/validators/active', (req, res) => {
+            try {
+                const { limit = 100, offset = 0 } = req.query;
+
+                const activeValidators = validatorRegistry.getActiveValidators();
+                const total = activeValidators.length;
+                
+                const paginatedValidators = activeValidators
+                    .slice(Number(offset), Number(offset) + Number(limit))
+                    .map(v => ({
+                        validatorId: v.validatorId,
+                        domain: v.domain,
+                        status: v.status,
+                        registrationDate: v.registrationDate,
+                        statistics: v.validator.getStatistics()
+                    }));
+
+                res.json({
+                    success: true,
+                    total,
+                    limit: Number(limit),
+                    offset: Number(offset),
+                    validators: paginatedValidators
+                });
+            } catch (error) {
+                console.error('❌ Get active validators error:', error);
+                res.status(500).json({
+                    success: false,
+                    error: 'Internal server error',
+                    message: error.message
+                });
+            }
+        });
+
+        // Get network statistics
+        this.app.get('/api/validators/stats', (req, res) => {
+            try {
+                const networkStats = validatorRegistry.getNetworkStats();
+
+                res.json({
+                    success: true,
+                    network: networkStats,
+                    breakdown: {
+                        genesisValidators: {
+                            count: 1313,
+                            type: 'Immutable foundation nodes',
+                            status: 'Always active'
+                        },
+                        personalValidators: {
+                            count: networkStats.activeValidators,
+                            type: 'Community-contributed nodes',
+                            status: 'Dynamic'
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('❌ Get network stats error:', error);
+                res.status(500).json({
+                    success: false,
+                    error: 'Internal server error',
+                    message: error.message
+                });
+            }
+        });
+
+        // Get validator by domain
+        this.app.get('/api/validator/domain/:domain', (req, res) => {
+            try {
+                const { domain } = req.params;
+                const validator = validatorRegistry.getValidatorByDomain(domain);
+                
+                if (!validator) {
+                    return res.status(404).json({
+                        success: false,
+                        error: `No validator found for domain: ${domain}`
+                    });
+                }
+
+                const stats = validator.validator.getStatistics();
+
+                res.json({
+                    success: true,
+                    validator: {
+                        id: validator.validatorId,
+                        domain: validator.domain,
+                        wallet: validator.wallet,
+                        status: validator.status,
+                        registrationDate: validator.registrationDate,
+                        statistics: stats
+                    }
+                });
+            } catch (error) {
+                console.error('❌ Get validator by domain error:', error);
+                res.status(500).json({
+                    success: false,
+                    error: 'Internal server error',
+                    message: error.message
+                });
+            }
+        });
+
+        // Get validators by wallet
+        this.app.get('/api/validator/wallet/:wallet', (req, res) => {
+            try {
+                const { wallet } = req.params;
+                const validators = validatorRegistry.getValidatorsByWallet(wallet);
+
+                res.json({
+                    success: true,
+                    wallet,
+                    count: validators.length,
+                    validators: validators.map(v => ({
+                        validatorId: v.validatorId,
+                        domain: v.domain,
+                        status: v.status,
+                        registrationDate: v.registrationDate,
+                        statistics: v.validator.getStatistics()
+                    }))
+                });
+            } catch (error) {
+                console.error('❌ Get validators by wallet error:', error);
+                res.status(500).json({
+                    success: false,
+                    error: 'Internal server error',
+                    message: error.message
+                });
+            }
+        });
+
+        // Deregister validator
+        this.app.delete('/api/validator/:validatorId', async (req, res) => {
+            try {
+                const { validatorId } = req.params;
+                const { signature } = req.body;
+
+                if (!signature) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Signature required to deregister validator'
+                    });
+                }
+
+                const result = await validatorRegistry.deregister(validatorId);
+
+                if (result.success) {
+                    res.json({
+                        success: true,
+                        message: result.message,
+                        validatorId
+                    });
+                } else {
+                    res.status(400).json({
+                        success: false,
+                        error: result.message
+                    });
+                }
+            } catch (error) {
+                console.error('❌ Deregister validator error:', error);
+                res.status(500).json({
+                    success: false,
+                    error: 'Internal server error',
+                    message: error.message
+                });
+            }
+        });
+
+        console.log('✅ Validator routes configured successfully');
+        console.log('   📡 POST /api/validator/register');
+        console.log('   📊 GET /api/validator/:id');
+        console.log('   💰 GET /api/validator/:id/rewards');
+        console.log('   📋 GET /api/validators/active');
+        console.log('   📈 GET /api/validators/stats');
+    }
+
+    setupSecurityRoutes() {
+        // ======== SUPERADMIN ROUTES ========
+        
+        // Create session (login)
+        this.app.post('/api/security/session/create', async (req, res) => {
+            try {
+                const { walletAddress, signature } = req.body;
+                
+                if (!this.adminController) {
+                    return res.status(503).json({ error: 'Security system not initialized' });
+                }
+                
+                const session = this.adminController.createSession(walletAddress, signature);
+                
+                res.json({
+                    success: true,
+                    ...session
+                });
+            } catch (error) {
+                console.error('❌ Session creation error:', error);
+                res.status(401).json({
+                    success: false,
+                    error: error.message
+                });
+            }
+        });
+
+        // Validate session
+        this.app.post('/api/security/session/validate', (req, res) => {
+            try {
+                const { sessionId } = req.body;
+                
+                if (!this.adminController) {
+                    return res.status(503).json({ error: 'Security system not initialized' });
+                }
+                
+                const session = this.adminController.validateSession(sessionId);
+                
+                if (session) {
+                    res.json({
+                        valid: true,
+                        walletAddress: session.walletAddress,
+                        role: this.adminController.getRoleName(session.role)
+                    });
+                } else {
+                    res.json({ valid: false });
+                }
+            } catch (error) {
+                console.error('❌ Session validation error:', error);
+                res.status(500).json({
+                    error: error.message
+                });
+            }
+        });
+
+        // Assign role (SuperAdmin only)
+        this.app.post('/api/security/role/assign', (req, res) => {
+            try {
+                const { walletAddress, role, assignedBy } = req.body;
+                
+                if (!this.adminController) {
+                    return res.status(503).json({ error: 'Security system not initialized' });
+                }
+                
+                const result = this.adminController.assignRole(walletAddress, role, assignedBy);
+                
+                res.json(result);
+            } catch (error) {
+                console.error('❌ Role assignment error:', error);
+                res.status(403).json({
+                    success: false,
+                    error: error.message
+                });
+            }
+        });
+
+        // Check permission
+        this.app.post('/api/security/permission/check', (req, res) => {
+            try {
+                const { walletAddress, permission } = req.body;
+                
+                if (!this.adminController) {
+                    return res.status(503).json({ error: 'Security system not initialized' });
+                }
+                
+                const hasPermission = this.adminController.hasPermission(walletAddress, permission);
+                
+                res.json({
+                    walletAddress,
+                    permission,
+                    hasPermission
+                });
+            } catch (error) {
+                console.error('❌ Permission check error:', error);
+                res.status(500).json({
+                    error: error.message
+                });
+            }
+        });
+
+        // Get audit logs
+        this.app.get('/api/security/audit/logs', (req, res) => {
+            try {
+                const { walletAddress, action, startTime, endTime, limit } = req.query;
+                
+                if (!this.adminController) {
+                    return res.status(503).json({ error: 'Security system not initialized' });
+                }
+                
+                const logs = this.adminController.getAuditLogs(walletAddress, {
+                    action,
+                    startTime: startTime ? Number(startTime) : undefined,
+                    endTime: endTime ? Number(endTime) : undefined,
+                    limit: limit ? Number(limit) : 100
+                });
+                
+                res.json({
+                    success: true,
+                    logs,
+                    count: logs.length
+                });
+            } catch (error) {
+                console.error('❌ Audit logs error:', error);
+                res.status(403).json({
+                    error: error.message
+                });
+            }
+        });
+
+        // Get all users with roles
+        this.app.get('/api/security/users', (req, res) => {
+            try {
+                const { requestedBy } = req.query;
+                
+                if (!this.adminController) {
+                    return res.status(503).json({ error: 'Security system not initialized' });
+                }
+                
+                const users = this.adminController.getAllUsers(requestedBy);
+                
+                res.json({
+                    success: true,
+                    users,
+                    count: users.length
+                });
+            } catch (error) {
+                console.error('❌ Get users error:', error);
+                res.status(403).json({
+                    error: error.message
+                });
+            }
+        });
+
+        // Get statistics
+        this.app.get('/api/security/stats', (req, res) => {
+            try {
+                if (!this.adminController) {
+                    return res.status(503).json({ error: 'Security system not initialized' });
+                }
+                
+                const stats = this.adminController.getStatistics();
+                
+                res.json({
+                    success: true,
+                    ...stats
+                });
+            } catch (error) {
+                console.error('❌ Security stats error:', error);
+                res.status(500).json({
+                    error: error.message
+                });
+            }
+        });
+
+        // ======== ZK-SNARK ROUTES ========
+        
+        // Generate transaction proof
+        this.app.post('/api/security/snark/transaction-proof', async (req, res) => {
+            try {
+                const { from, to, amount, nonce } = req.body;
+                
+                if (!this.zksnarkEngine) {
+                    return res.status(503).json({ error: 'ZK-SNARK engine not initialized' });
+                }
+                
+                const proof = await this.zksnarkEngine.createTransactionProof({
+                    from, to, amount, nonce
+                });
+                
+                res.json({
+                    success: true,
+                    ...proof
+                });
+            } catch (error) {
+                console.error('❌ Transaction proof error:', error);
+                res.status(500).json({
+                    error: error.message
+                });
+            }
+        });
+
+        // Verify SNARK proof
+        this.app.post('/api/security/snark/verify', async (req, res) => {
+            try {
+                const { proof, publicSignals } = req.body;
+                
+                if (!this.zksnarkEngine) {
+                    return res.status(503).json({ error: 'ZK-SNARK engine not initialized' });
+                }
+                
+                const isValid = await this.zksnarkEngine.verifyProof(proof, publicSignals);
+                
+                res.json({
+                    success: true,
+                    valid: isValid
+                });
+            } catch (error) {
+                console.error('❌ Proof verification error:', error);
+                res.status(500).json({
+                    error: error.message
+                });
+            }
+        });
+
+        // Get SNARK status
+        this.app.get('/api/security/snark/status', (req, res) => {
+            try {
+                if (!this.zksnarkEngine) {
+                    return res.status(503).json({ error: 'ZK-SNARK engine not initialized' });
+                }
+                
+                const status = this.zksnarkEngine.getStatus();
+                
+                res.json({
+                    success: true,
+                    ...status
+                });
+            } catch (error) {
+                console.error('❌ SNARK status error:', error);
+                res.status(500).json({
+                    error: error.message
+                });
+            }
+        });
+
+        // ======== SECURITY VALIDATION ROUTES ========
+        
+        // Validate ZK13STR address
+        this.app.post('/api/security/validate/zk13str', (req, res) => {
+            try {
+                const { address } = req.body;
+                
+                if (!this.securityValidator) {
+                    return res.status(503).json({ error: 'Security validator not initialized' });
+                }
+                
+                const result = this.securityValidator.validateZK13STR(address);
+                
+                res.json({
+                    success: true,
+                    ...result
+                });
+            } catch (error) {
+                console.error('❌ ZK13STR validation error:', error);
+                res.status(500).json({
+                    error: error.message
+                });
+            }
+        });
+
+        // Comprehensive security audit
+        this.app.post('/api/security/audit/comprehensive', async (req, res) => {
+            try {
+                const config = req.body;
+                
+                if (!this.securityValidator) {
+                    return res.status(503).json({ error: 'Security validator not initialized' });
+                }
+                
+                const audit = await this.securityValidator.auditSecurity(config);
+                
+                res.json({
+                    success: true,
+                    ...audit
+                });
+            } catch (error) {
+                console.error('❌ Security audit error:', error);
+                res.status(500).json({
+                    error: error.message
+                });
+            }
+        });
+
+        console.log('✅ Security routes configured successfully');
+        console.log('   🔐 SuperAdmin Access Control');
+        console.log('   🔒 ZK-SNARK Privacy Proofs');
+        console.log('   🛡️  Security Validation');
+    }
+
     setupErrorHandling() {
         // 404 handler
         this.app.use((req, res, next) => {
@@ -733,7 +1399,7 @@ class StratusProductionServer {
 
     async initializeBlockchainSystems() {
         if (!autoRunAll) {
-            console.warn('⚠️ AutoRunAll not available - running in database-only mode');
+            console.warn('⚠️  AutoRunAll not available - running in database-only mode');
             return;
         }
 
@@ -751,14 +1417,46 @@ class StratusProductionServer {
                 console.log('✅ AresLang initialized');
             }
             
+            // Initialize security systems
+            await this.initializeSecuritySystems();
+            
             // Sync blockchain data with database
             await this.syncBlockchainToDatabase();
             
             console.log('✅ Blockchain systems initialized');
             
         } catch (error) {
-            console.error('⚠️ Error initializing blockchain systems:', error.message);
+            console.error('⚠️  Error initializing blockchain systems:', error.message);
             // Server continues in database-only mode
+        }
+    }
+
+    async initializeSecuritySystems() {
+        try {
+            console.log('🔐 Initializing security systems...');
+            
+            // Initialize SuperAdmin Controller
+            this.adminController = new SuperAdminController();
+            
+            // Initialize Genesis SuperAdmins
+            this.adminController.initializeGenesisSuperAdmins([
+                'zk13str_foundation_genesis_wallet_address_001',
+                'zk13str_treasury_genesis_wallet_address_002',
+                'zk13str_market_genesis_wallet_address_003'
+            ]);
+            
+            // Initialize ZK-SNARK Engine
+            this.zksnarkEngine = new ZKSNARKEngine();
+            const snarkStatus = await this.zksnarkEngine.initialize();
+            console.log(`   ZK-SNARK Mode: ${snarkStatus.mode}`);
+            
+            // Initialize Security Validator
+            this.securityValidator = new SecurityValidator();
+            
+            console.log('✅ Security systems initialized');
+            
+        } catch (error) {
+            console.error('⚠️  Error initializing security systems:', error.message);
         }
     }
 

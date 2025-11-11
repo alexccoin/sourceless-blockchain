@@ -1,0 +1,42 @@
+{
+  "name": "@sourceless/starw-node",
+  "version": "0.21.0-beta",
+  "description": "STARW Node - Personal Validator CLI for Sourceless Blockchain",
+  "main": "cli.js",
+  "bin": {
+    "starw": "./cli.js"
+  },
+  "keywords": [
+    "blockchain",
+    "validator",
+    "sourceless",
+    "starw",
+    "cli",
+    "node",
+    "personal-validator",
+    "decentralized"
+  ],
+  "author": "Alexandru Marius Stratulat <alex@sourceless.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alexccoin/sourceless-blockchain.git"
+  },
+  "bugs": {
+    "url": "https://github.com/alexccoin/sourceless-blockchain/issues"
+  },
+  "homepage": "https://github.com/alexccoin/sourceless-blockchain#readme",
+  "dependencies": {
+    "commander": "^11.1.0",
+    "inquirer": "^8.2.5",
+    "chalk": "^4.1.2",
+    "ora": "^5.4.1",
+    "axios": "^1.6.2"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}

@@ -5,13 +5,15 @@
  * - ZK13 cryptographic validation
  * - GodCypher encryption between sender/receiver/witness
  * - 3-party validation: Sender → Receiver with Witness
- * - Lightweight PoE (Proof of Existence)
+ * - Enhanced PoE (Proof of Existence) with anomaly detection
  * - Auto-generated for every wallet
  * - Real-time metrics and benchmarking
+ * - Earthquake detection for attack patterns
  */
 
 const crypto = require('crypto');
 const EventEmitter = require('events');
+const EnhancedProofOfExistenceEngine = require('../../security/EnhancedProofOfExistenceEngine');
 
 class STARWMiniValidationNode extends EventEmitter {
     constructor(walletAddress) {
@@ -28,6 +30,21 @@ class STARWMiniValidationNode extends EventEmitter {
         // Validation components
         this.zk13Validator = new ZK13Validator();
         this.godCypherEngine = new GodCypherEngine();
+        
+        // Enhanced Proof of Existence with earthquake detection
+        this.poeEngine = new EnhancedProofOfExistenceEngine();
+        
+        // Setup earthquake detection listener
+        this.poeEngine.on('earthquake', (event) => {
+            console.log('🌊 EARTHQUAKE DETECTED in validation node:', this.nodeId);
+            this.emit('earthquake', event);
+        });
+        
+        this.poeEngine.on('high-threat', (event) => {
+            console.log('⚠️  HIGH THREAT in validation node:', this.nodeId);
+            this.emit('high-threat', event);
+        });
+
         this.poeEngine = new ProofOfExistenceEngine();
         
         // Metrics
@@ -593,7 +610,8 @@ class GodCypherEngine {
 }
 
 /**
- * Proof of Existence Engine
+ * Proof of Existence Engine (Legacy - kept for backward compatibility)
+ * Use EnhancedProofOfExistenceEngine for production
  */
 class ProofOfExistenceEngine {
     async createProof(validationData) {
@@ -607,7 +625,8 @@ class ProofOfExistenceEngine {
             hash: proofHash,
             timestamp,
             exists: true,
-            merkleRoot: this.calculateMerkleRoot([proofHash])
+            merkleRoot: this.calculateMerkleRoot([proofHash]),
+            legacy: true // Flag to indicate legacy proof
         };
     }
 

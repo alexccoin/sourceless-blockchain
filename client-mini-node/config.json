@@ -1,0 +1,56 @@
+{
+  "network": {
+    "endpoint": "http://localhost:3002",
+    "chainId": 1313,
+    "networkName": "Sourceless Mainnet",
+    "timeout": 30000,
+    "retryAttempts": 3,
+    "retryDelay": 10000
+  },
+  "validator": {
+    "enabled": false,
+    "minStake": 1000,
+    "lockPeriods": [7, 30, 90],
+    "apyRates": [5, 10, 15],
+    "validationInterval": 30000,
+    "autoClaimRewards": false
+  },
+  "wallet": {
+    "autoSave": true,
+    "backupPath": "./backups",
+    "requirePassword": true,
+    "autoLockMinutes": 5,
+    "encryptionAlgorithm": "AES-GCM",
+    "keyDerivation": "PBKDF2"
+  },
+  "performance": {
+    "maxPeers": 50,
+    "syncBatchSize": 100,
+    "cacheSize": "256MB",
+    "updateIntervals": {
+      "network": 5000,
+      "wallet": 10000,
+      "validator": 15000,
+      "explorer": 10000
+    }
+  },
+  "ui": {
+    "theme": "dark",
+    "notifications": true,
+    "soundEffects": false,
+    "animationSpeed": "normal"
+  },
+  "security": {
+    "autoLock": true,
+    "lockTimeout": 300000,
+    "requirePasswordForTransactions": true,
+    "maxLoginAttempts": 3,
+    "sessionTimeout": 3600000
+  },
+  "advanced": {
+    "logLevel": "info",
+    "debugMode": false,
+    "enableMetrics": true,
+    "metricsInterval": 60000
+  }
+}
