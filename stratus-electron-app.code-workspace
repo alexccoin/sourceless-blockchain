@@ -8,6 +8,7 @@
 		}
 	],
 	"settings": {
-		"DockerRun.DisableDockerrc": true
+		"DockerRun.DisableDockerrc": true,
+		"powershell.cwd": "stratus-electron-app"
 	}
 }

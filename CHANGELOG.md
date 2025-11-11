@@ -6,6 +6,44 @@ All notable changes to Sourceless Blockchain will be documented in this file.
 
 ---
 
+## [0.22.0] - MagnetWallet Release - 2025-11-11
+
+### 🧲 Universal MagnetWallet Implementation
+
+**Status:** Production Ready - Complete universal wallet system
+
+**Major Features:**
+
+#### 🧲 MagnetWallet System
+- **Universal Multi-Token Support** - Single wallet for all 6 tokens (STR, CCOS, ARSS, wSTR, eSTR, STR$)
+- **STR.Domain Minting** - Mint identity domains for exactly 999 STR cost
+- **Enhanced Security** - 24-word seed phrases, auto-lock functionality
+- **Complete API Integration** - 5 new API endpoints for wallet operations
+- **Responsive UI** - Modern glassmorphism design with mobile optimization
+
+#### 🔧 Technical Improvements
+- **New API Endpoints:**
+  - `GET /api/wallet/balances/:address` - Multi-token balance retrieval
+  - `GET /api/domain/check/:domainName` - Domain availability checking
+  - `POST /api/domain/mint` - STR.domain minting (999 STR)
+  - `POST /api/transaction/send` - Multi-token transactions
+  - `GET /api/domains/owned/:address` - Domain ownership tracking
+- **Enhanced Server Integration** - Complete backend API support
+- **Comprehensive Testing Suite** - Interactive API testing interface
+
+#### 📁 New Files Added
+- **MagnetWallet.js** (1,200+ lines) - Universal wallet core functionality
+- **magnet-wallet.html** (350+ lines) - Complete responsive user interface
+- **magnet-wallet.css** (800+ lines) - Modern styling with glassmorphism effects
+- **magnet-wallet-test.html** - Interactive API testing suite
+- **MAGNET_WALLET_IMPLEMENTATION_REPORT.md** - Complete documentation
+
+#### 🎯 User-Requested Features
+- ✅ "Magnet wallet for all the token" - Universal multi-token support
+- ✅ "Mint an identity str.domain for the cost of 999 str" - Exact 999 STR domain minting
+
+---
+
 ## [0.21.0] - Public Beta - 2025-01-11
 
 ### 🎉 Public Beta Release

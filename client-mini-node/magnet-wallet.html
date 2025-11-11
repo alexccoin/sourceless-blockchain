@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MagnetWallet - Universal Multi-Token Wallet</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="magnet-wallet.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <h1>🧲 MagnetWallet</h1>
+                    <p>Universal Multi-Token Wallet for Sourceless Blockchain</p>
+                </div>
+                <div class="wallet-status-section">
+                    <div id="wallet-status" class="wallet-status">
+                        <span class="status-indicator"></span>
+                        <span id="wallet-address">Not connected</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Wallet Setup Section -->
+        <div id="wallet-setup" class="wallet-setup">
+            <div class="setup-card">
+                <h2>🚀 Welcome to MagnetWallet</h2>
+                <p>Create your universal multi-token wallet to access the complete Sourceless ecosystem</p>
+                
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <div class="feature-icon">💰</div>
+                        <h3>Multi-Token Support</h3>
+                        <p>STR, CCOS, ARSS, wSTR, eSTR, $TR</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🌐</div>
+                        <h3>STR.Domain Minting</h3>
+                        <p>Mint your identity for 999 STR</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🔒</div>
+                        <h3>Enhanced Security</h3>
+                        <p>24-word seed, auto-lock, encryption</p>
+                    </div>
+                </div>
+                
+                <div class="setup-actions">
+                    <button id="create-magnet-wallet-btn" class="btn-primary">Create New Wallet</button>
+                    <button id="import-magnet-wallet-btn" class="btn-secondary">Import Existing Wallet</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Wallet Dashboard -->
+        <div id="wallet-dashboard" class="wallet-dashboard" style="display: none;">
+            <!-- Portfolio Overview -->
+            <div class="portfolio-section">
+                <div class="section-header">
+                    <h2>📊 Portfolio Overview</h2>
+                    <div class="section-actions">
+                        <button id="refresh-portfolio-btn" class="btn-icon">🔄</button>
+                        <button id="export-portfolio-btn" class="btn-icon">💾</button>
+                    </div>
+                </div>
+                
+                <div id="multi-token-balances" class="token-balances-grid">
+                    <!-- Token balances will be populated here -->
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions-section">
+                <div class="section-header">
+                    <h2>⚡ Quick Actions</h2>
+                </div>
+                
+                <div class="quick-actions-grid">
+                    <button class="quick-action-btn" onclick="document.getElementById('send-transaction-modal').style.display='block'">
+                        <div class="action-icon">📤</div>
+                        <span>Send Tokens</span>
+                    </button>
+                    <button class="quick-action-btn" onclick="magnetWallet.showDomainMintModal()">
+                        <div class="action-icon">🌐</div>
+                        <span>Mint Domain</span>
+                    </button>
+                    <button class="quick-action-btn" onclick="document.getElementById('receive-modal').style.display='block'">
+                        <div class="action-icon">📥</div>
+                        <span>Receive</span>
+                    </button>
+                    <button class="quick-action-btn" onclick="document.getElementById('swap-modal').style.display='block'">
+                        <div class="action-icon">🔄</div>
+                        <span>Swap Tokens</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STR.Domains Section -->
+            <div class="domains-section">
+                <div class="section-header">
+                    <h2>🌐 Your STR.Domains</h2>
+                    <button id="mint-domain-btn" class="btn-primary">Mint New Domain</button>
+                </div>
+                
+                <div id="owned-domains-list" class="domains-grid">
+                    <!-- Domains will be populated here -->
+                </div>
+            </div>
+
+            <!-- Transaction History -->
+            <div class="transactions-section">
+                <div class="section-header">
+                    <h2>📋 Recent Transactions</h2>
+                    <select id="transaction-filter" class="filter-select">
+                        <option value="all">All Tokens</option>
+                        <option value="STR">STR Only</option>
+                        <option value="CCOS">CCOS Only</option>
+                        <option value="ARSS">ARSS Only</option>
+                    </select>
+                </div>
+                
+                <div id="transaction-history" class="transaction-list">
+                    <!-- Transactions will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    
+    <!-- Create Wallet Modal -->
+    <div id="magnet-wallet-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>🧲 Create MagnetWallet</h2>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Wallet Password (12+ characters):</label>
+                    <input type="password" id="magnet-wallet-password" placeholder="Enter strong password" required>
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password:</label>
+                    <input type="password" id="confirm-magnet-wallet-password" placeholder="Confirm password" required>
+                </div>
+                <div class="security-notice">
+                    <h4>🔒 Security Features:</h4>
+                    <ul>
+                        <li>24-word recovery seed phrase</li>
+                        <li>Enhanced encryption</li>
+                        <li>Auto-lock functionality</li>
+                        <li>Multi-signature support ready</li>
+                    </ul>
+                </div>
+                <button id="generate-magnet-wallet-btn" class="btn-primary">Generate MagnetWallet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seed Phrase Modal -->
+    <div id="seed-phrase-modal" class="modal">
+        <div class="modal-content large">
+            <h2>🔐 Your Recovery Seed Phrase</h2>
+            <div class="modal-body">
+                <div class="security-warning">
+                    <h3>⚠️ CRITICAL: Save Your Seed Phrase</h3>
+                    <p>Write these 24 words down and store them safely. This is the ONLY way to recover your wallet!</p>
+                    <ul>
+                        <li>Never share your seed phrase with anyone</li>
+                        <li>Store it offline in a secure location</li>
+                        <li>Consider using multiple backup locations</li>
+                        <li>Anyone with these words can access your funds</li>
+                    </ul>
+                </div>
+                
+                <div id="seed-phrase-container" class="seed-phrase-container">
+                    <!-- Seed words will be populated here -->
+                </div>
+                
+                <div class="confirmation-section">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="seed-phrase-confirmed">
+                        I have safely written down my seed phrase
+                    </label>
+                    <button id="confirm-seed-phrase-btn" class="btn-primary">Continue to Wallet</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Domain Minting Modal -->
+    <div id="domain-mint-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>🌐 Mint STR.Domain Identity</h2>
+            <div class="modal-body">
+                <div class="domain-info">
+                    <h3>Create Your Digital Identity</h3>
+                    <p>STR.domains are unique identities on the Sourceless blockchain that can be used for:</p>
+                    <ul>
+                        <li>Simplified payments (receive funds via STR.yourname)</li>
+                        <li>Identity verification and reputation</li>
+                        <li>Domain-based decentralized websites</li>
+                        <li>NFT and asset trading identity</li>
+                    </ul>
+                </div>
+                
+                <div class="form-group">
+                    <label>Domain Name:</label>
+                    <div class="domain-input-container">
+                        <span class="domain-prefix">STR.</span>
+                        <input type="text" id="domain-name-input" placeholder="yourname" pattern="[a-z0-9]{3,32}">
+                    </div>
+                    <small>3-32 characters, lowercase letters and numbers only</small>
+                </div>
+                
+                <div class="cost-display">
+                    <div class="cost-label">Minting Cost:</div>
+                    <div class="cost-amount">
+                        <span id="domain-cost-display">999 STR</span>
+                    </div>
+                </div>
+                
+                <div class="domain-availability" id="domain-availability">
+                    <!-- Availability check results -->
+                </div>
+                
+                <button id="confirm-domain-mint-btn" class="btn-primary">Mint Domain for 999 STR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Send Transaction Modal -->
+    <div id="send-transaction-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>📤 Send Tokens</h2>
+            <div class="modal-body">
+                <form id="send-multi-token-form">
+                    <div class="form-group">
+                        <label>Token:</label>
+                        <select id="send-token-selector" class="form-control" required>
+                            <option value="STR">STR - Sourceless</option>
+                            <option value="CCOS">CCOS - CCOIN Network</option>
+                            <option value="ARSS">ARSS - ARES Storage</option>
+                            <option value="wSTR">wSTR - Wrapped STR</option>
+                            <option value="eSTR">eSTR - Energy Sourceless</option>
+                            <option value="STR$">$TR - Dollar Sourceless</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Recipient:</label>
+                        <input type="text" id="send-recipient" placeholder="zk13str_... or STR.domain" required>
+                        <small>Supports wallet addresses and STR.domains</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Amount:</label>
+                        <input type="number" id="send-amount" step="0.000001" min="0" placeholder="0.00" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Memo (optional):</label>
+                        <input type="text" id="send-memo" placeholder="Transaction note">
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">Send Transaction</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receive Modal -->
+    <div id="receive-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>📥 Receive Tokens</h2>
+            <div class="modal-body">
+                <div class="receive-info">
+                    <h3>Your Wallet Address:</h3>
+                    <div class="address-display">
+                        <input type="text" id="wallet-address-display" readonly>
+                        <button class="btn-icon" onclick="navigator.clipboard.writeText(document.getElementById('wallet-address-display').value)">📋</button>
+                    </div>
+                </div>
+                
+                <div class="qr-code-section">
+                    <h3>QR Code:</h3>
+                    <div id="qr-code-container" class="qr-code-placeholder">
+                        QR Code will be generated here
+                    </div>
+                </div>
+                
+                <div class="token-addresses">
+                    <h3>Supported Tokens:</h3>
+                    <div class="token-list">
+                        <div class="token-item">✅ STR (Sourceless)</div>
+                        <div class="token-item">✅ CCOS (CCOIN Network)</div>
+                        <div class="token-item">✅ ARSS (ARES Storage)</div>
+                        <div class="token-item">✅ wSTR (Wrapped STR)</div>
+                        <div class="token-item">✅ eSTR (Energy Sourceless)</div>
+                        <div class="token-item">✅ $TR (Dollar Sourceless)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="MagnetWallet.js"></script>
+    
+    <div class="notifications-container" id="notifications-container">
+        <!-- Notifications will appear here -->
+    </div>
+</body>
+</html>

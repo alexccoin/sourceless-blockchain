@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MagnetWallet API Test - Sourceless Ecosystem</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #4a90e2;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #4a90e2, #9c27b0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .test-section {
+            margin-bottom: 40px;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            border: 1px solid rgba(74, 144, 226, 0.2);
+        }
+
+        .test-section h2 {
+            color: #4a90e2;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        button {
+            background: linear-gradient(45deg, #4a90e2, #9c27b0);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        input {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            min-width: 250px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #4a90e2;
+        }
+
+        .result {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .success {
+            border-color: #28a745;
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            border-color: #dc3545;
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .token-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .token-card {
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .token-name {
+            font-weight: bold;
+            color: #4a90e2;
+            margin-bottom: 5px;
+        }
+
+        .token-balance {
+            font-size: 1.2em;
+            color: #28a745;
+        }
+
+        .demo-address {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-online {
+            background-color: #28a745;
+            animation: pulse 2s infinite;
+        }
+
+        .status-offline {
+            background-color: #dc3545;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .api-status {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧲 MagnetWallet API Test Suite</h1>
+        
+        <div class="api-status">
+            <h3><span id="statusIndicator" class="status-indicator status-offline"></span>API Server Status: <span id="serverStatus">Checking...</span></h3>
+            <p>Server: <strong>http://localhost:3002</strong></p>
+        </div>
+
+        <!-- Wallet Balance Test -->
+        <div class="test-section">
+            <h2>💰 Multi-Token Balance Test</h2>
+            <p>Test the wallet balance endpoint with all 6 supported tokens.</p>
+            
+            <div class="demo-address">
+                Demo Address: zk13str_demo_wallet_address_123456789abcdef
+            </div>
+            
+            <button onclick="testWalletBalance()">Test Wallet Balances</button>
+            <button onclick="testWalletBalance('zk13str_' + Date.now().toString(36) + '_test')">Test Random Address</button>
+            
+            <div id="balanceResult" class="result"></div>
+            <div id="tokenGrid" class="token-grid" style="display: none;"></div>
+        </div>
+
+        <!-- Domain Availability Test -->
+        <div class="test-section">
+            <h2>🌐 STR.Domain Availability Test</h2>
+            <p>Check if STR.domains are available for minting (Cost: 999 STR).</p>
+            
+            <input type="text" id="domainInput" placeholder="Enter domain (e.g., myname)" value="testdomain123">
+            <button onclick="testDomainAvailability()">Check Availability</button>
+            <button onclick="testDomainAvailability('demo')">Test Reserved Domain</button>
+            
+            <div id="domainResult" class="result"></div>
+        </div>
+
+        <!-- Domain Minting Test -->
+        <div class="test-section">
+            <h2>⚒️ STR.Domain Minting Test</h2>
+            <p>Test the domain minting functionality with 999 STR cost validation.</p>
+            
+            <input type="text" id="walletInput" placeholder="Wallet Address" value="zk13str_demo_wallet_address_123456789abcdef">
+            <input type="text" id="mintDomainInput" placeholder="Domain to mint" value="testmint">
+            <button onclick="testDomainMinting()">Mint Domain (999 STR)</button>
+            
+            <div id="mintResult" class="result"></div>
+        </div>
+
+        <!-- Multi-Token Transaction Test -->
+        <div class="test-section">
+            <h2>💸 Multi-Token Transaction Test</h2>
+            <p>Test sending different types of tokens between addresses.</p>
+            
+            <input type="text" id="fromInput" placeholder="From Address" value="zk13str_demo_wallet_sender_123456789">
+            <input type="text" id="toInput" placeholder="To Address/Domain" value="zk13str_demo_wallet_receiver_987654321">
+            <select id="tokenSelect">
+                <option value="STR">STR (Sourceless)</option>
+                <option value="CCOS">CCOS (Reward Token)</option>
+                <option value="ARSS">ARSS (Utility Token)</option>
+                <option value="wSTR">wSTR (Wrapped STR)</option>
+                <option value="eSTR">eSTR (Energy Token)</option>
+                <option value="STR$">STR$ (Stablecoin)</option>
+            </select>
+            <input type="number" id="amountInput" placeholder="Amount" value="100" step="0.001">
+            <input type="text" id="memoInput" placeholder="Memo (optional)" value="Test transaction">
+            <button onclick="testTransaction()">Send Transaction</button>
+            
+            <div id="transactionResult" class="result"></div>
+        </div>
+
+        <!-- Owned Domains Test -->
+        <div class="test-section">
+            <h2>📋 Owned Domains Test</h2>
+            <p>Retrieve all domains owned by a specific wallet address.</p>
+            
+            <input type="text" id="ownerInput" placeholder="Owner Address" value="zk13str_demo_wallet_address_123456789abcdef">
+            <button onclick="testOwnedDomains()">Get Owned Domains</button>
+            
+            <div id="ownedResult" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        // Check server status on load
+        window.onload = function() {
+            checkServerStatus();
+        };
+
+        async function checkServerStatus() {
+            try {
+                const response = await fetch('http://localhost:3002/health');
+                if (response.ok) {
+                    document.getElementById('statusIndicator').className = 'status-indicator status-online';
+                    document.getElementById('serverStatus').textContent = 'Online';
+                } else {
+                    throw new Error('Server not responding');
+                }
+            } catch (error) {
+                document.getElementById('statusIndicator').className = 'status-indicator status-offline';
+                document.getElementById('serverStatus').textContent = 'Offline';
+            }
+        }
+
+        async function testWalletBalance(customAddress = null) {
+            const address = customAddress || 'zk13str_demo_wallet_address_123456789abcdef';
+            const resultDiv = document.getElementById('balanceResult');
+            const tokenGrid = document.getElementById('tokenGrid');
+            
+            resultDiv.textContent = 'Loading wallet balances...';
+            resultDiv.className = 'result';
+            
+            try {
+                const response = await fetch(`http://localhost:3002/api/wallet/balances/${address}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.textContent = JSON.stringify(data, null, 2);
+                    resultDiv.className = 'result success';
+                    
+                    // Create token grid
+                    if (data.balances) {
+                        let gridHTML = '';
+                        Object.entries(data.balances).forEach(([token, balance]) => {
+                            gridHTML += `
+                                <div class="token-card">
+                                    <div class="token-name">${token}</div>
+                                    <div class="token-balance">${balance.toFixed(3)}</div>
+                                </div>
+                            `;
+                        });
+                        tokenGrid.innerHTML = gridHTML;
+                        tokenGrid.style.display = 'grid';
+                    }
+                } else {
+                    resultDiv.textContent = JSON.stringify(data, null, 2);
+                    resultDiv.className = 'result error';
+                    tokenGrid.style.display = 'none';
+                }
+            } catch (error) {
+                resultDiv.textContent = 'Error: ' + error.message;
+                resultDiv.className = 'result error';
+                tokenGrid.style.display = 'none';
+            }
+        }
+
+        async function testDomainAvailability(customDomain = null) {
+            const domain = customDomain || document.getElementById('domainInput').value;
+            const resultDiv = document.getElementById('domainResult');
+            
+            if (!domain) {
+                resultDiv.textContent = 'Please enter a domain name';
+                resultDiv.className = 'result error';
+                return;
+            }
+            
+            const fullDomain = domain.startsWith('STR.') ? domain : `STR.${domain}`;
+            resultDiv.textContent = `Checking availability for ${fullDomain}...`;
+            resultDiv.className = 'result';
+            
+            try {
+                const response = await fetch(`http://localhost:3002/api/domain/check/${fullDomain}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.textContent = JSON.stringify(data, null, 2);
+                    resultDiv.className = 'result success';
+                } else {
+                    resultDiv.textContent = JSON.stringify(data, null, 2);
+                    resultDiv.className = 'result error';
+                }
+            } catch (error) {
+                resultDiv.textContent = 'Error: ' + error.message;
+                resultDiv.className = 'result error';
+            }
+        }
+
+        async function testDomainMinting() {
+            const walletAddress = document.getElementById('walletInput').value;
+            const domain = document.getElementById('mintDomainInput').value;
+            const resultDiv = document.getElementById('mintResult');
+            
+            if (!walletAddress || !domain) {
+                resultDiv.textContent = 'Please enter both wallet address and domain name';
+                resultDiv.className = 'result error';
+                return;
+            }
+            
+            const fullDomain = domain.startsWith('STR.') ? domain : `STR.${domain}`;
+            resultDiv.textContent = `Minting domain ${fullDomain} for ${walletAddress}...`;
+            resultDiv.className = 'result';
+            
+            try {
+                const response = await fetch('http://localhost:3002/api/domain/mint', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        walletAddress: walletAddress,
+                        domainName: fullDomain,
+                        cost: 999
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.textContent = JSON.stringify(data, null, 2);
+                    resultDiv.className = 'result success';
+                } else {
+                    resultDiv.textContent = JSON.stringify(data, null, 2);
+                    resultDiv.className = 'result error';
+                }
+            } catch (error) {
+                resultDiv.textContent = 'Error: ' + error.message;
+                resultDiv.className = 'result error';
+            }
+        }
+
+        async function testTransaction() {
+            const from = document.getElementById('fromInput').value;
+            const to = document.getElementById('toInput').value;
+            const token = document.getElementById('tokenSelect').value;
+            const amount = parseFloat(document.getElementById('amountInput').value);
+            const memo = document.getElementById('memoInput').value;
+            const resultDiv = document.getElementById('transactionResult');
+            
+            if (!from || !to || !amount) {
+                resultDiv.textContent = 'Please fill in all required fields';
+                resultDiv.className = 'result error';
+                return;
+            }
+            
+            resultDiv.textContent = `Sending ${amount} ${token} from ${from} to ${to}...`;
+            resultDiv.className = 'result';
+            
+            try {
+                const response = await fetch('http://localhost:3002/api/transaction/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        from: from,
+                        to: to,
+                        token: token,
+                        amount: amount,
+                        memo: memo
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.textContent = JSON.stringify(data, null, 2);
+                    resultDiv.className = 'result success';
+                } else {
+                    resultDiv.textContent = JSON.stringify(data, null, 2);
+                    resultDiv.className = 'result error';
+                }
+            } catch (error) {
+                resultDiv.textContent = 'Error: ' + error.message;
+                resultDiv.className = 'result error';
+            }
+        }
+
+        async function testOwnedDomains() {
+            const address = document.getElementById('ownerInput').value;
+            const resultDiv = document.getElementById('ownedResult');
+            
+            if (!address) {
+                resultDiv.textContent = 'Please enter a wallet address';
+                resultDiv.className = 'result error';
+                return;
+            }
+            
+            resultDiv.textContent = `Loading domains owned by ${address}...`;
+            resultDiv.className = 'result';
+            
+            try {
+                const response = await fetch(`http://localhost:3002/api/domains/owned/${address}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.textContent = JSON.stringify(data, null, 2);
+                    resultDiv.className = 'result success';
+                } else {
+                    resultDiv.textContent = JSON.stringify(data, null, 2);
+                    resultDiv.className = 'result error';
+                }
+            } catch (error) {
+                resultDiv.textContent = 'Error: ' + error.message;
+                resultDiv.className = 'result error';
+            }
+        }
+    </script>
+</body>
+</html>
