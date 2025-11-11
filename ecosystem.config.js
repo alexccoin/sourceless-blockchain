@@ -5,7 +5,7 @@
 module.exports = {
   apps: [
     {
-      name: 'sourceless-stratus',
+      name: 'sourceless-blockchain',
       script: 'server-production-hardened.js',
       instances: 1,
       exec_mode: 'fork',

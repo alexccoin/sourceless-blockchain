@@ -1,11 +1,11 @@
 ﻿version: '3.8'
 
 services:
-  sourceless-stratus:
+  sourceless-blockchain:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: sourceless-stratus-blockchain
+    container_name: sourceless-blockchain
     ports:
       - "3002:3002"
     environment:

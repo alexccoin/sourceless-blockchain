@@ -46,8 +46,8 @@ We are committed to providing a welcoming and inspiring community for all.
 
 ```bash
 # Click "Fork" on GitHub, then clone your fork
-git clone https://github.com/YOUR_USERNAME/sourceless-stratus-blockchain.git
-cd sourceless-stratus-blockchain
+git clone https://github.com/YOUR_USERNAME/sourceless-blockchain.git
+cd sourceless-blockchain
 ```
 
 ### 2. Set Up Development Environment
@@ -269,7 +269,7 @@ Contributors will be recognized in:
 
 ## 📞 Questions?
 
-- **GitHub Discussions:** https://github.com/alexccoin/sourceless-stratus-blockchain/discussions
+- **GitHub Discussions:** https://github.com/alexccoin/sourceless-blockchain/discussions
 - **Email:** team@sourceless.io
 - **Discord:** https://discord.gg/sourceless
 

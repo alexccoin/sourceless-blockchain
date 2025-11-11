@@ -1,14 +1,16 @@
 # Changelog
 
-All notable changes to Sourceless Stratus Blockchain will be documented in this file.
+All notable changes to Sourceless Blockchain will be documented in this file.
 
 **Created with ❤️ by Alexandru Marius Stratulat and Sourceless Team**
 
 ---
 
-## [1.0.0] - 2025-01-XX
+## [0.21.0] - Public Beta - 2025-01-11
 
-### 🎉 Initial Release
+### 🎉 Public Beta Release
+
+**Status:** Public Beta - Open for community testing and feedback
 
 **Major Features:**
 

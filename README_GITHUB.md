@@ -1,10 +1,11 @@
 # Sourceless Blockchain
 
-**Enterprise-Grade Decentralized Multi-Ledger Blockchain System with Stratus Browser**
+**Public Beta v0.21 - Enterprise-Grade Decentralized Multi-Ledger Blockchain System with Stratus Browser**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Version](https://img.shields.io/badge/version-0.21--beta-orange)](CHANGELOG.md)
 
 Created with ❤️ by **Alexandru Marius Stratulat** and **Sourceless Team**
 
@@ -269,7 +270,7 @@ pm2 startup
 pm2 monit
 
 # View logs
-pm2 logs sourceless-stratus-hardened
+pm2 logs sourceless-blockchain
 ```
 
 ### Environment Variables
@@ -294,7 +295,7 @@ SKIP_HEAVY_HISTORY=true
 
 ```bash
 # Build Docker image
-docker build -t sourceless-stratus:latest .
+docker build -t sourceless-blockchain:latest .
 
 # Run container
 docker run -d \
@@ -452,8 +453,8 @@ We welcome contributions from the community!
 
 ## 🐛 Bug Reports & Feature Requests
 
-- **Bug Reports:** [GitHub Issues](https://github.com/alexccoin/sourceless-stratus-blockchain/issues)
-- **Feature Requests:** [GitHub Discussions](https://github.com/alexccoin/sourceless-stratus-blockchain/discussions)
+- **Bug Reports:** [GitHub Issues](https://github.com/alexccoin/sourceless-blockchain/issues)
+- **Feature Requests:** [GitHub Discussions](https://github.com/alexccoin/sourceless-blockchain/discussions)
 - **Security Issues:** Please email security@sourceless.io
 
 ---
