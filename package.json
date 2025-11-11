@@ -1,6 +1,6 @@
 {
   "name": "sourceless-blockchain",
-  "version": "0.22.0",
+  "version": "0.22.1",
   "description": "Sourceless Blockchain - Public Beta v0.22 - Enterprise-grade decentralized multi-ledger blockchain with MagnetWallet universal multi-token support, STR.domain minting (999 STR), 6-ledger architecture, and comprehensive token economy. Production-ready with enhanced security.",
   "main": "server-production-hardened.js",
   "author": "Alexandru Marius Stratulat <alexandru.stratulat@sourceless.io>",

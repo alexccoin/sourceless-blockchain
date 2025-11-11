@@ -30,6 +30,27 @@
     margin: 0;
     font-size: 2.5em;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo-icon {
+    width: 48px;
+    height: 48px;
+    filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(7500%) hue-rotate(315deg) brightness(103%) contrast(103%);
+    animation: magnetPulse 2s ease-in-out infinite;
+}
+
+@keyframes magnetPulse {
+    0%, 100% {
+        transform: scale(1);
+        filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(7500%) hue-rotate(315deg) brightness(103%) contrast(103%);
+    }
+    50% {
+        transform: scale(1.05);
+        filter: brightness(0) saturate(100%) invert(71%) sepia(96%) saturate(3420%) hue-rotate(267deg) brightness(92%) contrast(93%);
+    }
 }
 
 .logo-section p {
@@ -116,6 +137,22 @@
 .feature-icon {
     font-size: 2em;
     margin-bottom: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60px;
+}
+
+.icon-img {
+    width: 48px;
+    height: 48px;
+    filter: brightness(0) saturate(100%) invert(21%) sepia(87%) saturate(3069%) hue-rotate(219deg) brightness(93%) contrast(98%);
+    transition: all 0.3s ease;
+}
+
+.icon-img:hover {
+    transform: scale(1.1);
+    filter: brightness(0) saturate(100%) invert(40%) sepia(98%) saturate(3420%) hue-rotate(267deg) brightness(92%) contrast(93%);
 }
 
 .feature-item h3 {
@@ -269,6 +306,22 @@
 .action-icon {
     font-size: 2em;
     margin-bottom: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50px;
+}
+
+.action-icon-img {
+    width: 32px;
+    height: 32px;
+    filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(7500%) hue-rotate(315deg) brightness(103%) contrast(103%);
+    transition: all 0.3s ease;
+}
+
+.action-icon-img:hover {
+    transform: scale(1.15);
+    filter: brightness(0) saturate(100%) invert(71%) sepia(96%) saturate(3420%) hue-rotate(267deg) brightness(92%) contrast(93%);
 }
 
 /* Domains Section */
@@ -394,6 +447,17 @@
 
 .btn-icon:hover {
     background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.btn-icon-img {
+    width: 20px;
+    height: 20px;
+    filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(7500%) hue-rotate(315deg) brightness(103%) contrast(103%);
+    transition: all 0.3s ease;
+}
+
+.btn-icon:hover .btn-icon-img {
     transform: scale(1.1);
 }
 
