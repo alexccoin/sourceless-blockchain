@@ -1,6 +1,6 @@
-# Sourceless Stratus Blockchain
+# Sourceless Blockchain
 
-**Enterprise-Grade Decentralized Multi-Ledger Blockchain System**
+**Enterprise-Grade Decentralized Multi-Ledger Blockchain System with Stratus Browser**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org)
@@ -12,7 +12,9 @@ Created with ❤️ by **Alexandru Marius Stratulat** and **Sourceless Team**
 
 ## 🌟 Overview
 
-Sourceless Stratus is a revolutionary **HOSTLESS** pure blockchain system featuring:
+**Sourceless** is the complete blockchain ecosystem. **Sourceless Blockchain** is the revolutionary **HOSTLESS** pure blockchain system. **Stratus** is the browser interface for interacting with the blockchain.
+
+### System Features:
 
 - **1313 Genesis STARW Validation Nodes**
 - **6 Specialized Multi-Ledgers** (Main, Asset, Contract, Governance, CCOIN, CCOS)
