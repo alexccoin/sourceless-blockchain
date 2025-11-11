@@ -48,63 +48,9 @@ const schemas = {
 };
 
 // ============================================================================
-// INPUT VALIDATION UTILITIES
+// INPUT VALIDATION UTILITIES (using imported SecurityValidator)
 // ============================================================================
-
-class SecurityValidator {
-    static validateString(input, options = {}) {
-        if (typeof input !== 'string') {
-            return { valid: false, error: 'Input must be a string' };
-        }
-
-        const {
-            maxLength = 10000,
-            minLength = 0,
-            allowEmpty = true,
-            pattern = null,
-            trim = true
-        } = options;
-
-        let sanitized = trim ? input.trim() : input;
-
-        if (!allowEmpty && sanitized.length === 0) {
-            return { valid: false, error: 'Input cannot be empty' };
-        }
-
-        if (sanitized.length < minLength) {
-            return { valid: false, error: `Input must be at least ${minLength} characters` };
-        }
-
-        if (sanitized.length > maxLength) {
-            return { valid: false, error: `Input must be at most ${maxLength} characters` };
-        }
-
-        if (pattern && !pattern.test(sanitized)) {
-            return { valid: false, error: 'Input format is invalid' };
-        }
-
-        return { valid: true, value: sanitized };
-    }
-
-    static sanitizeHTML(input) {
-        if (typeof input !== 'string') return '';
-        return input
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#x27;')
-            .replace(/\//g, '&#x2F;');
-    }
-
-    static validateLedgerType(ledger) {
-        const validLedgers = ['main', 'asset', 'contract', 'governance', 'ccoin', 'ccos'];
-        if (!validLedgers.includes(ledger)) {
-            return { valid: false, error: `Invalid ledger type. Must be one of: ${validLedgers.join(', ')}` };
-        }
-        return { valid: true, value: ledger };
-    }
-}
+// Note: SecurityValidator is imported from './src/security/SecurityValidator'
 
 // ============================================================================
 // ENHANCED SERVER CLASS WITH COMPREHENSIVE ERROR HANDLING
