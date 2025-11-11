@@ -8,6 +8,8 @@ export class StarwWorkerNode {
   autoValidateContracts: boolean = true;
   autoExecutePoints: boolean = true;
   validationLog: string[] = [];
+  private currentTasks: number = 0;
+  private maxConcurrentTasks: number = 4;
 
   constructor(vmVersion: string = '1.0.0') {
     this.vm = new StarwVM(vmVersion);
@@ -15,12 +17,26 @@ export class StarwWorkerNode {
 
   async validateAndExecute(contractCode: string, input: any) {
     try {
+      this.currentTasks = Math.min(this.maxConcurrentTasks, this.currentTasks + 1);
       const result = await this.vm.executeContract(contractCode, input);
       this.validationLog.push(`Executed contract at ${Date.now()}`);
       return result;
     } catch (e) {
       this.validationLog.push(`Validation error: ${e}`);
       throw e;
+    } finally {
+      setTimeout(() => {
+        this.currentTasks = Math.max(0, this.currentTasks - 1);
+      }, 250);
     }
+  }
+
+  getTelemetry() {
+    const vm = (this.vm as any).getTelemetry ? (this.vm as any).getTelemetry() : {};
+    return {
+      currentTasks: this.currentTasks,
+      maxConcurrentTasks: this.maxConcurrentTasks,
+      vm
+    };
   }
 }

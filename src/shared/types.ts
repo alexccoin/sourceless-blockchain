@@ -36,8 +36,22 @@ export interface Transaction {
 	};
 }
 
-export type TransactionType = 'transfer' | 'stake' | 'unstake' | 'mint' | 'contract' | 'governance';
-export type LedgerType = 'main' | 'asset' | 'contract' | 'governance';
+export type TransactionType = 'transfer' | 'stake' | 'unstake' | 'mint' | 'contract' | 'governance' | 'cross-chain';
+export type LedgerType = 'main' | 'asset' | 'contract' | 'governance' | 'ccoin' | 'ccos';
+
+// ==================== TOKEN TYPES ====================
+
+export type TokenSymbol = 'STR' | 'CCOIN' | 'ARSS' | 'CCOS' | 'ESTR' | 'wSTR' | 'STR$';
+
+export interface TokenBalance {
+  STR: number;      // Main fuel token
+  CCOIN: number;    // Cross-chain bridge token
+  ARSS: number;     // VM computation & storage rewards
+  CCOS: number;     // IgniteHex platform token
+  ESTR: number;     // Energy token for network operations
+  wSTR: number;     // Wrapped STR for DeFi
+  'STR$': number;   // Stablecoin ($STR or $TR)
+}
 
 // ==================== APPLESS & ARES AI ====================
 
@@ -89,7 +103,8 @@ export interface CrossChainBridge {
   strFuel: boolean; // Use STR as fuel for zero-cost transactions
   supportedAssets: string[];
   transactionFee: number; // Minimal cost or zero with STR
-  tps: number; // Transactions per second capacity
+  tpms: number; // Transactions per millisecond capacity
+  tps: number;  // Transactions per second (tpms * 1000)
   status: 'active' | 'maintenance' | 'offline';
 }
 
@@ -100,8 +115,9 @@ export interface HybridNode {
   type: 'public' | 'private' | 'hybrid'; // Public (Bitcoin/Ethereum) + Private (DLT)
   strDomain: string;
   zkCompressed: boolean; // zk-SNARK compression (1MB node size)
-  tpsCapacity: number; // Up to 100,000 TPS through delegation
-  delegatedNodes: string[]; // Affiliated nodes for exponential TPS scaling
+  tpmsCapacity: number; // Transactions per millisecond (1 TPMS = 1000 TPS)
+  tpsCapacity: number; // Transactions per second (derived from TPMS)
+  delegatedNodes: string[]; // Affiliated nodes for exponential TPMS scaling
   storage: {
     totalSpace: number; // GB
     usedSpace: number;
@@ -165,7 +181,7 @@ export interface StarwWorkerNodeConfig {
 export interface Wallet {
   address: string; // STR.domain format (STR.{username}, max 128 chars after STR.)
   publicKey: string;
-  balance: number;
+  balances: TokenBalance; // All token balances
   stakedAmount: number;
   nonce: number;
   domains: string[]; // List of owned STR.domains

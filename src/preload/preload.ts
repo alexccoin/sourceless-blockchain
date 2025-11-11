@@ -18,6 +18,12 @@ contextBridge.exposeInMainWorld('sourcelessAPI', {
   // Send messages to main process
   getWalletData: () => ipcRenderer.invoke('wallet:get'),
   getLedgerStats: () => ipcRenderer.invoke('ledger:stats'),
+  getNetworkStats: () => ipcRenderer.invoke('network:stats'),
+  getNetworkMetrics: () => ipcRenderer.invoke('network:metrics'),
+  getBlockchainHistory: () => ipcRenderer.invoke('blockchain:history'),
+  getPoEStats: () => ipcRenderer.invoke('poe:stats'),
+  getStarwStats: () => ipcRenderer.invoke('starw:stats'),
+  runStarwMicrobench: (iterations?: number) => ipcRenderer.invoke('starw:microbench', { iterations }),
   getARSSMetering: () => ipcRenderer.invoke('arss:metering'),
   getCCOINBalance: () => ipcRenderer.invoke('ccoin:balance'),
   
@@ -25,6 +31,19 @@ contextBridge.exposeInMainWorld('sourcelessAPI', {
   sendTransaction: (data: any) => ipcRenderer.invoke('tx:send', data),
   deployContract: (data: any) => ipcRenderer.invoke('contract:deploy', data),
   executeContract: (data: any) => ipcRenderer.invoke('contract:execute', data),
+
+  // IDE Dev Mode
+  getExamples: () => ipcRenderer.invoke('ide:listExamples'),
+  compileExample: (id: string) => ipcRenderer.invoke('ide:compileExample', { id }),
+  deployExample: (id: string, initialBalance?: number) => ipcRenderer.invoke('ide:deployExample', { id, initialBalance }),
+
+  // CCOS operations
+  mintCCOS: (amount: number) => ipcRenderer.invoke('ccos:mint', { amount }),
+  transferCCOS: (to: string, amount: number) => ipcRenderer.invoke('ccos:transfer', { to, amount }),
+
+  // CCOIN cross-chain
+  initiateCrossChain: (data: { sourceChain: string; destChain: string; destAddr: string; amount: number; token: string }) =>
+    ipcRenderer.invoke('ccoin:crossChain', data),
   
   // Domain operations
   registerDomain: (data: any) => ipcRenderer.invoke('domain:register', data),
@@ -73,6 +92,36 @@ contextBridge.exposeInMainWorld('sourcelessAPI', {
   linkEmail: (email: string) => 
     ipcRenderer.invoke('spaceless:linkEmail', { email }),
   
+  // ==================== TOKEN DEPLOYMENT ====================
+  
+  // Deploy personal token
+  deployPersonalToken: (config: { 
+    tokenName: string; 
+    ticker: string; 
+    totalSupply: number; 
+    decimals: number; 
+    website?: string; 
+    description?: string 
+  }) => ipcRenderer.invoke('token:deployPersonal', config),
+  
+  // Deploy business token
+  deployBusinessToken: (config: { 
+    tokenName: string; 
+    ticker: string; 
+    totalSupply: number; 
+    decimals: number; 
+    website?: string; 
+    description?: string;
+    companyName: string;
+    personInCharge: string;
+  }) => ipcRenderer.invoke('token:deployBusiness', config),
+  
+  // Get deployment history
+  getDeploymentHistory: () => ipcRenderer.invoke('deployment:getHistory'),
+  
+  // Get deployment stats
+  getDeploymentStats: () => ipcRenderer.invoke('deployment:getStats'),
+  
   // Real-time updates
   onWalletUpdate: (callback: Function) => {
     ipcRenderer.on('wallet:update', (_, data) => callback(data));
@@ -86,6 +135,9 @@ contextBridge.exposeInMainWorld('sourcelessAPI', {
   onCCOINUpdate: (callback: Function) => {
     ipcRenderer.on('ccoin:update', (_, data) => callback(data));
   },
+  onDeploymentUpdate: (callback: Function) => {
+    ipcRenderer.on('deployment:update', (_, data) => callback(data));
+  },
   onHostingReward: (callback: Function) => {
     ipcRenderer.on('hosting:rewardDistributed', (_, data) => callback(data));
   },
@@ -97,5 +149,30 @@ contextBridge.exposeInMainWorld('sourcelessAPI', {
   },
   onDomainSynced: (callback: Function) => {
     ipcRenderer.on('spaceless:domainSynced', (_, data) => callback(data));
-  }
+  },
+  // Dynamic Network Updates
+  onNetworkDynamicUpdate: (callback: Function) => {
+    ipcRenderer.on('network:dynamicUpdate', (_, data) => callback(data));
+  },
+  onNetworkStatsUpdate: (callback: Function) => {
+    ipcRenderer.on('network:statsUpdate', (_, data) => callback(data));
+  },
+  onNetworkInitial: (callback: Function) => {
+    ipcRenderer.on('network:initial', (_, data) => callback(data));
+  },
+  onBlockchainHistoryInitial: (callback: Function) => {
+    ipcRenderer.on('blockchain:historyInitial', (_, data) => callback(data));
+  },
+    // AresLang API
+    ares: {
+      generateKeyPair: () => ipcRenderer.invoke('areslang:generateKeyPair'),
+      encrypt: (data: string, publicKey: string) => ipcRenderer.invoke('areslang:encrypt', { data, publicKey }),
+      decrypt: (payload: string, privateKey: string) => ipcRenderer.invoke('areslang:decrypt', { payload, privateKey }),
+      entropyBytes: (length: number) => ipcRenderer.invoke('areslang:entropyBytes', { length }),
+      entropyQuality: () => ipcRenderer.invoke('areslang:entropyQuality'),
+      chains: () => ipcRenderer.invoke('areslang:chains'),
+      sign: (message: string, privateKey: string) => ipcRenderer.invoke('areslang:sign', { message, privateKey }),
+      verify: (message: string, signature: string, publicKey: string) => ipcRenderer.invoke('areslang:verify', { message, signature, publicKey }),
+      cleanup: () => ipcRenderer.invoke('areslang:cleanup')
+    }
 });

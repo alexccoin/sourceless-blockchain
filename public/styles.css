@@ -545,3 +545,142 @@ code {
     background: linear-gradient(90deg, #00d4ff 0%, #00ff88 100%);
     transition: width 0.3s ease;
 }
+
+/* Token Creator Styles */
+.token-creator-content {
+    display: none;
+}
+
+.token-creator-content.active {
+    display: block;
+}
+
+.token-form {
+    max-width: 100%;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #00d4ff;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    border-radius: 6px;
+    color: #fff;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #00d4ff;
+    background: rgba(0, 212, 255, 0.1);
+}
+
+.form-group small {
+    display: block;
+    margin-top: 0.35rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+}
+
+.deployment-cost {
+    background: rgba(0, 212, 255, 0.1);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    border-radius: 6px;
+    padding: 1rem;
+    margin: 1.5rem 0 1rem;
+    text-align: center;
+    font-size: 1.05rem;
+}
+
+.deployment-cost strong {
+    color: #00ff88;
+}
+
+/* Deployment History */
+.deployment-item {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s;
+}
+
+.deployment-item:hover {
+    border-color: rgba(0, 212, 255, 0.4);
+    background: rgba(0, 212, 255, 0.05);
+}
+
+.deployment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.deployment-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #00d4ff;
+}
+
+.deployment-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.badge-personal {
+    background: rgba(0, 212, 255, 0.2);
+    color: #00d4ff;
+}
+
+.badge-business {
+    background: rgba(0, 255, 136, 0.2);
+    color: #00ff88;
+}
+
+.badge-dev {
+    background: rgba(255, 200, 0, 0.2);
+    color: #ffc800;
+}
+
+.deployment-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+    font-size: 0.9rem;
+}
+
+.deployment-detail {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.deployment-detail strong {
+    color: #fff;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.deployment-address {
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: #00ff88;
+    word-break: break-all;
+}

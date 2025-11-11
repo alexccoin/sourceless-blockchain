@@ -1,6 +1,6 @@
 // Sourceless Blockchain v0.13 - Transaction Class
 import * as crypto from 'crypto';
-import { Transaction as TransactionType } from '../../../shared/types';
+import { Transaction as TransactionType, TransactionType as TxType } from '../../../shared/types';
 import { v4 as uuidv4 } from 'uuid';
 
 export class Transaction implements TransactionType {
@@ -11,14 +11,14 @@ export class Transaction implements TransactionType {
   public fee: number;
   public timestamp: number;
   public signature: string;
-  public type: 'transfer' | 'stake' | 'unstake' | 'mint' | 'contract' | 'governance';
+  public type: TxType;
   public data?: any;
 
   constructor(
     from: string,
     to: string,
     amount: number,
-    type: 'transfer' | 'stake' | 'unstake' | 'mint' | 'contract' | 'governance' = 'transfer',
+    type: TxType = 'transfer',
     fee: number = 0.001,
     data?: any
   ) {

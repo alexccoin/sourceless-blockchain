@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STRXplorer - Sourceless Blockchain Explorer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+            background: #0a0e27;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .explorer-header {
+            background: linear-gradient(135deg, #1a1f3a 0%, #0f1729 100%);
+            border-bottom: 1px solid rgba(58, 255, 178, 0.2);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #3affb2 0%, #00d4ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .network-badge {
+            background: rgba(58, 255, 178, 0.2);
+            border: 1px solid #3affb2;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #3affb2;
+        }
+
+        .search-bar {
+            flex: 1;
+            max-width: 600px;
+            margin: 0 2rem;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.8rem 1.2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(58, 255, 178, 0.3);
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3affb2;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 2rem;
+            font-size: 0.85rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            color: #8b92b0;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            color: #3affb2;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            background: rgba(26, 31, 58, 0.6);
+            border-bottom: 1px solid rgba(58, 255, 178, 0.1);
+            padding: 0 2rem;
+            overflow-x: auto;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .nav-tab {
+            padding: 1rem 1.5rem;
+            background: transparent;
+            border: none;
+            color: #8b92b0;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .nav-tab:hover {
+            color: #3affb2;
+        }
+
+        .nav-tab.active {
+            color: #3affb2;
+        }
+
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #3affb2;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Overview Grid */
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, rgba(26, 31, 58, 0.8) 0%, rgba(15, 23, 41, 0.8) 100%);
+            border: 1px solid rgba(58, 255, 178, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .metric-card:hover {
+            border-color: #3affb2;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(58, 255, 178, 0.15);
+        }
+
+        .metric-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            color: #8b92b0;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #3affb2;
+            margin-bottom: 0.3rem;
+        }
+
+        .metric-change {
+            font-size: 0.8rem;
+            color: #3affb2;
+        }
+
+        .metric-change.negative {
+            color: #ff4757;
+        }
+
+        /* Section */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .section-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            background: rgba(58, 255, 178, 0.1);
+            border: 1px solid #3affb2;
+            border-radius: 6px;
+            color: #3affb2;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: rgba(58, 255, 178, 0.2);
+        }
+
+        /* Data Table */
+        .data-table {
+            background: rgba(26, 31, 58, 0.6);
+            border: 1px solid rgba(58, 255, 178, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .table-header {
+            display: grid;
+            background: rgba(58, 255, 178, 0.05);
+            padding: 1rem 1.5rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #8b92b0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .table-row {
+            display: grid;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid rgba(58, 255, 178, 0.1);
+            transition: all 0.2s;
+        }
+
+        .table-row:hover {
+            background: rgba(58, 255, 178, 0.05);
+        }
+
+        /* Transaction specific grid */
+        .tx-grid {
+            grid-template-columns: 120px 1fr 200px 150px 120px 100px;
+        }
+
+        /* Ledger specific grid */
+        .ledger-grid {
+            grid-template-columns: 150px 1fr 150px 150px 120px;
+        }
+
+        /* Node specific grid */
+        .node-grid {
+            grid-template-columns: 180px 200px 120px 150px 120px 1fr;
+        }
+
+        .tx-hash {
+            font-family: 'Courier New', monospace;
+            color: #3affb2;
+            cursor: pointer;
+        }
+
+        .tx-hash:hover {
+            text-decoration: underline;
+        }
+
+        .address {
+            font-family: 'Courier New', monospace;
+            color: #8b92b0;
+            font-size: 0.85rem;
+        }
+
+        .amount {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .status-success {
+            background: rgba(58, 255, 178, 0.2);
+            color: #3affb2;
+        }
+
+        .status-pending {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+
+        .status-failed {
+            background: rgba(255, 71, 87, 0.2);
+            color: #ff4757;
+        }
+
+        .status-active {
+            background: rgba(58, 255, 178, 0.2);
+            color: #3affb2;
+        }
+
+        /* Live Indicator */
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(58, 255, 178, 0.1);
+            border: 1px solid #3affb2;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: #3affb2;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Network Map */
+        .network-map {
+            background: rgba(26, 31, 58, 0.6);
+            border: 1px solid rgba(58, 255, 178, 0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .map-canvas {
+            width: 100%;
+            height: 500px;
+            background: rgba(10, 14, 39, 0.8);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Node visualization */
+        .node-viz {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #3affb2;
+            box-shadow: 0 0 20px rgba(58, 255, 178, 0.6);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .node-viz:hover {
+            transform: scale(1.5);
+            box-shadow: 0 0 30px rgba(58, 255, 178, 0.9);
+        }
+
+        .node-viz.special {
+            width: 18px;
+            height: 18px;
+            background: #00d4ff;
+            box-shadow: 0 0 25px rgba(0, 212, 255, 0.8);
+        }
+
+        .node-viz.treasury {
+            width: 24px;
+            height: 24px;
+            background: #ffd700;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.9);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-box {
+            background: rgba(26, 31, 58, 0.6);
+            border: 1px solid rgba(58, 255, 178, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .stat-box-label {
+            color: #8b92b0;
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-box-value {
+            color: #3affb2;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #8b92b0;
+        }
+
+        .spinner {
+            border: 3px solid rgba(58, 255, 178, 0.2);
+            border-top: 3px solid #3affb2;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-stats {
+                display: none;
+            }
+            
+            .tx-grid, .ledger-grid, .node-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .search-bar {
+                margin: 1rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="explorer-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">STRXplorer</div>
+                <div class="network-badge">MAINNET</div>
+            </div>
+            
+            <div class="search-bar">
+                <input type="text" class="search-input" placeholder="Search by Address / Txn Hash / Block / Token / Domain">
+            </div>
+            
+            <div class="header-stats">
+                <div class="stat-item">
+                    <div class="stat-label">TPMS</div>
+                    <div class="stat-value" id="header-tpms">131</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Active Nodes</div>
+                    <div class="stat-value" id="header-nodes">1,313</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">STR Price</div>
+                    <div class="stat-value">$0.00</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="nav-tabs">
+        <div class="nav-container">
+            <button class="nav-tab active" data-tab="overview">Overview</button>
+            <button class="nav-tab" data-tab="transactions">Live Transactions</button>
+            <button class="nav-tab" data-tab="ledgers">Multi-Ledgers</button>
+            <button class="nav-tab" data-tab="nodes">Network Nodes</button>
+            <button class="nav-tab" data-tab="supernodes">SuperNodes</button>
+            <button class="nav-tab" data-tab="domains">Special Domains</button>
+            <button class="nav-tab" data-tab="tokens">Token Economy</button>
+            <button class="nav-tab" data-tab="network-map">Network Map</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Overview Section -->
+        <section id="overview" class="section active">
+            <div class="overview-grid">
+                <div class="metric-card">
+                    <div class="metric-icon">⚡</div>
+                    <div class="metric-label">Network Throughput</div>
+                    <div class="metric-value" id="network-tpms">131 TPMS</div>
+                    <div class="metric-change">131,300 TPS</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">🔷</div>
+                    <div class="metric-label">Total Nodes</div>
+                    <div class="metric-value" id="total-nodes">1,313</div>
+                    <div class="metric-change">+0 today</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">📦</div>
+                    <div class="metric-label">Total Blocks</div>
+                    <div class="metric-value" id="total-blocks">6,000</div>
+                    <div class="metric-change">+100 today</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">💎</div>
+                    <div class="metric-label">Total STR Supply</div>
+                    <div class="metric-value">63B</div>
+                    <div class="metric-change">Fixed Supply</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">🔗</div>
+                    <div class="metric-label">Multi-Ledgers</div>
+                    <div class="metric-value">6</div>
+                    <div class="metric-change">Main, Asset, Contract, Gov, CCOIN, CCOS</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">🌟</div>
+                    <div class="metric-label">Special Domains</div>
+                    <div class="metric-value" id="special-domains">21</div>
+                    <div class="metric-change">Treasury + 20 Genesis</div>
+                </div>
+            </div>
+
+            <div class="section-header">
+                <h2 class="section-title">Recent Transactions</h2>
+                <div class="live-indicator">
+                    <div class="pulse-dot"></div>
+                    <span>LIVE</span>
+                </div>
+            </div>
+
+            <div class="data-table">
+                <div class="table-header tx-grid">
+                    <div>Txn Hash</div>
+                    <div>From → To</div>
+                    <div>Amount</div>
+                    <div>Type</div>
+                    <div>Status</div>
+                    <div>Time</div>
+                </div>
+                <div id="recent-transactions">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Loading transactions...
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Transactions Section -->
+        <section id="transactions" class="section">
+            <div class="section-header">
+                <h2 class="section-title">Live Transaction Stream</h2>
+                <div class="section-actions">
+                    <div class="live-indicator">
+                        <div class="pulse-dot"></div>
+                        <span>LIVE</span>
+                    </div>
+                    <button class="btn" onclick="pauseTransactions()">Pause</button>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-box-label">Total Transactions</div>
+                    <div class="stat-box-value" id="total-txs">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-label">Last 24h</div>
+                    <div class="stat-box-value" id="txs-24h">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-label">Success Rate</div>
+                    <div class="stat-box-value" id="success-rate">100%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-label">Avg Confirmation</div>
+                    <div class="stat-box-value" id="avg-confirm">0.001s</div>
+                </div>
+            </div>
+
+            <div class="data-table">
+                <div class="table-header tx-grid">
+                    <div>Txn Hash</div>
+                    <div>From → To</div>
+                    <div>Amount</div>
+                    <div>Type</div>
+                    <div>Status</div>
+                    <div>Time</div>
+                </div>
+                <div id="live-transactions"></div>
+            </div>
+        </section>
+
+        <!-- Ledgers Section -->
+        <section id="ledgers" class="section">
+            <div class="section-header">
+                <h2 class="section-title">Multi-Ledger System</h2>
+                <div class="section-actions">
+                    <button class="btn">Refresh</button>
+                </div>
+            </div>
+
+            <div class="overview-grid">
+                <div class="metric-card">
+                    <div class="metric-icon">⛓️</div>
+                    <div class="metric-label">Main Ledger</div>
+                    <div class="metric-value" id="main-blocks">1,000</div>
+                    <div class="metric-change">Blocks</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">💰</div>
+                    <div class="metric-label">Asset Ledger</div>
+                    <div class="metric-value" id="asset-blocks">1,000</div>
+                    <div class="metric-change">Blocks</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">📜</div>
+                    <div class="metric-label">Contract Ledger</div>
+                    <div class="metric-value" id="contract-blocks">1,000</div>
+                    <div class="metric-change">Blocks</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">🏛️</div>
+                    <div class="metric-label">Governance Ledger</div>
+                    <div class="metric-value" id="gov-blocks">1,000</div>
+                    <div class="metric-change">Blocks</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">🪙</div>
+                    <div class="metric-label">CCOIN Ledger</div>
+                    <div class="metric-value" id="ccoin-blocks">1,000</div>
+                    <div class="metric-change">Blocks</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">🔰</div>
+                    <div class="metric-label">CCOS Ledger</div>
+                    <div class="metric-value" id="ccos-blocks">1,000</div>
+                    <div class="metric-change">Blocks</div>
+                </div>
+            </div>
+
+            <div class="data-table">
+                <div class="table-header ledger-grid">
+                    <div>Ledger Name</div>
+                    <div>Purpose</div>
+                    <div>Blocks</div>
+                    <div>Transactions</div>
+                    <div>Status</div>
+                </div>
+                <div id="ledger-list"></div>
+            </div>
+        </section>
+
+        <!-- Nodes Section -->
+        <section id="nodes" class="section">
+            <div class="section-header">
+                <h2 class="section-title">Network Validation Nodes</h2>
+                <div class="section-actions">
+                    <button class="btn">Filter</button>
+                    <button class="btn">Export</button>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-box-label">Total Validators</div>
+                    <div class="stat-box-value" id="validator-count">1,313</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-label">Active Now</div>
+                    <div class="stat-box-value" id="active-validators">1,313</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-label">Special Domains</div>
+                    <div class="stat-box-value">21</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-label">Network Uptime</div>
+                    <div class="stat-box-value">100%</div>
+                </div>
+            </div>
+
+            <div class="data-table">
+                <div class="table-header node-grid">
+                    <div>Node ID</div>
+                    <div>Domain/Wallet</div>
+                    <div>Power</div>
+                    <div>Status</div>
+                    <div>Validations</div>
+                    <div>Tokens</div>
+                </div>
+                <div id="node-list"></div>
+            </div>
+        </section>
+
+        <!-- SuperNodes Section -->
+        <section id="supernodes" class="section">
+            <div class="section-header">
+                <h2 class="section-title">STARW SuperNodes</h2>
+            </div>
+
+            <div class="overview-grid">
+                <div class="metric-card">
+                    <div class="metric-icon">🌟</div>
+                    <div class="metric-label">Total SuperNodes</div>
+                    <div class="metric-value">21</div>
+                    <div class="metric-change">Special Domains</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">⚡</div>
+                    <div class="metric-label">Combined Power</div>
+                    <div class="metric-value">1,795</div>
+                    <div class="metric-change">Total Power Units</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">💎</div>
+                    <div class="metric-label">Treasury Holdings</div>
+                    <div class="metric-value">20B STR</div>
+                    <div class="metric-change">31.7% of supply</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">🔐</div>
+                    <div class="metric-label">Governance Power</div>
+                    <div class="metric-value">47M CCOS</div>
+                    <div class="metric-change">Voting Tokens</div>
+                </div>
+            </div>
+
+            <div class="data-table">
+                <div class="table-header node-grid">
+                    <div>Domain</div>
+                    <div>Role</div>
+                    <div>Power</div>
+                    <div>STR Balance</div>
+                    <div>CCOS</div>
+                    <div>Wallet Address</div>
+                </div>
+                <div id="supernode-list"></div>
+            </div>
+        </section>
+
+        <!-- Special Domains Section -->
+        <section id="domains" class="section">
+            <div class="section-header">
+                <h2 class="section-title">Special Domain Registry</h2>
+                <div class="section-actions">
+                    <button class="btn">Register Domain</button>
+                </div>
+            </div>
+
+            <div class="data-table">
+                <div class="table-header" style="grid-template-columns: 200px 150px 120px 1fr 200px;">
+                    <div>Domain Name</div>
+                    <div>Abbreviation</div>
+                    <div>Power</div>
+                    <div>Role</div>
+                    <div>Wallet Address</div>
+                </div>
+                <div id="domain-list"></div>
+            </div>
+        </section>
+
+        <!-- Token Economy Section -->
+        <section id="tokens" class="section">
+            <div class="section-header">
+                <h2 class="section-title">Token Economy</h2>
+            </div>
+
+            <div class="overview-grid">
+                <div class="metric-card">
+                    <div class="metric-icon">💎</div>
+                    <div class="metric-label">STR Token</div>
+                    <div class="metric-value">63B</div>
+                    <div class="metric-change">Total Supply</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">🏛️</div>
+                    <div class="metric-label">CCOS Governance</div>
+                    <div class="metric-value">63M</div>
+                    <div class="metric-change">Voting Power</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">🔄</div>
+                    <div class="metric-label">WSTR Wrapped</div>
+                    <div class="metric-value">10B</div>
+                    <div class="metric-change">Cross-chain</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">⚔️</div>
+                    <div class="metric-label">ARSS Ares</div>
+                    <div class="metric-value">5B</div>
+                    <div class="metric-change">Utility Token</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">🔒</div>
+                    <div class="metric-label">ESTR Escrowed</div>
+                    <div class="metric-value">1B</div>
+                    <div class="metric-change">Locked STR</div>
+                </div>
+            </div>
+
+            <div class="section-header">
+                <h2 class="section-title">Token Distribution</h2>
+            </div>
+
+            <div class="data-table">
+                <div class="table-header" style="grid-template-columns: 150px repeat(5, 1fr);">
+                    <div>Category</div>
+                    <div>STR</div>
+                    <div>CCOS</div>
+                    <div>WSTR</div>
+                    <div>ARSS</div>
+                    <div>ESTR</div>
+                </div>
+                <div id="token-distribution"></div>
+            </div>
+        </section>
+
+        <!-- Network Map Section -->
+        <section id="network-map" class="section">
+            <div class="section-header">
+                <h2 class="section-title">Network Topology Map</h2>
+                <div class="section-actions">
+                    <button class="btn" onclick="toggleMapView()">Toggle View</button>
+                    <button class="btn" onclick="resetMapZoom()">Reset Zoom</button>
+                </div>
+            </div>
+
+            <div class="network-map">
+                <div class="map-canvas" id="network-canvas">
+                    <!-- Network visualization will be rendered here -->
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-box-label">Network Diameter</div>
+                    <div class="stat-box-value">~8 hops</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-label">Avg Latency</div>
+                    <div class="stat-box-value">< 1ms</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-label">P2P Connections</div>
+                    <div class="stat-box-value">~26,260</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-label">Geographic Distribution</div>
+                    <div class="stat-box-value">Global</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Configuration
+        const API_BASE = 'http://localhost:3002/api';
+        const GENESIS_CONFIG_PATH = '../genesis-nodes/config/genesis-nodes.json';
+        
+        let genesisData = null;
+        let transactionsPaused = false;
+        let liveTransactions = [];
+        let transactionCounter = 0;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadGenesisData();
+            initializeTabs();
+            renderOverview();
+            renderLedgers();
+            renderNodes();
+            renderSuperNodes();
+            renderDomains();
+            renderTokenEconomy();
+            renderNetworkMap();
+            startLiveTransactionStream();
+        });
+
+        // Load Genesis Configuration
+        async function loadGenesisData() {
+            try {
+                const response = await fetch(GENESIS_CONFIG_PATH);
+                genesisData = await response.json();
+                console.log('✅ Genesis data loaded:', genesisData);
+                updateHeaderStats();
+            } catch (error) {
+                console.error('❌ Failed to load genesis data:', error);
+            }
+        }
+
+        // Update Header Statistics
+        function updateHeaderStats() {
+            if (!genesisData) return;
+            
+            document.getElementById('header-tpms').textContent = '131';
+            document.getElementById('header-nodes').textContent = genesisData.totalNodes.toLocaleString();
+            document.getElementById('total-nodes').textContent = genesisData.totalNodes.toLocaleString();
+            document.getElementById('special-domains').textContent = genesisData.specialDomains.length;
+        }
+
+        // Tab Navigation
+        function initializeTabs() {
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active from all tabs
+                    tabs.forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                    
+                    // Add active to clicked tab
+                    tab.classList.add('active');
+                    const sectionId = tab.dataset.tab;
+                    document.getElementById(sectionId).classList.add('active');
+                });
+            });
+        }
+
+        // Render Overview
+        function renderOverview() {
+            renderRecentTransactions();
+        }
+
+        // Render Recent Transactions (simulated)
+        function renderRecentTransactions() {
+            const container = document.getElementById('recent-transactions');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < 10; i++) {
+                const tx = generateMockTransaction();
+                container.appendChild(createTransactionRow(tx));
+            }
+        }
+
+        // Generate Mock Transaction
+        function generateMockTransaction() {
+            const types = ['Transfer', 'Contract', 'Stake', 'Vote', 'Mint'];
+            const statuses = ['success', 'pending'];
+            
+            return {
+                hash: generateTxHash(),
+                from: generateAddress(),
+                to: generateAddress(),
+                amount: (Math.random() * 10000).toFixed(2),
+                type: types[Math.floor(Math.random() * types.length)],
+                status: statuses[Math.floor(Math.random() * statuses.length)],
+                time: new Date(Date.now() - Math.random() * 3600000).toLocaleTimeString()
+            };
+        }
+
+        // Create Transaction Row
+        function createTransactionRow(tx) {
+            const row = document.createElement('div');
+            row.className = 'table-row tx-grid';
+            row.innerHTML = `
+                <div class="tx-hash">${tx.hash.slice(0, 12)}...</div>
+                <div>
+                    <div class="address">${tx.from.slice(0, 20)}...</div>
+                    <div style="margin: 0.2rem 0;">→</div>
+                    <div class="address">${tx.to.slice(0, 20)}...</div>
+                </div>
+                <div class="amount">${tx.amount} STR</div>
+                <div>${tx.type}</div>
+                <div><span class="status-badge status-${tx.status}">${tx.status.toUpperCase()}</span></div>
+                <div>${tx.time}</div>
+            `;
+            return row;
+        }
+
+        // Start Live Transaction Stream
+        function startLiveTransactionStream() {
+            setInterval(() => {
+                if (!transactionsPaused) {
+                    const container = document.getElementById('live-transactions');
+                    if (container) {
+                        const tx = generateMockTransaction();
+                        liveTransactions.unshift(tx);
+                        if (liveTransactions.length > 50) liveTransactions.pop();
+                        
+                        container.innerHTML = '';
+                        liveTransactions.forEach(tx => {
+                            container.appendChild(createTransactionRow(tx));
+                        });
+                        
+                        transactionCounter++;
+                        document.getElementById('total-txs').textContent = transactionCounter.toLocaleString();
+                        document.getElementById('txs-24h').textContent = Math.min(transactionCounter, 10000).toLocaleString();
+                    }
+                }
+            }, 2000); // New transaction every 2 seconds
+        }
+
+        // Pause Transactions
+        function pauseTransactions() {
+            transactionsPaused = !transactionsPaused;
+        }
+
+        // Render Ledgers
+        function renderLedgers() {
+            const ledgers = [
+                { name: 'Main Ledger', purpose: 'Primary blockchain for STR transactions', blocks: 1000, txs: 50000, status: 'active' },
+                { name: 'Asset Ledger', purpose: 'NFT and digital asset management', blocks: 1000, txs: 12000, status: 'active' },
+                { name: 'Contract Ledger', purpose: 'Smart contract execution', blocks: 1000, txs: 8500, status: 'active' },
+                { name: 'Governance Ledger', purpose: 'DAO voting and proposals', blocks: 1000, txs: 3200, status: 'active' },
+                { name: 'CCOIN Ledger', purpose: 'Community coin transactions', blocks: 1000, txs: 15000, status: 'active' },
+                { name: 'CCOS Ledger', purpose: 'Governance token operations', blocks: 1000, txs: 5800, status: 'active' }
+            ];
+
+            const container = document.getElementById('ledger-list');
+            container.innerHTML = '';
+            
+            ledgers.forEach(ledger => {
+                const row = document.createElement('div');
+                row.className = 'table-row ledger-grid';
+                row.innerHTML = `
+                    <div style="font-weight: 600;">${ledger.name}</div>
+                    <div class="address">${ledger.purpose}</div>
+                    <div>${ledger.blocks.toLocaleString()}</div>
+                    <div>${ledger.txs.toLocaleString()}</div>
+                    <div><span class="status-badge status-${ledger.status}">${ledger.status.toUpperCase()}</span></div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        // Render Nodes
+        function renderNodes() {
+            if (!genesisData) return;
+            
+            const container = document.getElementById('node-list');
+            container.innerHTML = '';
+            
+            // Show first 20 nodes as example
+            const nodesToShow = genesisData.allNodes.slice(0, 20);
+            
+            nodesToShow.forEach(node => {
+                const row = document.createElement('div');
+                row.className = 'table-row node-grid';
+                
+                const tokens = node.tokenBalances ? 
+                    `${(node.tokenBalances.STR / 1000000).toFixed(1)}M STR` : 
+                    'N/A';
+                
+                row.innerHTML = `
+                    <div style="font-family: monospace; color: #3affb2;">${node.nodeId}</div>
+                    <div class="address">${node.domain || node.walletAddress.slice(0, 25)}...</div>
+                    <div>${node.power || 'N/A'}</div>
+                    <div><span class="status-badge status-active">ACTIVE</span></div>
+                    <div>0</div>
+                    <div>${tokens}</div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        // Render SuperNodes
+        function renderSuperNodes() {
+            if (!genesisData) return;
+            
+            const container = document.getElementById('supernode-list');
+            container.innerHTML = '';
+            
+            genesisData.specialDomains.forEach(node => {
+                const row = document.createElement('div');
+                row.className = 'table-row node-grid';
+                
+                const strBalance = node.tokenBalances ? 
+                    `${(node.tokenBalances.STR / 1000000000).toFixed(1)}B` : 
+                    'N/A';
+                    
+                const ccosBalance = node.tokenBalances ? 
+                    `${(node.tokenBalances.CCOS / 1000000).toFixed(1)}M` : 
+                    'N/A';
+                
+                row.innerHTML = `
+                    <div style="font-weight: 700; color: #00d4ff;">${node.domain}</div>
+                    <div>${node.role}</div>
+                    <div style="color: #3affb2;">${node.power}</div>
+                    <div class="amount">${strBalance}</div>
+                    <div>${ccosBalance}</div>
+                    <div class="address">${node.walletAddress.slice(0, 30)}...</div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        // Render Domains
+        function renderDomains() {
+            if (!genesisData) return;
+            
+            const container = document.getElementById('domain-list');
+            container.innerHTML = '';
+            
+            genesisData.specialDomains.forEach(domain => {
+                const row = document.createElement('div');
+                row.className = 'table-row';
+                row.style.gridTemplateColumns = '200px 150px 120px 1fr 200px';
+                row.innerHTML = `
+                    <div style="font-weight: 700; color: #00d4ff;">${domain.domain}</div>
+                    <div style="color: #3affb2;">${domain.abbreviation}</div>
+                    <div>${domain.power}</div>
+                    <div>${domain.role}</div>
+                    <div class="address">${domain.walletAddress.slice(0, 25)}...</div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        // Render Token Economy
+        function renderTokenEconomy() {
+            if (!genesisData) return;
+            
+            const container = document.getElementById('token-distribution');
+            container.innerHTML = '';
+            
+            const allocation = genesisData.tokenAllocation;
+            
+            if (allocation) {
+                const row = document.createElement('div');
+                row.className = 'table-row';
+                row.style.gridTemplateColumns = '150px repeat(5, 1fr)';
+                row.innerHTML = `
+                    <div style="font-weight: 600;">Total Allocated</div>
+                    <div class="amount">${(allocation.totalAllocated.STR / 1000000000).toFixed(2)}B</div>
+                    <div class="amount">${(allocation.totalAllocated.CCOS / 1000000).toFixed(2)}M</div>
+                    <div class="amount">${(allocation.totalAllocated.WSTR / 1000000000).toFixed(2)}B</div>
+                    <div class="amount">${(allocation.totalAllocated.ARSS / 1000000000).toFixed(2)}B</div>
+                    <div class="amount">${(allocation.totalAllocated.ESTR / 1000000).toFixed(2)}M</div>
+                `;
+                container.appendChild(row);
+            }
+        }
+
+        // Render Network Map
+        function renderNetworkMap() {
+            const canvas = document.getElementById('network-canvas');
+            canvas.innerHTML = '';
+            
+            if (!genesisData) return;
+            
+            // Create visual representation of nodes
+            const width = canvas.offsetWidth;
+            const height = canvas.offsetHeight;
+            
+            // Place treasury node in center
+            const treasury = createNodeViz('treasury', width/2, height/2);
+            canvas.appendChild(treasury);
+            
+            // Place special domains in inner ring
+            genesisData.specialDomains.slice(1).forEach((node, i) => {
+                const angle = (i / 20) * Math.PI * 2;
+                const radius = 150;
+                const x = width/2 + Math.cos(angle) * radius;
+                const y = height/2 + Math.sin(angle) * radius;
+                const viz = createNodeViz('special', x, y);
+                canvas.appendChild(viz);
+            });
+            
+            // Place regular nodes in outer rings
+            const regularNodes = 100; // Show subset
+            for (let i = 0; i < regularNodes; i++) {
+                const angle = (i / regularNodes) * Math.PI * 2;
+                const radius = 200 + Math.random() * 150;
+                const x = width/2 + Math.cos(angle) * radius;
+                const y = height/2 + Math.sin(angle) * radius;
+                const viz = createNodeViz('regular', x, y);
+                canvas.appendChild(viz);
+            }
+        }
+
+        // Create Node Visualization
+        function createNodeViz(type, x, y) {
+            const node = document.createElement('div');
+            node.className = `node-viz ${type}`;
+            node.style.left = `${x}px`;
+            node.style.top = `${y}px`;
+            return node;
+        }
+
+        // Helper Functions
+        function generateTxHash() {
+            return '0x' + Array.from({length: 64}, () => 
+                Math.floor(Math.random() * 16).toString(16)).join('');
+        }
+
+        function generateAddress() {
+            return 'zk13str_' + Array.from({length: 40}, () => 
+                Math.floor(Math.random() * 16).toString(16)).join('') + '_' + 
+                Array.from({length: 4}, () => 
+                Math.floor(Math.random() * 16).toString(16)).join('');
+        }
+
+        function toggleMapView() {
+            // Toggle between different map views
+            console.log('Toggle map view');
+        }
+
+        function resetMapZoom() {
+            // Reset map zoom
+            console.log('Reset map zoom');
+        }
+    </script>
+</body>
+</html>

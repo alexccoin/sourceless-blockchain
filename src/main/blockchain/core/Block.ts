@@ -1,6 +1,6 @@
 // Sourceless Blockchain v0.13 - Block Class
 import * as crypto from 'crypto';
-import { Block as BlockType } from '../../../shared/types';
+import { Block as BlockType, LedgerType } from '../../../shared/types';
 import { Transaction as TransactionClass } from './Transaction';
 import { ZkSnarkEngine } from '../../zkSnark/zkSnarkEngine';
 
@@ -13,17 +13,17 @@ export class Block implements BlockType {
   public nonce: number;
   public miner: string;
   public difficulty: number;
-  public ledgerType: 'main' | 'asset' | 'contract' | 'governance';
+  public ledgerType: LedgerType;
   public zkProof?: string;
   public snarkData?: any;
 
   constructor(
     index: number,
-  transactions: TransactionClass[],
+    transactions: TransactionClass[],
     previousHash: string,
     miner: string,
     difficulty: number,
-    ledgerType: 'main' | 'asset' | 'contract' | 'governance' = 'main'
+    ledgerType: LedgerType = 'main'
   ) {
     this.index = index;
     this.timestamp = Date.now();

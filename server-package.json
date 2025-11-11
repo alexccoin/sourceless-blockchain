@@ -1,0 +1,44 @@
+{
+  "name": "stratus-blockchain-server",
+  "version": "1.0.0",
+  "description": "Production-ready Stratus Blockchain Server with Database Persistence",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "init-db": "node scripts/init-database.js",
+    "migrate": "node scripts/migrate-database.js",
+    "test": "jest",
+    "production": "NODE_ENV=production node server.js"
+  },
+  "dependencies": {
+    "pg": "^8.11.0",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^6.1.5",
+    "express-rate-limit": "^6.7.0",
+    "compression": "^1.7.4",
+    "dotenv": "^16.0.3",
+    "winston": "^3.8.2",
+    "bcrypt": "^5.1.0",
+    "jsonwebtoken": "^9.0.0",
+    "joi": "^17.9.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22",
+    "jest": "^29.5.0",
+    "supertest": "^6.3.3"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "keywords": [
+    "blockchain",
+    "stratus",
+    "sourceless",
+    "cryptocurrency",
+    "electron"
+  ],
+  "author": "Stratus Development Team",
+  "license": "MIT"
+}

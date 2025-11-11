@@ -35,6 +35,10 @@
                 <span class="icon">🔍</span>
                 <span>Block Explorer</span>
             </button>
+            <button class="nav-item" id="strxplorer-link">
+                <span class="icon">🌌</span>
+                <span>STRXplorer</span>
+            </button>
             <button class="nav-item" data-page="contracts">
                 <span class="icon">📝</span>
                 <span>Smart Contracts</span>
@@ -118,6 +122,11 @@
                     <small class="stat-change">Delegated nodes active</small>
                 </div>
                 <div class="stat-card">
+                    <h3>Network TPMS</h3>
+                    <p class="stat-value" id="networkTPMS">100</p>
+                    <small class="stat-change">Ultra throughput</small>
+                </div>
+                <div class="stat-card">
                     <h3>ARSS Balance</h3>
                     <p class="stat-value" id="arssBalance">0</p>
                     <small class="stat-change">VM hosting credits</small>
@@ -126,6 +135,11 @@
                     <h3>CCOIN Balance</h3>
                     <p class="stat-value" id="ccoinBalance">0</p>
                     <small class="stat-change">Financial network</small>
+                </div>
+                <div class="stat-card">
+                    <h3>Liveliness (PoE)</h3>
+                    <p class="stat-value" id="poeLive">–</p>
+                    <small class="stat-change">zk13Score: <span id="poeScore">–</span></small>
                 </div>
                 <div class="stat-card">
                     <h3>Your Domains</h3>
@@ -139,6 +153,26 @@
                     <h3>Multi-Ledger Status</h3>
                     <div id="ledgerStatus"></div>
                 </div>
+                <div class="card">
+                    <h3>STARW VM Telemetry</h3>
+                    <div id="starwTelemetry">
+                        <div class="financial-row">
+                            <span>CPU:</span>
+                            <strong><span id="starw-cpu">–</span>%</strong>
+                        </div>
+                        <div class="financial-row">
+                            <span>Memory:</span>
+                            <strong><span id="starw-mem">–</span> MB</strong>
+                        </div>
+                        <div class="financial-row">
+                            <span>Tasks:</span>
+                            <strong id="starw-tasks">–</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2">
                 <div class="card">
                     <h3>CCOIN Financial Network</h3>
                     <div id="ccoinFinancial">
@@ -156,6 +190,10 @@
                         </div>
                         <button class="btn-secondary" onclick="openBridge()">Open Bridge</button>
                     </div>
+                </div>
+                <div class="card">
+                    <h3>Recent Transactions</h3>
+                    <div id="recentTransactions"></div>
                 </div>
             </div>
 
@@ -182,8 +220,18 @@
                     </div>
                 </div>
                 <div class="card">
-                    <h3>Recent Transactions</h3>
-                    <div id="recentTransactions"></div>
+                    <h3>Transaction Flow</h3>
+                    <div id="txFlow">
+                        <div class="meter-row">
+                            <span>In-Chain Txs:</span>
+                            <strong id="inChainTxs">–</strong>
+                        </div>
+                        <div class="meter-row">
+                            <span>Off-Chain Txs:</span>
+                            <strong id="offChainTxs">–</strong>
+                        </div>
+                        <small>On-ledger vs cross-chain activity</small>
+                    </div>
                 </div>
             </div>
         </section>
@@ -215,6 +263,201 @@
                 </div>
             </div>
 
+            <div class="card">
+                <h3>Token Balances</h3>
+                <div id="tokenBalances"></div>
+            </div>
+
+            <div class="card">
+                <h3>STARW Mini Validation</h3>
+                <div id="miniValidation">
+                    <div class="deployment-details" style="margin-bottom:0.5rem;">
+                        <div class="deployment-detail">
+                            <strong>PoE</strong>
+                            <span id="mini-poe">–</span>
+                        </div>
+                        <div class="deployment-detail">
+                            <strong>STARW VM</strong>
+                            <span id="mini-vm">cpu: – | mem: – | tasks: –</span>
+                        </div>
+                        <div class="deployment-detail">
+                            <strong>Tx Flow</strong>
+                            <span id="mini-tx">in-chain: – | off-chain: –</span>
+                        </div>
+                        <div class="deployment-detail">
+                            <strong>Network</strong>
+                            <span id="mini-net">– TPMS (– TPS)</span>
+                        </div>
+                        <div class="deployment-detail">
+                            <strong>Process</strong>
+                            <span id="mini-proc">rss: – | heap: –</span>
+                        </div>
+                        <div class="deployment-detail">
+                            <strong>Speed</strong>
+                            <span id="mini-speed">–</span>
+                        </div>
+                    </div>
+                    <button id="btnMicrobench" class="btn-primary">Run microbench</button>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h3>Mint CCOS Tokens</h3>
+                    <form id="mintCCOSForm">
+                        <input type="number" id="mintCCOSAmount" placeholder="Amount" step="1" required />
+                        <button type="submit" class="btn-primary">Mint CCOS</button>
+                    </form>
+                </div>
+                <div class="card">
+                    <h3>Transfer CCOS</h3>
+                    <form id="transferCCOSForm">
+                        <input type="text" placeholder="To Address" required />
+                        <input type="number" placeholder="Amount" step="0.01" required />
+                        <button type="submit" class="btn-primary">Transfer CCOS</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Token Creator Section -->
+            <div class="card">
+                <h2>🪙 Token Creator</h2>
+                <p style="margin-bottom: 1rem; color: rgba(0, 212, 255, 0.7);">
+                    Create your own custom token on the STR testnet. Deployment fee: <strong>100 CCOS</strong>
+                </p>
+                
+                <div class="explorer-tabs" style="margin-bottom: 1rem;">
+                    <button class="tab-btn active" data-tab="personal-token">Personal Token</button>
+                    <button class="tab-btn" data-tab="business-token">Business Token</button>
+                </div>
+
+                <!-- Personal Token Form -->
+                <div id="token-personal" class="token-creator-content active">
+                    <h3>Create Personal Token</h3>
+                    <form id="personalTokenForm" class="token-form">
+                        <div class="form-group">
+                            <label>Token Name</label>
+                            <input type="text" name="tokenName" placeholder="e.g., My Awesome Token" required />
+                            <small>The full name of your token</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Ticker Symbol</label>
+                            <input type="text" name="ticker" placeholder="e.g., MAT" maxlength="10" required style="text-transform: uppercase;" />
+                            <small>Short symbol (3-10 characters)</small>
+                        </div>
+                        
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label>Total Supply</label>
+                                <input type="number" name="totalSupply" placeholder="1000000" min="1" required />
+                                <small>Total number of tokens</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Decimals</label>
+                                <input type="number" name="decimals" placeholder="18" min="0" max="18" value="18" required />
+                                <small>Precision (usually 18)</small>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Website (Optional)</label>
+                            <input type="url" name="website" placeholder="https://mytoken.com" />
+                            <small>Your token's website</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Description (Optional)</label>
+                            <textarea name="description" placeholder="Describe your token purpose and features..." rows="3"></textarea>
+                            <small>Brief description of your token</small>
+                        </div>
+                        
+                        <div class="deployment-cost">
+                            <strong>Deployment Cost:</strong> 100 CCOS
+                        </div>
+                        
+                        <button type="submit" class="btn-primary" style="width: 100%;">
+                            🚀 Deploy Personal Token (100 CCOS)
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Business Token Form -->
+                <div id="token-business" class="token-creator-content">
+                    <h3>Create Business Token</h3>
+                    <form id="businessTokenForm" class="token-form">
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label>Company Name</label>
+                                <input type="text" name="companyName" placeholder="e.g., Acme Corporation" required />
+                                <small>Your company's legal name</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Person in Charge</label>
+                                <input type="text" name="personInCharge" placeholder="e.g., John Doe, CEO" required />
+                                <small>Full name and title</small>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Token Name</label>
+                            <input type="text" name="tokenName" placeholder="e.g., Acme Utility Token" required />
+                            <small>The full name of your business token</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Ticker Symbol</label>
+                            <input type="text" name="ticker" placeholder="e.g., ACME" maxlength="10" required style="text-transform: uppercase;" />
+                            <small>Short symbol (3-10 characters)</small>
+                        </div>
+                        
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label>Total Supply</label>
+                                <input type="number" name="totalSupply" placeholder="1000000" min="1" required />
+                                <small>Total number of tokens</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Decimals</label>
+                                <input type="number" name="decimals" placeholder="18" min="0" max="18" value="18" required />
+                                <small>Precision (usually 18)</small>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Website (Optional)</label>
+                            <input type="url" name="website" placeholder="https://acme.com" />
+                            <small>Your company's website</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Business Description (Optional)</label>
+                            <textarea name="description" placeholder="Describe your business and token purpose..." rows="3"></textarea>
+                            <small>Brief description of your business token</small>
+                        </div>
+                        
+                        <div class="deployment-cost">
+                            <strong>Deployment Cost:</strong> 100 CCOS
+                        </div>
+                        
+                        <button type="submit" class="btn-primary" style="width: 100%;">
+                            🚀 Deploy Business Token (100 CCOS)
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Deployment History -->
+            <div class="card">
+                <h3>📜 Deployment History</h3>
+                <div id="deploymentHistory">
+                    <p style="color: rgba(0, 212, 255, 0.5);">No deployments yet</p>
+                </div>
+            </div>
+
             <div class="grid-2">
                 <div class="card">
                     <h3>Send STR</h3>
@@ -243,30 +486,94 @@
 
         <!-- Block Explorer Page -->
         <section id="page-explorer" class="page">
-            <h1>Block Explorer</h1>
+            <div class="hero-header">
+                <h1>Block Explorer</h1>
+                <p class="hero-subtitle">Live blockchain data • Dynamic transactions • Node telemetry</p>
+            </div>
+
+            <div class="stats-grid" style="margin-bottom: 2rem;">
+                <div class="stat-card">
+                    <h3>Live Transactions</h3>
+                    <p class="stat-value" id="explorer-tx-count">0</p>
+                    <small class="stat-change"><span id="explorer-tx-pending">0</span> pending</small>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Blocks</h3>
+                    <p class="stat-value" id="explorer-block-count">0</p>
+                    <small class="stat-change">Across all ledgers</small>
+                </div>
+                <div class="stat-card">
+                    <h3>Active Nodes</h3>
+                    <p class="stat-value" id="explorer-node-count">0</p>
+                    <small class="stat-change">Telemetry enabled</small>
+                </div>
+                <div class="stat-card">
+                    <h3>Network Volume</h3>
+                    <p class="stat-value" id="explorer-volume">0 STR</p>
+                    <small class="stat-change">24h total</small>
+                </div>
+            </div>
             
             <div class="explorer-tabs">
                 <button class="tab-btn active" data-tab="blocks">Blocks</button>
-                <button class="tab-btn" data-tab="transactions">Transactions</button>
+                <button class="tab-btn" data-tab="transactions">Live Transactions</button>
                 <button class="tab-btn" data-tab="addresses">Addresses</button>
+                <button class="tab-btn" data-tab="telemetry">Node Telemetry</button>
             </div>
 
             <div id="explorer-blocks" class="explorer-content active">
+                <div style="margin-bottom: 1rem; padding: 1rem; background: rgba(0, 212, 255, 0.1); border-radius: 8px;">
+                    <strong>📊 Full Blockchain History: <span id="blockchain-history">6,000 blocks</span> per ledger</strong><br>
+                    <small style="color: rgba(0, 212, 255, 0.7);">Showing last 99 most recent blocks (most recent first)</small>
+                    <button onclick="loadBlocks('main', null, 99)" style="float: right; padding: 4px 8px; background: rgba(0, 212, 255, 0.2); border: 1px solid #00d4ff; color: #00d4ff; border-radius: 4px; cursor: pointer;">🔄 Refresh Blocks</button>
+                </div>
                 <div class="ledger-selector">
                     <button class="ledger-btn active" data-ledger="main">Fuel (STR)</button>
                     <button class="ledger-btn" data-ledger="asset">STR.Domains</button>
                     <button class="ledger-btn" data-ledger="contract">STARW VM (ARSS)</button>
                     <button class="ledger-btn" data-ledger="governance">Governance</button>
+                    <button class="ledger-btn" data-ledger="ccoin">CCOIN</button>
+                    <button class="ledger-btn" data-ledger="ccos">CCOS</button>
                 </div>
                 <div id="blockList"></div>
             </div>
 
             <div id="explorer-transactions" class="explorer-content">
+                <div style="margin-bottom: 1rem;">
+                    <select id="txLedgerFilter" style="padding: 0.5rem; margin-right: 1rem; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(0, 212, 255, 0.3); color: #00d4ff; border-radius: 4px;">
+                        <option value="">All Ledgers</option>
+                        <option value="main">Fuel (STR)</option>
+                        <option value="asset">STR.Domains</option>
+                        <option value="contract">STARW VM</option>
+                        <option value="governance">Governance</option>
+                        <option value="ccoin">CCOIN</option>
+                        <option value="ccos">CCOS</option>
+                    </select>
+                    <button id="txRefresh" class="btn-secondary" style="padding: 0.5rem 1rem;">🔄 Refresh</button>
+                </div>
                 <div id="transactionList"></div>
             </div>
 
             <div id="explorer-addresses" class="explorer-content">
+                <div style="margin-bottom: 1rem;">
+                    <input type="text" id="addressSearch" placeholder="Search address (zk13str_...)" style="width: 400px; padding: 0.5rem; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(0, 212, 255, 0.3); color: #00d4ff; border-radius: 4px; margin-right: 1rem;" />
+                    <button id="addressSearchBtn" class="btn-primary">🔍 Search</button>
+                </div>
                 <div id="addressList"></div>
+            </div>
+
+            <div id="explorer-telemetry" class="explorer-content">
+                <div style="margin-bottom: 1rem;">
+                    <select id="telemetryFilter" style="padding: 0.5rem; margin-right: 1rem; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(0, 212, 255, 0.3); color: #00d4ff; border-radius: 4px;">
+                        <option value="">All Nodes</option>
+                        <option value="validator">Validators</option>
+                        <option value="delegated">Delegated</option>
+                        <option value="personal">Personal</option>
+                        <option value="worker">Workers</option>
+                    </select>
+                    <button id="telemetryRefresh" class="btn-secondary">🔄 Refresh</button>
+                </div>
+                <div id="telemetryList"></div>
             </div>
         </section>
 
@@ -294,6 +601,14 @@
                         <button type="submit" class="btn-primary">Execute</button>
                     </form>
                 </div>
+            </div>
+
+            <div class="card">
+                <h3>Dev Mode Examples (ARESLang)</h3>
+                <div id="devExamples">
+                    <small>Loading examples…</small>
+                </div>
+            </div>
             </div>
 
             <div class="card">
@@ -352,6 +667,49 @@
                 <pre id="generatedCode"><code>// AI-generated code will appear here...</code></pre>
                 <button class="btn-secondary" onclick="copyCode()">📋 Copy Code</button>
                 <button class="btn-secondary" onclick="deployGenerated()">🚀 Deploy</button>
+            </div>
+
+            <div class="card">
+                <h3>AresLang Cryptography & Entropy</h3>
+                <p style="color: rgba(0,212,255,0.7); font-size:0.85rem;">Interact with the mock AresLang engine (keypairs, encryption, signing, entropy).</p>
+                
+                <!-- Quick Test Button -->
+                <div style="margin-bottom:1rem; padding:1rem; background:rgba(0,212,255,0.05); border-radius:8px;">
+                    <button class="btn-primary" id="btnAresQuickTest" style="width:100%; padding:0.75rem;">
+                        🚀 Run Quick Test (All Endpoints)
+                    </button>
+                    <div id="aresQuickTestOut" style="margin-top:0.75rem; font-size:0.75rem; max-height:300px; overflow-y:auto;"></div>
+                </div>
+
+                <div style="display:grid; gap:0.75rem; grid-template-columns: repeat(auto-fit,minmax(240px,1fr));">
+                    <div>
+                        <button class="btn-primary" id="btnAresGenKeys">🔐 Generate KeyPair</button>
+                        <div class="mini-output" id="aresKeys" style="margin-top:0.5rem; font-size:0.7rem; word-break:break-all;"></div>
+                    </div>
+                    <div>
+                        <textarea id="aresPlain" placeholder="Message to encrypt" rows="3" style="width:100%;"></textarea>
+                        <button class="btn-secondary" id="btnAresEncrypt" style="margin-top:0.4rem;">🔒 Encrypt</button>
+                        <button class="btn-secondary" id="btnAresDecrypt" style="margin-top:0.4rem;">🔓 Decrypt</button>
+                        <div class="mini-output" id="aresEncOut" style="margin-top:0.5rem; font-size:0.7rem; word-break:break-all;"></div>
+                    </div>
+                    <div>
+                        <textarea id="aresSignMsg" placeholder="Message to sign" rows="3" style="width:100%;"></textarea>
+                        <button class="btn-secondary" id="btnAresSign" style="margin-top:0.4rem;">✍️ Sign</button>
+                        <button class="btn-secondary" id="btnAresVerify" style="margin-top:0.4rem;">✅ Verify</button>
+                        <div class="mini-output" id="aresSignOut" style="margin-top:0.5rem; font-size:0.7rem; word-break:break-all;"></div>
+                    </div>
+                    <div>
+                        <input type="number" id="aresEntropyLen" placeholder="Entropy bytes (e.g. 32)" style="width:100%;" />
+                        <button class="btn-secondary" id="btnAresEntropy" style="margin-top:0.4rem;">🎲 Generate Entropy</button>
+                        <button class="btn-secondary" id="btnAresEntropyQuality" style="margin-top:0.4rem;">📈 Quality</button>
+                        <div class="mini-output" id="aresEntropyOut" style="margin-top:0.5rem; font-size:0.7rem; word-break:break-all;"></div>
+                    </div>
+                    <div>
+                        <button class="btn-secondary" id="btnAresChains">🌐 Supported Chains</button>
+                        <div class="mini-output" id="aresChainsOut" style="margin-top:0.5rem; font-size:0.7rem; word-break:break-all;"></div>
+                        <button class="btn-secondary" id="btnAresCleanup" style="margin-top:0.4rem;">🧹 Cleanup State</button>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -468,6 +826,7 @@
         </section>
     </main>
 
-    <script src="renderer.js"></script>
+    <script type="module" src="browser-api.js"></script>
+    <script type="module" src="renderer.js"></script>
 </body>
 </html>

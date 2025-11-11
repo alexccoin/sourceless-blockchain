@@ -1,0 +1,267 @@
+<!-- New Token Panels for wSTR, eSTR, $TR -->
+<!-- Add these sections to index.html in the dashboard -->
+
+<!-- wSTR (Wrapped STR) Panel -->
+<div class="card">
+    <h3>🔐 wSTR - Wrapped STR</h3>
+    <div class="info-grid">
+        <div class="info-item">
+            <strong id="wstr-balance">0 wSTR</strong>
+            <small>Balance</small>
+        </div>
+        <div class="info-item">
+            <strong id="wstr-value">$0.00</strong>
+            <small>Total Value</small>
+        </div>
+        <div class="info-item">
+            <strong id="wstr-domains">0</strong>
+            <small>Domains Locked</small>
+        </div>
+    </div>
+    
+    <div class="grid-2" style="margin-top: 1rem;">
+        <div>
+            <h4>Wrap STR</h4>
+            <form id="wrapSTRForm">
+                <input type="number" id="wrapSTRAmount" placeholder="STR Amount" step="0.01" required />
+                <input type="text" id="wrapDomainIds" placeholder="Domain IDs (comma-separated)" />
+                <button type="submit" class="btn-primary">Wrap to wSTR</button>
+            </form>
+        </div>
+        <div>
+            <h4>Unwrap wSTR</h4>
+            <form id="unwrapSTRForm">
+                <input type="number" id="unwrapSTRAmount" placeholder="wSTR Amount" step="0.01" required />
+                <button type="submit" class="btn-primary">Unwrap to STR</button>
+            </form>
+        </div>
+    </div>
+    
+    <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(0, 212, 255, 0.1); border-radius: 4px;">
+        <small><strong>Formula:</strong> wSTR Value = STR Value + (Domains × $<span id="domainMultiplier">100</span>)</small>
+    </div>
+</div>
+
+<!-- eSTR (Energy Sourceless) Panel -->
+<div class="card">
+    <h3>⚡ eSTR - Energy Sourceless</h3>
+    <div class="info-grid">
+        <div class="info-item">
+            <strong id="estr-balance">0 eSTR</strong>
+            <small>Balance</small>
+        </div>
+        <div class="info-item">
+            <strong id="estr-energy">0 kWh</strong>
+            <small>Energy Units</small>
+        </div>
+        <div class="info-item">
+            <strong id="estr-credits">0</strong>
+            <small>Compute Credits</small>
+        </div>
+    </div>
+    
+    <div class="grid-2" style="margin-top: 1rem;">
+        <div>
+            <h4>Mine eSTR</h4>
+            <form id="mineESTRForm">
+                <input type="number" id="mineESTRAmount" placeholder="Amount to Mine" step="1" required />
+                <select id="energyType" style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem; background: rgba(0, 212, 255, 0.1); color: #00d4ff; border: 1px solid rgba(0, 212, 255, 0.3); border-radius: 4px;">
+                    <option value="standard">Standard Energy</option>
+                    <option value="renewable">Renewable (+20% bonus)</option>
+                </select>
+                <button type="submit" class="btn-primary">Mine eSTR</button>
+            </form>
+        </div>
+        <div>
+            <h4>Spend eSTR</h4>
+            <form id="spendESTRForm">
+                <input type="number" id="spendESTRAmount" placeholder="Amount to Spend" step="0.01" required />
+                <select id="operationType" style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem; background: rgba(0, 212, 255, 0.1); color: #00d4ff; border: 1px solid rgba(0, 212, 255, 0.3); border-radius: 4px;">
+                    <option value="compute">Smart Contract Execution</option>
+                    <option value="storage">STARW Storage</option>
+                    <option value="bandwidth">Network Bandwidth</option>
+                </select>
+                <button type="submit" class="btn-primary">Spend eSTR</button>
+            </form>
+        </div>
+    </div>
+    
+    <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(0, 255, 136, 0.1); border-radius: 4px;">
+        <small><strong>Green Energy Bonus:</strong> Earn 20% more eSTR when using renewable energy sources</small>
+    </div>
+</div>
+
+<!-- $TR (Dollar Sourceless) Panel -->
+<div class="card">
+    <h3>💵 $TR - Dollar Sourceless (Stablecoin)</h3>
+    <div class="info-grid">
+        <div class="info-item">
+            <strong id="tr-balance">0 $TR</strong>
+            <small>Balance</small>
+        </div>
+        <div class="info-item">
+            <strong id="tr-usd">$0.00 USD</strong>
+            <small>USD Value (1:1)</small>
+        </div>
+        <div class="info-item">
+            <strong id="tr-collateral">0%</strong>
+            <small>Collateralization</small>
+        </div>
+    </div>
+    
+    <div class="grid-2" style="margin-top: 1rem;">
+        <div>
+            <h4>Mint $TR</h4>
+            <form id="mintTRForm">
+                <select id="collateralType" style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem; background: rgba(0, 212, 255, 0.1); color: #00d4ff; border: 1px solid rgba(0, 212, 255, 0.3); border-radius: 4px;">
+                    <option value="STR">STR (150% required)</option>
+                    <option value="ETH">ETH (150% required)</option>
+                    <option value="BTC">BTC (130% required)</option>
+                    <option value="USDC">USDC (105% required)</option>
+                </select>
+                <input type="number" id="collateralAmount" placeholder="Collateral Amount" step="0.01" required />
+                <input type="number" id="mintTRAmount" placeholder="$TR to Mint" step="0.01" required />
+                <button type="submit" class="btn-primary">Mint $TR</button>
+            </form>
+        </div>
+        <div>
+            <h4>Redeem $TR</h4>
+            <form id="redeemTRForm">
+                <input type="number" id="redeemTRAmount" placeholder="$TR Amount" step="0.01" required />
+                <button type="submit" class="btn-primary">Redeem Collateral</button>
+            </form>
+            <form id="transferTRForm" style="margin-top: 1rem;">
+                <input type="text" id="trRecipient" placeholder="Recipient Address" required />
+                <input type="number" id="transferTRAmount" placeholder="$TR Amount" step="0.01" required />
+                <button type="submit" class="btn-primary">Transfer $TR</button>
+            </form>
+        </div>
+    </div>
+    
+    <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 4px;">
+        <small><strong>⚠️ Liquidation Warning:</strong> Maintain 130%+ collateralization to avoid liquidation</small>
+    </div>
+</div>
+
+<!-- Genesis Blockchain Info Panel -->
+<div class="card">
+    <h3>🌍 Genesis Blockchain</h3>
+    <div id="genesisInfo" class="info-grid">
+        <!-- Will be populated by JavaScript -->
+    </div>
+    <div style="margin-top: 1rem;">
+        <h4>Initial Token Supply</h4>
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="border-bottom: 1px solid rgba(0, 212, 255, 0.3);">
+                    <th style="text-align: left; padding: 0.5rem;">Token</th>
+                    <th style="text-align: right; padding: 0.5rem;">Supply</th>
+                    <th style="text-align: right; padding: 0.5rem;">Market (33%)</th>
+                    <th style="text-align: right; padding: 0.5rem;">Treasury (67%)</th>
+                </tr>
+            </thead>
+            <tbody id="genesisSupplyTable">
+                <!-- Will be populated by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- All Tokens Overview Panel -->
+<div class="card">
+    <h3>📊 All Tokens Overview</h3>
+    <div class="token-overview-grid">
+        <div class="token-overview-item">
+            <div class="token-icon" style="background: linear-gradient(135deg, #00d4ff, #0099cc);">STR</div>
+            <div>
+                <strong id="overview-str">0 STR</strong>
+                <small>Sourceless</small>
+            </div>
+        </div>
+        <div class="token-overview-item">
+            <div class="token-icon" style="background: linear-gradient(135deg, #00ff88, #00cc66);">CCOS</div>
+            <div>
+                <strong id="overview-ccos">0 CCOS</strong>
+                <small>CCOIN Network</small>
+            </div>
+        </div>
+        <div class="token-overview-item">
+            <div class="token-icon" style="background: linear-gradient(135deg, #ff6b6b, #cc5555);">ARSS</div>
+            <div>
+                <strong id="overview-arss">0 ARSS</strong>
+                <small>Asset Shares</small>
+            </div>
+        </div>
+        <div class="token-overview-item">
+            <div class="token-icon" style="background: linear-gradient(135deg, #4ecdc4, #3da89f);">wSTR</div>
+            <div>
+                <strong id="overview-wstr">0 wSTR</strong>
+                <small>Wrapped STR</small>
+            </div>
+        </div>
+        <div class="token-overview-item">
+            <div class="token-icon" style="background: linear-gradient(135deg, #ffd93d, #ccae31);">eSTR</div>
+            <div>
+                <strong id="overview-estr">0 eSTR</strong>
+                <small>Energy Sourceless</small>
+            </div>
+        </div>
+        <div class="token-overview-item">
+            <div class="token-icon" style="background: linear-gradient(135deg, #95e1d3, #76b4a7);">$TR</div>
+            <div>
+                <strong id="overview-tr">0 $TR</strong>
+                <small>Dollar Sourceless</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.token-overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.token-overview-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: rgba(0, 212, 255, 0.05);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.token-overview-item:hover {
+    background: rgba(0, 212, 255, 0.1);
+    border-color: rgba(0, 212, 255, 0.4);
+    transform: translateY(-2px);
+}
+
+.token-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.7rem;
+    color: white;
+}
+
+.token-overview-item strong {
+    display: block;
+    color: #00d4ff;
+    font-size: 0.9rem;
+}
+
+.token-overview-item small {
+    display: block;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.7rem;
+}
+</style>

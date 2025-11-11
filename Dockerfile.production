@@ -1,0 +1,43 @@
+# Production Dockerfile for Stratus Blockchain Server
+FROM node:18-alpine AS base
+
+# Install system dependencies
+RUN apk add --no-cache \
+    postgresql-client \
+    curl \
+    bash
+
+WORKDIR /app
+
+# Copy package files
+COPY server-package.json package.json
+COPY package-lock.json* ./
+
+# Install dependencies
+RUN npm ci --only=production && npm cache clean --force
+
+# Copy application code
+COPY . .
+
+# Create logs directory
+RUN mkdir -p logs
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S stratus -u 1001 -G nodejs
+
+# Change ownership
+RUN chown -R stratus:nodejs /app
+
+# Switch to non-root user
+USER stratus
+
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:3000/health || exit 1
+
+# Start command
+CMD ["node", "server-production.js"]

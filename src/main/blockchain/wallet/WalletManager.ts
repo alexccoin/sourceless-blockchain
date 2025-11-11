@@ -5,7 +5,7 @@
 import * as crypto from 'crypto';
 import { ec as EC } from 'elliptic';
 import { v4 as uuidv4 } from 'uuid';
-import { Wallet } from '../../../shared/types';
+import { Wallet, TokenBalance } from '../../../shared/types';
 
 const ec = new EC('secp256k1'); // Same curve as Bitcoin/Ethereum
 
@@ -39,7 +39,15 @@ export class WalletManager {
     const wallet: Wallet = {
       address,
       publicKey,
-      balance: 0,
+      balances: {
+        STR: 0,
+        CCOIN: 0,
+        ARSS: 0,
+        CCOS: 0,
+        ESTR: 0,
+        wSTR: 0,
+        'STR$': 0
+      },
       stakedAmount: 0,
       nonce: 0,
       domains: [strDomain],
@@ -96,7 +104,15 @@ export class WalletManager {
       const wallet: Wallet = {
         address,
         publicKey,
-        balance: 0,
+        balances: {
+          STR: 0,
+          CCOIN: 0,
+          ARSS: 0,
+          CCOS: 0,
+          ESTR: 0,
+          wSTR: 0,
+          'STR$': 0
+        },
         stakedAmount: 0,
         nonce: 0,
         domains: [strDomain],
@@ -149,12 +165,39 @@ export class WalletManager {
   /**
    * Update wallet balance (called by blockchain)
    */
-  updateBalance(address: string, balance: number): void {
+  updateBalance(address: string, token: keyof TokenBalance, amount: number): void {
     const wallet = this.wallets.get(address);
     if (wallet) {
-      wallet.balance = balance;
+      wallet.balances[token] = amount;
       this.wallets.set(address, wallet);
     }
+  }
+
+  /**
+   * Add to wallet balance
+   */
+  addBalance(address: string, token: keyof TokenBalance, amount: number): void {
+    const wallet = this.wallets.get(address);
+    if (wallet) {
+      wallet.balances[token] += amount;
+      this.wallets.set(address, wallet);
+    }
+  }
+
+  /**
+   * Get token balance
+   */
+  getTokenBalance(address: string, token: keyof TokenBalance): number {
+    const wallet = this.wallets.get(address);
+    return wallet?.balances[token] || 0;
+  }
+
+  /**
+   * Get all token balances
+   */
+  getAllBalances(address: string): TokenBalance | null {
+    const wallet = this.wallets.get(address);
+    return wallet?.balances || null;
   }
 
   /**

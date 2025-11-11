@@ -1,10 +1,10 @@
 // Sourceless Blockchain v0.13 - Main Blockchain Class
 import { Block } from './Block';
 import { Transaction } from './Transaction';
-import { Ledger } from '../../../shared/types';
+import { Ledger, LedgerType } from '../../../shared/types';
 
 export class Blockchain implements Ledger {
-  public type: 'main' | 'asset' | 'contract' | 'governance';
+  public type: LedgerType;
   public chain: Block[];
   public pendingTransactions: Transaction[];
   public difficulty: number;
@@ -12,7 +12,7 @@ export class Blockchain implements Ledger {
   private validators: Map<string, number>;
 
   constructor(
-    type: 'main' | 'asset' | 'contract' | 'governance' = 'main',
+    type: LedgerType = 'main',
     difficulty: number = 4
   ) {
     this.type = type;

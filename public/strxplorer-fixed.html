@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STRXplorer - Sourceless Blockchain Explorer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0e27;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .explorer-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .explorer-header {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(58, 255, 178, 0.2);
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #3affb2, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-text h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #3affb2, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-text p {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 0.2rem;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #3affb2;
+            margin-top: 0.2rem;
+        }
+
+        /* Search Bar */
+        .search-container {
+            max-width: 600px;
+            width: 100%;
+            position: relative;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 0.8rem 1.2rem 0.8rem 3rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(58, 255, 178, 0.3);
+            border-radius: 50px;
+            color: #fff;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .search-bar:focus {
+            outline: none;
+            border-color: #3affb2;
+            box-shadow: 0 0 20px rgba(58, 255, 178, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1.2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(10, 14, 39, 0.98);
+            border: 1px solid rgba(58, 255, 178, 0.3);
+            border-radius: 12px;
+            margin-top: 0.5rem;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+            z-index: 1001;
+        }
+
+        .search-results.show {
+            display: block;
+        }
+
+        .search-result-item {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .search-result-item:hover {
+            background: rgba(58, 255, 178, 0.1);
+        }
+
+        .search-result-type {
+            font-size: 0.7rem;
+            color: #3affb2;
+            text-transform: uppercase;
+            margin-bottom: 0.3rem;
+        }
+
+        .search-result-value {
+            font-family: monospace;
+            color: #fff;
+            font-size: 0.9rem;
+        }
+
+        /* Navigation */
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0 2rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-tab {
+            padding: 1rem 1.5rem;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .nav-tab:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-tab.active {
+            color: #3affb2;
+            border-bottom-color: #3affb2;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* Cards */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, rgba(58, 255, 178, 0.1), rgba(0, 212, 255, 0.1));
+            border: 1px solid rgba(58, 255, 178, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(58, 255, 178, 0.2);
+        }
+
+        .metric-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #3affb2;
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #fff;
+            margin-top: 0.5rem;
+        }
+
+        /* Table */
+        .data-table {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(58, 255, 178, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .table-header {
+            background: rgba(58, 255, 178, 0.1);
+            padding: 1rem 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #3affb2;
+            text-transform: uppercase;
+        }
+
+        .table-row {
+            padding: 1rem 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .table-row:hover {
+            background: rgba(58, 255, 178, 0.05);
+        }
+
+        .address {
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: #00d4ff;
+        }
+
+        .tx-hash {
+            font-family: monospace;
+            color: #3affb2;
+            font-weight: 600;
+        }
+
+        .amount {
+            color: #ffaa00;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-success {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+            border: 1px solid #00ff88;
+        }
+
+        .status-pending {
+            background: rgba(255, 170, 0, 0.2);
+            color: #ffaa00;
+            border: 1px solid #ffaa00;
+        }
+
+        .status-active {
+            background: rgba(58, 255, 178, 0.2);
+            color: #3affb2;
+            border: 1px solid #3affb2;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            border: 3px solid rgba(58, 255, 178, 0.2);
+            border-top: 3px solid #3affb2;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Error Message */
+        .error-message {
+            background: rgba(255, 68, 68, 0.1);
+            border: 1px solid #ff4444;
+            border-radius: 12px;
+            padding: 1.5rem;
+            color: #ff4444;
+            text-align: center;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 3rem;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="explorer-container">
+        <!-- Header -->
+        <header class="explorer-header">
+            <div class="header-top">
+                <div class="logo">
+                    <div class="logo-icon"><i class="fas fa-cube"></i></div>
+                    <div class="logo-text">
+                        <h1>STRXplorer</h1>
+                        <p>Sourceless Blockchain Explorer</p>
+                    </div>
+                </div>
+
+                <div class="header-stats">
+                    <div class="stat-item">
+                        <div class="stat-label">TPMS</div>
+                        <div class="stat-value" id="header-tpms">...</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Nodes</div>
+                        <div class="stat-value" id="header-nodes">...</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Blocks</div>
+                        <div class="stat-value" id="header-blocks">...</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Price</div>
+                        <div class="stat-value">$<span id="header-price">0.00</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input 
+                    type="text" 
+                    class="search-bar" 
+                    id="globalSearch" 
+                    placeholder="Search wallets (zk13str_...), domains (STR.ALEX), transactions..."
+                >
+                <div class="search-results" id="searchResults"></div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav-tabs">
+            <button class="nav-tab active" data-tab="overview"><i class="fas fa-chart-line"></i> Overview</button>
+            <button class="nav-tab" data-tab="transactions"><i class="fas fa-exchange-alt"></i> Transactions</button>
+            <button class="nav-tab" data-tab="ledgers"><i class="fas fa-database"></i> Ledgers</button>
+            <button class="nav-tab" data-tab="nodes"><i class="fas fa-network-wired"></i> Nodes</button>
+            <button class="nav-tab" data-tab="supernodes"><i class="fas fa-star"></i> SuperNodes</button>
+            <button class="nav-tab" data-tab="domains"><i class="fas fa-globe"></i> Domains</button>
+            <button class="nav-tab" data-tab="tokens"><i class="fas fa-coins"></i> Tokens</button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Overview Section -->
+            <section id="overview" class="section active">
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-cubes"></i></div>
+                        <div class="metric-label">Total Blocks</div>
+                        <div class="metric-value" id="total-blocks">...</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-exchange-alt"></i></div>
+                        <div class="metric-label">Total Transactions</div>
+                        <div class="metric-value" id="total-txs">...</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-server"></i></div>
+                        <div class="metric-label">Active Nodes</div>
+                        <div class="metric-value" id="total-nodes">...</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-tachometer-alt"></i></div>
+                        <div class="metric-label">Network TPS</div>
+                        <div class="metric-value" id="network-tps">...</div>
+                    </div>
+                </div>
+
+                <h2 style="margin-bottom: 1rem; color: #3affb2;"><i class="fas fa-clock"></i> Recent Transactions</h2>
+                <div id="recentTransactionsContainer"></div>
+            </section>
+
+            <!-- Transactions Section -->
+            <section id="transactions" class="section">
+                <h2 style="margin-bottom: 1rem; color: #3affb2;"><i class="fas fa-stream"></i> Live Transaction Stream</h2>
+                <div id="transactionsContainer"></div>
+            </section>
+
+            <!-- Ledgers Section -->
+            <section id="ledgers" class="section">
+                <h2 style="margin-bottom: 1rem; color: #3affb2;"><i class="fas fa-layer-group"></i> Multi-Ledger System (6 Ledgers)</h2>
+                <div id="ledgersContainer"></div>
+            </section>
+
+            <!-- Nodes Section -->
+            <section id="nodes" class="section">
+                <h2 style="margin-bottom: 1rem; color: #3affb2;"><i class="fas fa-sitemap"></i> Network Nodes (1313)</h2>
+                <div id="nodesContainer"></div>
+            </section>
+
+            <!-- SuperNodes Section -->
+            <section id="supernodes" class="section">
+                <h2 style="margin-bottom: 1rem; color: #3affb2;"><i class="fas fa-crown"></i> SuperNodes (21 Special Domains)</h2>
+                <div id="supernodesContainer"></div>
+            </section>
+
+            <!-- Domains Section -->
+            <section id="domains" class="section">
+                <h2 style="margin-bottom: 1rem; color: #3affb2;"><i class="fas fa-tags"></i> Special Domains Registry</h2>
+                <div id="domainsContainer"></div>
+            </section>
+
+            <!-- Tokens Section -->
+            <section id="tokens" class="section">
+                <h2 style="margin-bottom: 1rem; color: #3affb2;"><i class="fas fa-money-bill-wave"></i> Token Economy (5 Tokens)</h2>
+                <div id="tokensContainer"></div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE = 'http://localhost:3002/api';
+        const GENESIS_CONFIG_PATH = '../genesis-nodes/config/genesis-nodes.json';
+        
+        let genesisData = null;
+        let blockchainStats = null;
+        let allNodes = [];
+        let allTransactions = [];
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadData();
+            initializeTabs();
+            initializeSearch();
+            renderAllSections();
+        });
+
+        // Load All Data
+        async function loadData() {
+            showLoading();
+            
+            try {
+                // Load Genesis Configuration
+                const genesisResponse = await fetch(GENESIS_CONFIG_PATH);
+                genesisData = await genesisResponse.json();
+                console.log('✅ Genesis data loaded:', genesisData);
+                
+                // Load Blockchain Stats from API
+                try {
+                    const statsResponse = await fetch(`${API_BASE}/blockchain/stats`);
+                    if (statsResponse.ok) {
+                        blockchainStats = await statsResponse.json();
+                        console.log('✅ Blockchain stats loaded:', blockchainStats);
+                    }
+                } catch (error) {
+                    console.warn('⚠️ Could not load blockchain stats from API:', error);
+                }
+                
+                // Prepare nodes list
+                allNodes = genesisData.allNodes || [];
+                
+                updateHeaderStats();
+                hideLoading();
+            } catch (error) {
+                console.error('❌ Failed to load data:', error);
+                showError('Failed to load blockchain data. Make sure the server is running on port 3002.');
+            }
+        }
+
+        // Update Header Statistics
+        function updateHeaderStats() {
+            document.getElementById('header-tpms').textContent = '131';
+            document.getElementById('header-nodes').textContent = genesisData?.totalNodes?.toLocaleString() || '1313';
+            document.getElementById('header-blocks').textContent = blockchainStats?.totalBlocks?.toLocaleString() || '6000';
+            document.getElementById('header-price').textContent = '0.15';
+        }
+
+        // Initialize Tabs
+        function initializeTabs() {
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                    
+                    tab.classList.add('active');
+                    const sectionId = tab.dataset.tab;
+                    document.getElementById(sectionId).classList.add('active');
+                });
+            });
+        }
+
+        // Initialize Search
+        function initializeSearch() {
+            const searchInput = document.getElementById('globalSearch');
+            const searchResults = document.getElementById('searchResults');
+            
+            let searchTimeout;
+            
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                const query = e.target.value.trim();
+                
+                if (query.length < 3) {
+                    searchResults.classList.remove('show');
+                    return;
+                }
+                
+                searchTimeout = setTimeout(() => performSearch(query), 300);
+            });
+            
+            // Close search on click outside
+            document.addEventListener('click', (e) => {
+                if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                    searchResults.classList.remove('show');
+                }
+            });
+        }
+
+        // Perform Search
+        function performSearch(query) {
+            const results = [];
+            const searchResults = document.getElementById('searchResults');
+            const queryLower = query.toLowerCase();
+            
+            if (!genesisData) {
+                searchResults.innerHTML = '<div class="search-result-item">Data not loaded yet...</div>';
+                searchResults.classList.add('show');
+                return;
+            }
+            
+            // Search in domains
+            genesisData.specialDomains?.forEach(node => {
+                if (node.domain?.toLowerCase().includes(queryLower) || 
+                    node.abbreviation?.toLowerCase().includes(queryLower)) {
+                    results.push({
+                        type: 'Domain',
+                        value: `${node.domain} (${node.abbreviation})`,
+                        data: node
+                    });
+                }
+            });
+            
+            // Search in wallet addresses
+            allNodes.forEach(node => {
+                if (node.walletAddress?.toLowerCase().includes(queryLower)) {
+                    results.push({
+                        type: 'Wallet',
+                        value: node.walletAddress,
+                        data: node
+                    });
+                }
+            });
+            
+            // Display results
+            if (results.length === 0) {
+                searchResults.innerHTML = '<div class="search-result-item">No results found</div>';
+            } else {
+                searchResults.innerHTML = results.slice(0, 10).map(result => `
+                    <div class="search-result-item" onclick='showSearchResult(${JSON.stringify(result).replace(/'/g, "&apos;")})'>
+                        <div class="search-result-type"><i class="fas fa-${result.type === 'Domain' ? 'globe' : 'wallet'}"></i> ${result.type}</div>
+                        <div class="search-result-value">${result.value}</div>
+                    </div>
+                `).join('');
+            }
+            
+            searchResults.classList.add('show');
+        }
+
+        // Show Search Result
+        function showSearchResult(result) {
+            document.getElementById('searchResults').classList.remove('show');
+            alert(`Found: ${result.value}\n\nType: ${result.type}\n\nFull details:\n${JSON.stringify(result.data, null, 2)}`);
+        }
+
+        // Render All Sections
+        function renderAllSections() {
+            renderOverview();
+            renderTransactions();
+            renderLedgers();
+            renderNodes();
+            renderSuperNodes();
+            renderDomains();
+            renderTokens();
+        }
+
+        // Render Overview
+        function renderOverview() {
+            document.getElementById('total-blocks').textContent = '6,000';
+            document.getElementById('total-txs').textContent = '94,500';
+            document.getElementById('total-nodes').textContent = genesisData?.totalNodes?.toLocaleString() || '1313';
+            document.getElementById('network-tps').textContent = '131,300';
+            
+            // Recent Transactions (from genesis data if available)
+            const container = document.getElementById('recentTransactionsContainer');
+            if (!genesisData) {
+                container.innerHTML = '<div class="no-data">No data available</div>';
+                return;
+            }
+            
+            container.innerHTML = `
+                <div class="data-table">
+                    <div class="table-header">
+                        <div>Hash</div>
+                        <div>From → To</div>
+                        <div>Amount</div>
+                        <div>Type</div>
+                        <div>Status</div>
+                    </div>
+                    <div class="no-data">No recent transactions. Server integration pending.</div>
+                </div>
+            `;
+        }
+
+        // Render Transactions
+        function renderTransactions() {
+            const container = document.getElementById('transactionsContainer');
+            container.innerHTML = `
+                <div class="data-table">
+                    <div class="table-header">
+                        <div>Time</div>
+                        <div>Hash</div>
+                        <div>From → To</div>
+                        <div>Amount</div>
+                        <div>Status</div>
+                    </div>
+                    <div class="no-data"><i class="fas fa-sync fa-spin"></i> Waiting for live transactions...</div>
+                </div>
+            `;
+        }
+
+        // Render Ledgers
+        function renderLedgers() {
+            const ledgers = [
+                { name: 'Main Ledger', icon: 'fa-coins', purpose: 'STR Transfers', blocks: 1000, status: 'active' },
+                { name: 'Asset Ledger', icon: 'fa-gem', purpose: 'Domains & NFTs', blocks: 1000, status: 'active' },
+                { name: 'Contract Ledger', icon: 'fa-file-contract', purpose: 'Smart Contracts', blocks: 1000, status: 'active' },
+                { name: 'Governance Ledger', icon: 'fa-vote-yea', purpose: 'DAO & Voting', blocks: 1000, status: 'active' },
+                { name: 'CCOIN Ledger', icon: 'fa-bridge', purpose: 'Cross-Chain', blocks: 1000, status: 'active' },
+                { name: 'CCOS Ledger', icon: 'fa-fire', purpose: 'Governance Tokens', blocks: 1000, status: 'active' }
+            ];
+            
+            const container = document.getElementById('ledgersContainer');
+            container.innerHTML = `
+                <div class="data-table">
+                    <div class="table-header">
+                        <div>Ledger</div>
+                        <div>Purpose</div>
+                        <div>Blocks</div>
+                        <div>Status</div>
+                    </div>
+                    ${ledgers.map(ledger => `
+                        <div class="table-row" onclick="alert('Ledger: ${ledger.name}\\nPurpose: ${ledger.purpose}\\nBlocks: ${ledger.blocks}')">
+                            <div style="font-weight: 600;"><i class="fas ${ledger.icon}"></i> ${ledger.name}</div>
+                            <div>${ledger.purpose}</div>
+                            <div>${ledger.blocks.toLocaleString()}</div>
+                            <div><span class="status-badge status-${ledger.status}">${ledger.status.toUpperCase()}</span></div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Render Nodes
+        function renderNodes() {
+            const container = document.getElementById('nodesContainer');
+            
+            if (!genesisData || !allNodes.length) {
+                container.innerHTML = '<div class="no-data">No nodes data available</div>';
+                return;
+            }
+            
+            // Show first 50 nodes
+            const nodesToShow = allNodes.slice(0, 50);
+            
+            container.innerHTML = `
+                <div class="data-table">
+                    <div class="table-header">
+                        <div>Node ID</div>
+                        <div>Wallet Address</div>
+                        <div>Domain/Abbrev</div>
+                        <div>Power</div>
+                        <div>STR Balance</div>
+                        <div>Status</div>
+                    </div>
+                    ${nodesToShow.map(node => `
+                        <div class="table-row" onclick='showNodeDetails(${JSON.stringify(node).replace(/'/g, "&apos;")})'>
+                            <div>${node.nodeId}</div>
+                            <div class="address">${node.walletAddress?.slice(0, 30)}...</div>
+                            <div>${node.domain || node.abbreviation || 'Validator'}</div>
+                            <div>${node.power}</div>
+                            <div class="amount">${formatNumber(node.tokenBalances?.STR || 0)}</div>
+                            <div><span class="status-badge status-${node.status}">${node.status?.toUpperCase() || 'ACTIVE'}</span></div>
+                        </div>
+                    `).join('')}
+                </div>
+                <p style="text-align: center; margin-top: 1rem; color: rgba(255,255,255,0.5);">
+                    Showing 50 of ${allNodes.length.toLocaleString()} nodes
+                </p>
+            `;
+        }
+
+        // Render SuperNodes
+        function renderSuperNodes() {
+            const container = document.getElementById('supernodesContainer');
+            
+            if (!genesisData?.specialDomains) {
+                container.innerHTML = '<div class="no-data">No special domains data available</div>';
+                return;
+            }
+            
+            container.innerHTML = `
+                <div class="data-table">
+                    <div class="table-header">
+                        <div>Domain</div>
+                        <div>Abbreviation</div>
+                        <div>Power</div>
+                        <div>STR Balance</div>
+                        <div>CCOS Balance</div>
+                        <div>Role</div>
+                    </div>
+                    ${genesisData.specialDomains.map(node => `
+                        <div class="table-row" onclick='showNodeDetails(${JSON.stringify(node).replace(/'/g, "&apos;")})'>
+                            <div style="font-weight: 600; color: #3affb2;"><i class="fas fa-crown"></i> ${node.domain}</div>
+                            <div>${node.abbreviation}</div>
+                            <div>${node.power}</div>
+                            <div class="amount">${formatNumber(node.tokenBalances?.STR || 0)}</div>
+                            <div class="amount">${formatNumber(node.tokenBalances?.CCOS || 0)}</div>
+                            <div>${node.role || 'Validator'}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Render Domains
+        function renderDomains() {
+            const container = document.getElementById('domainsContainer');
+            
+            if (!genesisData?.specialDomains) {
+                container.innerHTML = '<div class="no-data">No domains data available</div>';
+                return;
+            }
+            
+            container.innerHTML = `
+                <div class="metrics-grid">
+                    ${genesisData.specialDomains.map(domain => `
+                        <div class="metric-card" onclick='showNodeDetails(${JSON.stringify(domain).replace(/'/g, "&apos;")})'>
+                            <div class="metric-icon"><i class="fas fa-${domain.power >= 100 ? 'crown' : domain.power >= 50 ? 'star' : 'certificate'}"></i></div>
+                            <div class="metric-label">${domain.domain}</div>
+                            <div class="metric-value" style="font-size: 1.5rem;">${domain.abbreviation}</div>
+                            <p style="margin-top: 0.5rem; color: rgba(255,255,255,0.6); font-size: 0.85rem;">
+                                <i class="fas fa-bolt"></i> Power: ${domain.power}<br>
+                                <i class="fas fa-coins"></i> ${formatNumber(domain.tokenBalances?.STR || 0)} STR
+                            </p>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Render Tokens
+        function renderTokens() {
+            const tokens = [
+                { symbol: 'STR', name: 'Sourceless', supply: '63B', allocated: '47B', type: 'Currency', icon: 'fa-coins' },
+                { symbol: 'CCOS', name: 'Governance', supply: '63M', allocated: '47M', type: 'Governance', icon: 'fa-vote-yea' },
+                { symbol: 'WSTR', name: 'Wrapped STR', supply: '10B', allocated: '8.4B', type: 'Bridge', icon: 'fa-exchange-alt' },
+                { symbol: 'ARSS', name: 'ARES Utility', supply: '5B', allocated: '4.2B', type: 'Utility', icon: 'fa-robot' },
+                { symbol: 'ESTR', name: 'Escrowed STR', supply: '1B', allocated: '1.3B', type: 'Locked', icon: 'fa-lock' }
+            ];
+            
+            const container = document.getElementById('tokensContainer');
+            container.innerHTML = `
+                <div class="metrics-grid">
+                    ${tokens.map(token => `
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas ${token.icon}"></i></div>
+                            <div class="metric-label">${token.symbol}</div>
+                            <div class="metric-value" style="font-size: 1.3rem;">${token.name}</div>
+                            <p style="margin-top: 0.5rem; color: rgba(255,255,255,0.6); font-size: 0.85rem;">
+                                <i class="fas fa-layer-group"></i> Supply: ${token.supply}<br>
+                                <i class="fas fa-chart-pie"></i> Allocated: ${token.allocated}<br>
+                                <i class="fas fa-tag"></i> Type: ${token.type}
+                            </p>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #3affb2;"><i class="fas fa-chart-pie"></i> Token Distribution</h3>
+                <div class="data-table">
+                    <div class="table-header">
+                        <div>Token</div>
+                        <div>Total Supply</div>
+                        <div>Allocated</div>
+                        <div>Treasury</div>
+                        <div>Distribution %</div>
+                    </div>
+                    ${tokens.map(token => `
+                        <div class="table-row">
+                            <div style="font-weight: 600;"><i class="fas ${token.icon}"></i> ${token.symbol}</div>
+                            <div>${token.supply}</div>
+                            <div class="amount">${token.allocated}</div>
+                            <div>${token.symbol === 'STR' ? '20B' : token.symbol === 'CCOS' ? '20M' : 'N/A'}</div>
+                            <div>${token.symbol === 'STR' ? '74.6%' : token.symbol === 'CCOS' ? '74.6%' : '84%'}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Show Node Details
+        function showNodeDetails(node) {
+            const balances = node.tokenBalances || {};
+            alert(`Node Details:\n\nDomain: ${node.domain || 'N/A'}\nAbbreviation: ${node.abbreviation || 'N/A'}\nWallet: ${node.walletAddress}\nPower: ${node.power}\n\nToken Balances:\nSTR: ${formatNumber(balances.STR || 0)}\nCCOS: ${formatNumber(balances.CCOS || 0)}\nWSTR: ${formatNumber(balances.WSTR || 0)}\nARSS: ${formatNumber(balances.ARSS || 0)}\nESTR: ${formatNumber(balances.ESTR || 0)}\n\nRole: ${node.role || 'Validator'}\nStatus: ${node.status || 'active'}`);
+        }
+
+        // Format Number
+        function formatNumber(num) {
+            if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+            if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+            if (num >= 1e3) return (num / 1e3).toFixed(2) + 'K';
+            return num.toLocaleString();
+        }
+
+        // Loading States
+        function showLoading() {
+            document.querySelector('.main-content').innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading blockchain data...</p>
+                </div>
+            `;
+        }
+
+        function hideLoading() {
+            // Sections will be rendered by renderAllSections()
+        }
+
+        function showError(message) {
+            document.querySelector('.main-content').innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <h2>Error Loading Data</h2>
+                    <p>${message}</p>
+                    <button onclick="location.reload()" style="margin-top: 1rem; padding: 0.8rem 2rem; background: #3affb2; color: #000; border: none; border-radius: 50px; cursor: pointer; font-weight: 600;">
+                        <i class="fas fa-redo"></i> Retry
+                    </button>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
