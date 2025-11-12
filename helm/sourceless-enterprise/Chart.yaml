@@ -1,0 +1,26 @@
+apiVersion: v2
+name: sourceless-enterprise
+description: Sourceless Enterprise Platform Helm Chart
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - blockchain
+  - cryptocurrency
+  - enterprise
+  - sourceless
+home: https://sourceless.io
+sources:
+  - https://github.com/sourceless/sourceless-blockchain
+maintainers:
+  - name: Sourceless Team
+    email: devops@sourceless.io
+dependencies:
+  - name: redis
+    version: 17.3.0
+    repository: https://charts.bitnami.com/bitnami
+    condition: redis.enabled
+  - name: prometheus
+    version: 15.5.0
+    repository: https://prometheus-community.github.io/helm-charts
+    condition: monitoring.prometheus.enabled

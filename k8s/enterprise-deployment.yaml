@@ -1,0 +1,385 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sourceless-enterprise
+  namespace: sourceless
+  labels:
+    app: sourceless-enterprise
+    tier: backend
+    version: v1
+spec:
+  replicas: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: sourceless-enterprise
+  template:
+    metadata:
+      labels:
+        app: sourceless-enterprise
+        tier: backend
+        version: v1
+    spec:
+      serviceAccountName: sourceless-enterprise
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 2000
+      containers:
+      - name: enterprise
+        image: sourceless/enterprise:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+          name: http
+        - containerPort: 8080
+          name: websocket
+        - containerPort: 9090
+          name: metrics
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PLATFORM
+          value: "enterprise"
+        - name: HOSTLESS_DB_URL
+          valueFrom:
+            secretKeyRef:
+              name: sourceless-secrets
+              key: hostless-db-url
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: sourceless-secrets
+              key: jwt-secret
+        - name: ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: sourceless-secrets
+              key: encryption-key
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: sourceless-secrets
+              key: redis-url
+        - name: PROMETHEUS_METRICS_PORT
+          value: "9090"
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /startup
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 30
+        volumeMounts:
+        - name: config
+          mountPath: /app/config
+          readOnly: true
+        - name: logs
+          mountPath: /app/logs
+        - name: temp
+          mountPath: /tmp
+      volumes:
+      - name: config
+        configMap:
+          name: sourceless-enterprise-config
+      - name: logs
+        emptyDir: {}
+      - name: temp
+        emptyDir: {}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - sourceless-enterprise
+              topologyKey: kubernetes.io/hostname
+      tolerations:
+      - key: "node.kubernetes.io/memory-pressure"
+        operator: "Exists"
+        effect: "NoSchedule"
+      - key: "node.kubernetes.io/disk-pressure"
+        operator: "Exists"
+        effect: "NoSchedule"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sourceless-enterprise
+  namespace: sourceless
+  labels:
+    app: sourceless-enterprise
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9090"
+    prometheus.io/path: "/metrics"
+spec:
+  type: ClusterIP
+  selector:
+    app: sourceless-enterprise
+  ports:
+  - name: http
+    port: 80
+    targetPort: 3000
+    protocol: TCP
+  - name: websocket
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+  - name: metrics
+    port: 9090
+    targetPort: 9090
+    protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sourceless-enterprise-lb
+  namespace: sourceless
+  labels:
+    app: sourceless-enterprise
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: nlb
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: tcp
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:us-east-1:123456789012:certificate/12345678-1234-1234-1234-123456789012"
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https"
+spec:
+  type: LoadBalancer
+  selector:
+    app: sourceless-enterprise
+  ports:
+  - name: https
+    port: 443
+    targetPort: 3000
+    protocol: TCP
+  - name: websocket-secure
+    port: 8443
+    targetPort: 8080
+    protocol: TCP
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sourceless-enterprise-ingress
+  namespace: sourceless
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/rate-limit: "1000"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+spec:
+  tls:
+  - hosts:
+    - api.sourceless.io
+    - enterprise.sourceless.io
+    secretName: sourceless-enterprise-tls
+  rules:
+  - host: api.sourceless.io
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: sourceless-enterprise
+            port:
+              number: 80
+  - host: enterprise.sourceless.io
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: sourceless-enterprise
+            port:
+              number: 80
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: sourceless-enterprise-hpa
+  namespace: sourceless
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: sourceless-enterprise
+  minReplicas: 5
+  maxReplicas: 50
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  - type: Pods
+    pods:
+      metric:
+        name: transactions_per_second
+      target:
+        type: AverageValue
+        averageValue: "2500"
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+      - type: Pods
+        value: 4
+        periodSeconds: 15
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+      - type: Pods
+        value: 2
+        periodSeconds: 15
+      selectPolicy: Min
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: sourceless-enterprise-pdb
+  namespace: sourceless
+spec:
+  selector:
+    matchLabels:
+      app: sourceless-enterprise
+  maxUnavailable: 25%
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sourceless-enterprise-config
+  namespace: sourceless
+data:
+  app.json: |
+    {
+      "name": "Sourceless Enterprise Platform",
+      "version": "1.0.0",
+      "environment": "production",
+      "platform": "enterprise",
+      "features": {
+        "advancedAnalytics": true,
+        "customIntegrations": true,
+        "prioritySupport": true,
+        "slaGuarantee": "99.9%",
+        "maxTransactionsPerSecond": 131300,
+        "maxConcurrentUsers": 100000
+      },
+      "blockchain": {
+        "network": "mainnet",
+        "consensusAlgorithm": "HOSTLESS",
+        "blockTime": 400,
+        "maxBlockSize": "10MB",
+        "ledgers": 6
+      },
+      "security": {
+        "encryptionAlgorithm": "AES-256-GCM",
+        "hashingAlgorithm": "SHA-256",
+        "zkProofs": true,
+        "multiSigRequired": true,
+        "hsmIntegration": true
+      },
+      "monitoring": {
+        "metricsEnabled": true,
+        "tracingEnabled": true,
+        "loggingLevel": "info",
+        "healthCheckInterval": 30
+      }
+    }
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sourceless-enterprise
+  namespace: sourceless
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/sourceless-enterprise-role
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: sourceless
+  name: sourceless-enterprise-role
+rules:
+- apiGroups: [""]
+  resources: ["configmaps", "secrets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: sourceless-enterprise-binding
+  namespace: sourceless
+subjects:
+- kind: ServiceAccount
+  name: sourceless-enterprise
+  namespace: sourceless
+roleRef:
+  kind: Role
+  name: sourceless-enterprise-role
+  apiGroup: rbac.authorization.k8s.io

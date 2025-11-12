@@ -1,0 +1,281 @@
+groups:
+  - name: sourceless.blockchain
+    rules:
+      # High-level blockchain metrics
+      - alert: HighTransactionLatency
+        expr: histogram_quantile(0.95, rate(transaction_duration_seconds_bucket[5m])) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          component: blockchain
+        annotations:
+          summary: "High transaction latency detected"
+          description: "95th percentile transaction latency is {{ $value }}s, above 100ms threshold"
+
+      - alert: HighBlockTime
+        expr: avg(rate(block_time_seconds[5m])) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          component: blockchain
+        annotations:
+          summary: "Block time above target"
+          description: "Average block time is {{ $value }}s, above 400ms target"
+
+      - alert: LowTransactionThroughput
+        expr: rate(transactions_total[5m]) < 100000
+        for: 10m
+        labels:
+          severity: critical
+          component: blockchain
+        annotations:
+          summary: "Transaction throughput below target"
+          description: "Current TPS is {{ $value }}, below 131,300 target"
+
+      - alert: FailedTransactionRate
+        expr: rate(transactions_failed_total[5m]) / rate(transactions_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          component: blockchain
+        annotations:
+          summary: "High transaction failure rate"
+          description: "Transaction failure rate is {{ $value | humanizePercentage }}, above 5% threshold"
+
+  - name: sourceless.platform
+    rules:
+      # Platform-specific alerts
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          component: platform
+        annotations:
+          summary: "High HTTP error rate detected"
+          description: "HTTP 5xx error rate is {{ $value | humanizePercentage }} on {{ $labels.instance }}"
+
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1.0
+        for: 5m
+        labels:
+          severity: warning
+          component: platform
+        annotations:
+          summary: "High response time detected"
+          description: "95th percentile response time is {{ $value }}s on {{ $labels.instance }}"
+
+      - alert: WebSocketConnectionFailures
+        expr: rate(websocket_connections_failed_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          component: websocket
+        annotations:
+          summary: "High WebSocket connection failure rate"
+          description: "WebSocket connection failures: {{ $value }} per second on {{ $labels.instance }}"
+
+      - alert: APIRateLimitExceeded
+        expr: rate(api_rate_limit_exceeded_total[1m]) > 100
+        for: 1m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "API rate limit frequently exceeded"
+          description: "API rate limit exceeded {{ $value }} times per second on {{ $labels.instance }}"
+
+  - name: sourceless.infrastructure
+    rules:
+      # Infrastructure and resource alerts
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is {{ $value }}% on {{ $labels.instance }}"
+
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          component: infrastructure
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is {{ $value }}% on {{ $labels.instance }}"
+
+      - alert: HighDiskUsage
+        expr: 100 - (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"} * 100) > 90
+        for: 5m
+        labels:
+          severity: critical
+          component: infrastructure
+        annotations:
+          summary: "High disk usage detected"
+          description: "Disk usage is {{ $value }}% on {{ $labels.instance }}"
+
+      - alert: PodCrashLooping
+        expr: rate(kube_pod_container_status_restarts_total[15m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+          component: kubernetes
+        annotations:
+          summary: "Pod is crash looping"
+          description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is restarting frequently"
+
+      - alert: PodNotReady
+        expr: kube_pod_status_ready{condition="false"} == 1
+        for: 10m
+        labels:
+          severity: warning
+          component: kubernetes
+        annotations:
+          summary: "Pod not ready"
+          description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has been not ready for 10+ minutes"
+
+  - name: sourceless.security
+    rules:
+      # Security-related alerts
+      - alert: UnauthorizedAPIAccess
+        expr: rate(http_requests_total{status="401"}[5m]) > 50
+        for: 2m
+        labels:
+          severity: warning
+          component: security
+        annotations:
+          summary: "High rate of unauthorized API requests"
+          description: "{{ $value }} unauthorized requests per second on {{ $labels.instance }}"
+
+      - alert: SuspiciousLoginActivity
+        expr: rate(user_login_failures_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          component: security
+        annotations:
+          summary: "High rate of login failures"
+          description: "{{ $value }} login failures per second, possible brute force attack"
+
+      - alert: ZKProofValidationFailures
+        expr: rate(zk_proof_validation_failures_total[5m]) > 1
+        for: 1m
+        labels:
+          severity: critical
+          component: security
+        annotations:
+          summary: "ZK proof validation failures detected"
+          description: "{{ $value }} ZK proof validation failures per second on {{ $labels.instance }}"
+
+      - alert: HSMConnectionFailure
+        expr: hsm_connection_status == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: security
+        annotations:
+          summary: "HSM connection failure"
+          description: "HSM connection is down on {{ $labels.instance }}"
+
+  - name: sourceless.wallet
+    rules:
+      # Wallet and financial alerts
+      - alert: WalletTransactionFailures
+        expr: rate(wallet_transaction_failures_total[5m]) > 5
+        for: 2m
+        labels:
+          severity: warning
+          component: wallet
+        annotations:
+          summary: "High wallet transaction failure rate"
+          description: "{{ $value }} wallet transaction failures per second on {{ $labels.instance }}"
+
+      - alert: CrossChainBridgeFailure
+        expr: bridge_connection_status{chain=~"ethereum|solana|polkadot"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: bridge
+        annotations:
+          summary: "Cross-chain bridge connection failure"
+          description: "Bridge to {{ $labels.chain }} is down on {{ $labels.instance }}"
+
+      - alert: LargeTransactionVolume
+        expr: sum(rate(transaction_amount_total[1h])) > 1000000
+        for: 5m
+        labels:
+          severity: info
+          component: wallet
+        annotations:
+          summary: "Unusually large transaction volume"
+          description: "Total transaction volume is {{ $value }} in the last hour"
+
+  - name: sourceless.performance
+    rules:
+      # Performance monitoring
+      - alert: DatabaseSlowQueries
+        expr: histogram_quantile(0.95, rate(database_query_duration_seconds_bucket[5m])) > 5.0
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "Slow database queries detected"
+          description: "95th percentile query time is {{ $value }}s on {{ $labels.instance }}"
+
+      - alert: RedisConnectionFailures
+        expr: rate(redis_connection_failures_total[5m]) > 1
+        for: 2m
+        labels:
+          severity: warning
+          component: redis
+        annotations:
+          summary: "Redis connection failures"
+          description: "{{ $value }} Redis connection failures per second on {{ $labels.instance }}"
+
+      - alert: HighGoroutineCount
+        expr: go_goroutines > 10000
+        for: 5m
+        labels:
+          severity: warning
+          component: application
+        annotations:
+          summary: "High goroutine count"
+          description: "Goroutine count is {{ $value }} on {{ $labels.instance }}"
+
+  - name: sourceless.business
+    rules:
+      # Business metrics
+      - alert: DailyActiveUsersDecline
+        expr: (daily_active_users - daily_active_users offset 24h) / daily_active_users offset 24h < -0.2
+        for: 1h
+        labels:
+          severity: warning
+          component: business
+        annotations:
+          summary: "Significant decline in daily active users"
+          description: "Daily active users declined by {{ $value | humanizePercentage }} compared to yesterday"
+
+      - alert: RevenueDecline
+        expr: (daily_revenue - daily_revenue offset 24h) / daily_revenue offset 24h < -0.1
+        for: 2h
+        labels:
+          severity: warning
+          component: business
+        annotations:
+          summary: "Daily revenue decline detected"
+          description: "Daily revenue declined by {{ $value | humanizePercentage }} compared to yesterday"
+
+      - alert: ServiceUptimeBelow99
+        expr: avg_over_time(up[24h]) < 0.99
+        for: 1h
+        labels:
+          severity: critical
+          component: sla
+        annotations:
+          summary: "Service uptime below 99%"
+          description: "Service uptime is {{ $value | humanizePercentage }} over the last 24 hours"

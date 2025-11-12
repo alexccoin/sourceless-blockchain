@@ -1,0 +1,293 @@
+# Default values for sourceless-enterprise
+replicaCount: 5
+
+image:
+  repository: sourceless/enterprise
+  pullPolicy: Always
+  tag: "latest"
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations:
+    eks.amazonaws.com/role-arn: ""
+  name: ""
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "9090"
+  prometheus.io/path: "/metrics"
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 2000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3000
+  websocketPort: 8080
+  metricsPort: 9090
+
+loadBalancer:
+  enabled: true
+  type: nlb
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: nlb
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: tcp
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+  ports:
+    https: 443
+    websocketSecure: 8443
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/rate-limit: "1000"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+  hosts:
+    - host: api.sourceless.io
+      paths:
+        - path: /
+          pathType: Prefix
+    - host: enterprise.sourceless.io
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: sourceless-enterprise-tls
+      hosts:
+        - api.sourceless.io
+        - enterprise.sourceless.io
+
+resources:
+  requests:
+    memory: "2Gi"
+    cpu: "1000m"
+  limits:
+    memory: "4Gi"
+    cpu: "2000m"
+
+autoscaling:
+  enabled: true
+  minReplicas: 5
+  maxReplicas: 50
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+  customMetrics:
+    - type: Pods
+      pods:
+        metric:
+          name: transactions_per_second
+        target:
+          type: AverageValue
+          averageValue: "2500"
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+      - type: Pods
+        value: 4
+        periodSeconds: 15
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+      - type: Pods
+        value: 2
+        periodSeconds: 15
+
+podDisruptionBudget:
+  enabled: true
+  maxUnavailable: 25%
+
+nodeSelector: {}
+
+tolerations:
+  - key: "node.kubernetes.io/memory-pressure"
+    operator: "Exists"
+    effect: "NoSchedule"
+  - key: "node.kubernetes.io/disk-pressure"
+    operator: "Exists"
+    effect: "NoSchedule"
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 100
+      podAffinityTerm:
+        labelSelector:
+          matchExpressions:
+          - key: app.kubernetes.io/name
+            operator: In
+            values:
+            - sourceless-enterprise
+        topologyKey: kubernetes.io/hostname
+
+# Environment configuration
+env:
+  NODE_ENV: production
+  PLATFORM: enterprise
+  PROMETHEUS_METRICS_PORT: "9090"
+
+# Application configuration
+config:
+  name: "Sourceless Enterprise Platform"
+  version: "1.0.0"
+  environment: "production"
+  platform: "enterprise"
+  features:
+    advancedAnalytics: true
+    customIntegrations: true
+    prioritySupport: true
+    slaGuarantee: "99.9%"
+    maxTransactionsPerSecond: 131300
+    maxConcurrentUsers: 100000
+  blockchain:
+    network: "mainnet"
+    consensusAlgorithm: "HOSTLESS"
+    blockTime: 400
+    maxBlockSize: "10MB"
+    ledgers: 6
+  security:
+    encryptionAlgorithm: "AES-256-GCM"
+    hashingAlgorithm: "SHA-256"
+    zkProofs: true
+    multiSigRequired: true
+    hsmIntegration: true
+  monitoring:
+    metricsEnabled: true
+    tracingEnabled: true
+    loggingLevel: "info"
+    healthCheckInterval: 30
+
+# Secrets configuration (must be provided during deployment)
+secrets:
+  hostlessDbUrl: ""
+  jwtSecret: ""
+  encryptionKey: ""
+  redisUrl: ""
+
+# Health checks
+healthChecks:
+  liveness:
+    httpGet:
+      path: /health
+      port: 3000
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  readiness:
+    httpGet:
+      path: /ready
+      port: 3000
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+  startup:
+    httpGet:
+      path: /startup
+      port: 3000
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 30
+
+# Volume mounts
+volumes:
+  config:
+    enabled: true
+    mountPath: /app/config
+  logs:
+    enabled: true
+    mountPath: /app/logs
+  temp:
+    enabled: true
+    mountPath: /tmp
+
+# Dependencies
+redis:
+  enabled: true
+  auth:
+    enabled: true
+    password: ""
+  architecture: standalone
+  master:
+    persistence:
+      enabled: true
+      size: 10Gi
+      storageClass: gp3
+
+monitoring:
+  prometheus:
+    enabled: true
+    server:
+      retention: "30d"
+      persistentVolume:
+        size: 100Gi
+        storageClass: gp3
+  grafana:
+    enabled: true
+    adminPassword: ""
+    persistence:
+      enabled: true
+      size: 10Gi
+      storageClass: gp3
+
+# Network policies
+networkPolicy:
+  enabled: true
+  ingress:
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            name: ingress-nginx
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/name: sourceless-light
+      ports:
+      - protocol: TCP
+        port: 3000
+      - protocol: TCP
+        port: 8080
+  egress:
+    - to:
+      - podSelector:
+          matchLabels:
+            app: redis
+      ports:
+      - protocol: TCP
+        port: 6379
+    - to: []
+      ports:
+      - protocol: TCP
+        port: 443
+      - protocol: TCP
+        port: 53
+      - protocol: UDP
+        port: 53

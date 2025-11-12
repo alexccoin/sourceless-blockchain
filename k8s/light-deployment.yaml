@@ -1,0 +1,210 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sourceless-light
+  namespace: sourceless
+  labels:
+    app: sourceless-light
+    tier: backend
+    version: v1
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: sourceless-light
+  template:
+    metadata:
+      labels:
+        app: sourceless-light
+        tier: backend
+        version: v1
+    spec:
+      serviceAccountName: sourceless-light
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 2000
+      containers:
+      - name: light
+        image: sourceless/light:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+          name: http
+        - containerPort: 8080
+          name: websocket
+        - containerPort: 9090
+          name: metrics
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PLATFORM
+          value: "light"
+        - name: HOSTLESS_DB_URL
+          valueFrom:
+            secretKeyRef:
+              name: sourceless-secrets
+              key: hostless-db-url
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: sourceless-secrets
+              key: jwt-secret
+        - name: PROMETHEUS_METRICS_PORT
+          value: "9090"
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - name: config
+          mountPath: /app/config
+          readOnly: true
+        - name: logs
+          mountPath: /app/logs
+      volumes:
+      - name: config
+        configMap:
+          name: sourceless-light-config
+      - name: logs
+        emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sourceless-light
+  namespace: sourceless
+  labels:
+    app: sourceless-light
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9090"
+spec:
+  type: ClusterIP
+  selector:
+    app: sourceless-light
+  ports:
+  - name: http
+    port: 80
+    targetPort: 3000
+  - name: websocket
+    port: 8080
+    targetPort: 8080
+  - name: metrics
+    port: 9090
+    targetPort: 9090
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sourceless-light-ingress
+  namespace: sourceless
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rate-limit: "500"
+spec:
+  tls:
+  - hosts:
+    - light.sourceless.io
+    secretName: sourceless-light-tls
+  rules:
+  - host: light.sourceless.io
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: sourceless-light
+            port:
+              number: 80
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: sourceless-light-hpa
+  namespace: sourceless
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: sourceless-light
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sourceless-light-config
+  namespace: sourceless
+data:
+  app.json: |
+    {
+      "name": "Sourceless Light Platform",
+      "version": "1.0.0",
+      "environment": "production",
+      "platform": "light",
+      "features": {
+        "basicAnalytics": true,
+        "standardSupport": true,
+        "maxTransactionsPerSecond": 50000,
+        "maxConcurrentUsers": 10000
+      },
+      "blockchain": {
+        "network": "mainnet",
+        "consensusAlgorithm": "HOSTLESS",
+        "blockTime": 400,
+        "ledgers": 3
+      },
+      "security": {
+        "encryptionAlgorithm": "AES-256-GCM",
+        "hashingAlgorithm": "SHA-256",
+        "zkProofs": true
+      }
+    }
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sourceless-light
+  namespace: sourceless
