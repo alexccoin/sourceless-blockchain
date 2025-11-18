@@ -85,7 +85,7 @@ Start-Process "genesis-nodes\dashboard.html"
 - **STR:** 63 Billion (main currency)
 - **CCOS:** 63 Million (governance token)
 - **WSTR:** 10 Billion (wrapped/bridge token)
-- **ARSS:** 5 Billion (ARES AI utility)
+- **ARSS:** 5 Billion (ARES Lang utility)
 - **ESTR:** 1 Billion (escrowed STR)
 
 ### Multi-Ledger System

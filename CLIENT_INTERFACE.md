@@ -146,10 +146,10 @@ The Sourceless Blockchain v0.13 STARW Personal Node now features a comprehensive
 
 ## 🤖 ARES AI Page
 
-### AI Code Generator
-- Prompt input (describe what to build)
+### Contract Generator
+- Request input (describe what to build)
 - Generate Code button
-- Uses GPT-3 + Formwelt intelligence
+- Uses advanced ARES processing
 
 ### Generated Code Display
 - Syntax-highlighted code
@@ -158,7 +158,7 @@ The Sourceless Blockchain v0.13 STARW Personal Node now features a comprehensive
 
 ### Example Output
 ```javascript
-// ARES AI Generated Code
+// ARES Generated Code
 class VotingContract {
     constructor() {
         this.proposals = [];
@@ -447,8 +447,8 @@ The client is ready for IPC integration:
 4. Deploy to Contract Ledger
 5. View in "Your Contracts" list
 
-### AI Code Generation
-1. Navigate to ARES AI
+### Contract Generation
+1. Navigate to ARES Lang
 2. Describe contract in natural language
 3. Click Generate Code
 4. Review generated contract

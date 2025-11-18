@@ -248,7 +248,7 @@ export class ResourceMonitor {
     const bandwidthStats = this.bandwidthManager.getNetworkBandwidthStats();
 
     // Check for unusual patterns
-    // TODO: Implement machine learning-based anomaly detection
+    // TODO: Implement advanced anomaly detection
 
     // Simple threshold checks
     if (storageStats.averageUtilization > 90) {

@@ -84,7 +84,7 @@ npm start
 | **STR** | 63B | Main currency, gas fees |
 | **CCOS** | 63M | Governance & rewards |
 | **WSTR** | 10B | Wrapped/bridge token |
-| **ARSS** | 5B | ARES AI utility token |
+| **ARSS** | 5B | ARES Lang utility token |
 | **ESTR** | 1B | Escrowed transactions |
 
 ---

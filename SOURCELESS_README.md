@@ -12,7 +12,7 @@
 
 ## 📖 Overview
 
-**Sourceless Blockchain v0.13** is a revolutionary Electron desktop application implementing the **official Sourceless Hybrid Blockchain** with zk-SNARK compression, 100,000 TPS capacity, and ARES AI programming language. This brings the complete Sourceless ecosystem to your desktop.
+**Sourceless Blockchain v0.13** is a revolutionary Electron desktop application implementing the **official Sourceless Hybrid Blockchain** with zk-SNARK compression, 100,000 TPS capacity, and ARES Lang programming language. This brings the complete Sourceless ecosystem to your desktop.
 
 **Official Sources:**
 - 🌐 https://sourceless.net
@@ -32,13 +32,13 @@
 - **Main Ledger**: STR token transfers, cross-chain transactions
 - **Asset Ledger**: STR.domain NFTs, digital assets
 - **Contract Ledger**: AppLess applications (not Dapps!)
-- **Governance Ledger**: AI-governed DAO proposals
+- **Governance Ledger**: ARES-governed DAO proposals
 
-🤖 **ARES AI Programming**
-- **GPT-3**: Construction and code generation
+🤖 **ARES Lang Programming**
+- **ARES Core**: Construction and code generation
 - **Formwelt**: Communication and integration (320 semantic references)
-- **AI Governance**: Autonomous blockchain operations
-- **No IT Skills Needed**: Build websites/apps with AI assistance
+- **ARES Governance**: Autonomous blockchain operations
+- **No IT Skills Needed**: Build websites/apps with ARES assistance
 
 📍 **STR.Domain Addressing**
 - Format: `STR.{name}` (up to 128 characters)

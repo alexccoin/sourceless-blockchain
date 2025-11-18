@@ -532,11 +532,11 @@ const AresComponents = {
     createChatInterface() {
         return `
             <div class="ares-chat card">
-                <h3>🤖 ARES AI Assistant</h3>
+                <h3>⚡ ARES Assistant</h3>
                 <div class="chat-messages" id="ares-messages">
                     <div class="message assistant">
                         <strong>ARES:</strong>
-                        <p>Hello! I'm ARES, your AI assistant for Sourceless Blockchain. I can help you:</p>
+                        <p>Hello! I'm ARES, your intelligent assistant for Sourceless Blockchain. I can help you:</p>
                         <ul>
                             <li>Generate smart contracts</li>
                             <li>Explain blockchain concepts</li>

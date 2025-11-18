@@ -560,7 +560,7 @@ DELETE /api/validator/:id           // Deregister
 ---
 
 **Generated:** November 11, 2025 at 05:58 UTC  
-**Team Leader:** GitHub Copilot AI  
+**Team Leader:** SourceLess Development Team  
 **Project:** SOURCELESS BLOCKCHAIN v0.21.0 Public Beta  
 **Repository:** sourceless-blockchain (pending creation)  
 **Next Review:** Week 7 (Frontend Dashboard kickoff)

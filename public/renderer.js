@@ -1992,8 +1992,8 @@ function generateCode() {
         return;
     }
     
-    document.getElementById('generatedCode').innerHTML = `<code>// ARES AI Generated Code
-// Prompt: ${prompt}
+    document.getElementById('generatedCode').innerHTML = `<code>// ARES Lang Generated Code
+// Request: ${prompt}
 
 class VotingContract {
     constructor() {
@@ -2028,7 +2028,7 @@ function copyCode() {
 }
 
 function deployGenerated() {
-    alert('AI-generated contract deployed to Contract Ledger!');
+    alert('Generated contract deployed to Contract Ledger!');
 }
 
 // =============== AresLang Panel ===============

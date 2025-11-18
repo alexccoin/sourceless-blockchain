@@ -70,10 +70,10 @@ export interface AppLess {
     blockchainCalculation: any;
     proofOutput: string;
   };
-  aresAIConfig?: { // ARES AI programming language integration
-    useGPT3: boolean; // GPT-3 for construction
-    useFormwelt: boolean; // Formwelt for communication/integration
-    aiGovernance: boolean; // AI-governed execution
+  aresConfig?: { // ARES programming language integration
+    useAdvanced: boolean; // Advanced processing for construction
+    useSemantics: boolean; // Semantic processing for communication/integration
+    autoGovernance: boolean; // Automated execution governance
   };
   resources: {
     storage: number; // MB allocated

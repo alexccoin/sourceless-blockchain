@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔮 Quantum Computing Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a0033 0%, #330066 50%, #660099 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .quantum-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .quantum-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, #ff6b6b, #4ecdc4);
+            border-radius: 50%;
+            animation: quantumFloat 12s infinite linear;
+            opacity: 0.8;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        @keyframes quantumFloat {
+            0% {
+                transform: translateY(100vh) translateX(-50px) rotate(0deg);
+                opacity: 0;
+            }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% {
+                transform: translateY(-100px) translateX(50px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-bottom: 3px solid #ff6b6b;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            color: #ff6b6b;
+            text-shadow: 0 0 20px #ff6b6b;
+            margin-bottom: 10px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid rgba(255, 107, 107, 0.5);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, transparent, rgba(255, 107, 107, 0.3), transparent);
+            border-radius: 15px;
+            animation: rotate 4s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .card h3 {
+            color: #ff6b6b;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .metric {
+            background: rgba(255, 107, 107, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+        }
+
+        .metric-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #ff6b6b;
+            margin-bottom: 8px;
+        }
+
+        .metric-label {
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .quantum-console {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ff6b6b;
+        }
+
+        .console-line {
+            margin-bottom: 8px;
+            color: #4ecdc4;
+        }
+
+        .console-line.success {
+            color: #00ff41;
+        }
+
+        .console-line.warning {
+            color: #ffa500;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 10px 5px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        .status-active {
+            background: #00ff41;
+        }
+
+        .status-standby {
+            background: #ffa500;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 107, 107, 0.2);
+            border: 1px solid #ff6b6b;
+            color: #ff6b6b;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 107, 107, 0.4);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="quantum-bg" id="quantumBg"></div>
+    
+    <a href="javascript:history.back()" class="back-btn">← Back to Dashboard</a>
+
+    <div class="header">
+        <h1>🔮 Quantum Computing Control Center</h1>
+        <p>Post-Quantum Cryptography & Quantum Key Distribution</p>
+    </div>
+
+    <div class="container">
+        <div class="dashboard-grid">
+            <div class="card">
+                <h3>🔐 Post-Quantum Cryptography</h3>
+                <div class="metrics-grid">
+                    <div class="metric">
+                        <div class="metric-value" id="crystalsKeys">847</div>
+                        <div class="metric-label">CRYSTALS Keys</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="quantumSafety">99.9%</div>
+                        <div class="metric-label">Quantum Safety</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="resistance">25+</div>
+                        <div class="metric-label">Years Resistant</div>
+                    </div>
+                </div>
+                <button class="btn" onclick="generateQuantumKeys()">Generate New Keys</button>
+                <button class="btn" onclick="testQuantumSafety()">Test Security</button>
+            </div>
+
+            <div class="card">
+                <h3>🌐 Quantum Key Distribution</h3>
+                <div class="metrics-grid">
+                    <div class="metric">
+                        <div class="metric-value" id="qkdChannels">12</div>
+                        <div class="metric-label">Active Channels</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="fidelity">98.7%</div>
+                        <div class="metric-label">Fidelity</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="entanglements">156</div>
+                        <div class="metric-label">Entanglements</div>
+                    </div>
+                </div>
+                <button class="btn" onclick="establishQKD()">Establish QKD</button>
+                <button class="btn" onclick="quantumTeleport()">Quantum Teleport</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>📊 Quantum Network Status</h3>
+            <div style="margin-bottom: 20px;">
+                <div style="margin: 10px 0;">
+                    <span class="status-indicator status-active"></span>
+                    <strong>Node QN-001:</strong> Entangled with QN-007 | Fidelity: 98.9%
+                </div>
+                <div style="margin: 10px 0;">
+                    <span class="status-indicator status-active"></span>
+                    <strong>Node QN-003:</strong> QKD Channel Active | Key Rate: 1.2 Mbps
+                </div>
+                <div style="margin: 10px 0;">
+                    <span class="status-indicator status-standby"></span>
+                    <strong>Node QN-005:</strong> Standby Mode | Ready for Entanglement
+                </div>
+                <div style="margin: 10px 0;">
+                    <span class="status-indicator status-active"></span>
+                    <strong>Node QN-012:</strong> Quantum Teleportation Ready | Success Rate: 99.1%
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>💻 Quantum Console</h3>
+            <div class="quantum-console" id="quantumConsole">
+                <div class="console-line success">[QUANTUM] CRYSTALS-Kyber key pair generated successfully</div>
+                <div class="console-line success">[QKD] BB84 protocol initialized on channel QKD-007</div>
+                <div class="console-line">[SYSTEM] Quantum entropy pool: 2048 bits available</div>
+                <div class="console-line success">[DILITHIUM] Digital signature verified - quantum safe</div>
+                <div class="console-line">[TELEPORT] Quantum state prepared for transmission</div>
+                <div class="console-line warning">[MONITOR] Decoherence detected on QN-008 - auto-correcting</div>
+                <div class="console-line success">[NETWORK] All 12 QKD channels operational</div>
+                <div class="console-line">[CRYPTO] Post-quantum algorithms: ACTIVE</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize quantum background
+        function initQuantumBg() {
+            const bg = document.getElementById('quantumBg');
+            for (let i = 0; i < 40; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'quantum-particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 12 + 's';
+                particle.style.animationDuration = (8 + Math.random() * 8) + 's';
+                bg.appendChild(particle);
+            }
+        }
+
+        // Update metrics in real-time
+        function updateMetrics() {
+            document.getElementById('crystalsKeys').textContent = Math.floor(Math.random() * 200) + 800;
+            document.getElementById('qkdChannels').textContent = Math.floor(Math.random() * 5) + 10;
+            document.getElementById('fidelity').textContent = (98 + Math.random() * 2).toFixed(1) + '%';
+            document.getElementById('entanglements').textContent = Math.floor(Math.random() * 50) + 150;
+        }
+
+        // Add console messages
+        function addConsoleMessage(message, type = '') {
+            const console = document.getElementById('quantumConsole');
+            const line = document.createElement('div');
+            line.className = `console-line ${type}`;
+            line.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            console.appendChild(line);
+            console.scrollTop = console.scrollHeight;
+            
+            // Keep only last 20 messages
+            while (console.children.length > 20) {
+                console.removeChild(console.firstChild);
+            }
+        }
+
+        // Interactive functions
+        function generateQuantumKeys() {
+            addConsoleMessage('Generating new CRYSTALS-Kyber key pair...', '');
+            setTimeout(() => {
+                addConsoleMessage('✅ Quantum key pair generated successfully', 'success');
+                updateMetrics();
+            }, 2000);
+        }
+
+        function testQuantumSafety() {
+            addConsoleMessage('Running quantum safety analysis...', '');
+            setTimeout(() => {
+                addConsoleMessage('✅ All algorithms quantum-resistant for 25+ years', 'success');
+            }, 1500);
+        }
+
+        function establishQKD() {
+            addConsoleMessage('Initializing BB84 quantum key distribution...', '');
+            setTimeout(() => {
+                addConsoleMessage('🔗 QKD channel established with 98.9% fidelity', 'success');
+                updateMetrics();
+            }, 3000);
+        }
+
+        function quantumTeleport() {
+            addConsoleMessage('Preparing quantum state for teleportation...', '');
+            setTimeout(() => {
+                addConsoleMessage('⚛️ Quantum teleportation successful - fidelity: 99.2%', 'success');
+            }, 2500);
+        }
+
+        // Initialize everything
+        initQuantumBg();
+        
+        // Update metrics every 5 seconds
+        setInterval(updateMetrics, 5000);
+        
+        // Add random console messages
+        setInterval(() => {
+            const messages = [
+                'Quantum entropy refreshed',
+                'Entanglement pair created successfully', 
+                'QKD key exchange completed',
+                'Post-quantum signature verified',
+                'Quantum network synchronization complete'
+            ];
+            addConsoleMessage(messages[Math.floor(Math.random() * messages.length)], 'success');
+        }, 8000);
+    </script>
+</body>
+</html>

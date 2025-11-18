@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌐 Metaverse Blockchain Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2d1b69 0%, #11998e 50%, #38ef7d 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .metaverse-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .grid-line {
+            position: absolute;
+            background: linear-gradient(90deg, transparent, rgba(56, 239, 125, 0.3), transparent);
+            height: 1px;
+            width: 100%;
+            animation: gridMove 8s infinite linear;
+        }
+
+        .grid-vertical {
+            width: 1px;
+            height: 100%;
+            animation: gridMoveVertical 10s infinite linear;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes gridMoveVertical {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-bottom: 3px solid #38ef7d;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            color: #38ef7d;
+            text-shadow: 0 0 20px #38ef7d;
+            margin-bottom: 10px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid rgba(56, 239, 125, 0.5);
+            border-radius: 15px;
+            padding: 25px;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, transparent, rgba(56, 239, 125, 0.2), transparent);
+            border-radius: 15px;
+            animation: rotate 6s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .card h3 {
+            color: #38ef7d;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .metric {
+            background: rgba(56, 239, 125, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid rgba(56, 239, 125, 0.3);
+        }
+
+        .metric-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #38ef7d;
+            margin-bottom: 8px;
+        }
+
+        .metric-label {
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .vr-console {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #38ef7d;
+        }
+
+        .console-line {
+            margin-bottom: 8px;
+            color: #38ef7d;
+        }
+
+        .console-line.success {
+            color: #00ff41;
+        }
+
+        .console-line.warning {
+            color: #ffa500;
+        }
+
+        .console-line.vr {
+            color: #ff6b6b;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #38ef7d, #11998e);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 10px 5px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(56, 239, 125, 0.3);
+        }
+
+        .world-list {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .world-item {
+            background: rgba(56, 239, 125, 0.1);
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #38ef7d;
+        }
+
+        .world-name {
+            font-weight: bold;
+            color: #38ef7d;
+            margin-bottom: 5px;
+        }
+
+        .world-stats {
+            font-size: 12px;
+            color: #ccc;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        .status-active {
+            background: #00ff41;
+        }
+
+        .status-loading {
+            background: #ffa500;
+        }
+
+        .status-vr {
+            background: #ff6b6b;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(56, 239, 125, 0.2);
+            border: 1px solid #38ef7d;
+            color: #38ef7d;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(56, 239, 125, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .vr-viewer {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(45deg, #2d1b69, #11998e);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #38ef7d;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .vr-content {
+            text-align: center;
+            color: #38ef7d;
+        }
+
+        .floating-cube {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: rgba(56, 239, 125, 0.3);
+            border: 1px solid #38ef7d;
+            animation: float 4s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotateX(0) rotateY(0); }
+            50% { transform: translateY(-20px) rotateX(180deg) rotateY(180deg); }
+        }
+
+        .network-status {
+            margin-bottom: 20px;
+        }
+
+        .network-item {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="metaverse-bg" id="metaverseBg"></div>
+    
+    <a href="javascript:history.back()" class="back-btn">← Back to Dashboard</a>
+
+    <div class="header">
+        <h1>🌐 Metaverse Blockchain Control Center</h1>
+        <p>3D Visualization & Virtual Reality Integration</p>
+    </div>
+
+    <div class="container">
+        <div class="dashboard-grid">
+            <div class="card">
+                <h3>🥽 VR/AR Integration</h3>
+                <div class="metrics-grid">
+                    <div class="metric">
+                        <div class="metric-value" id="vrUsers">2,847</div>
+                        <div class="metric-label">Active VR Users</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="vrWorlds">47</div>
+                        <div class="metric-label">Virtual Worlds</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="immersion">94.7%</div>
+                        <div class="metric-label">Immersion Level</div>
+                    </div>
+                </div>
+                <button class="btn" onclick="launchVR()">Launch VR Interface</button>
+                <button class="btn" onclick="createWorld()">Create New World</button>
+            </div>
+
+            <div class="card">
+                <h3>🔮 3D Blockchain Viz</h3>
+                <div class="metrics-grid">
+                    <div class="metric">
+                        <div class="metric-value" id="nodes3D">1,247</div>
+                        <div class="metric-label">3D Nodes</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="connections">8,934</div>
+                        <div class="metric-label">Connections</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="renderFPS">60</div>
+                        <div class="metric-label">Render FPS</div>
+                    </div>
+                </div>
+                <button class="btn" onclick="enable3D()">Enable 3D Mode</button>
+                <button class="btn" onclick="optimizeRender()">Optimize Rendering</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>🌍 Active Virtual Worlds</h3>
+            <div class="world-list">
+                <div class="world-item">
+                    <div class="world-name">
+                        <span class="status-indicator status-active"></span>
+                        CryptoMetropolis
+                    </div>
+                    <div class="world-stats">
+                        Users: 847 | NFTs: 2,341 | Transactions: 15.2K/hour
+                    </div>
+                </div>
+                <div class="world-item">
+                    <div class="world-name">
+                        <span class="status-indicator status-vr"></span>
+                        DeFi Plaza VR
+                    </div>
+                    <div class="world-stats">
+                        VR Sessions: 234 | Trading Volume: $2.3M | Latency: 12ms
+                    </div>
+                </div>
+                <div class="world-item">
+                    <div class="world-name">
+                        <span class="status-indicator status-loading"></span>
+                        Quantum Garden
+                    </div>
+                    <div class="world-stats">
+                        Loading: 87% | Assets: 1,247 | Physics: Enabled
+                    </div>
+                </div>
+                <div class="world-item">
+                    <div class="world-name">
+                        <span class="status-indicator status-active"></span>
+                        Blockchain City
+                    </div>
+                    <div class="world-stats">
+                        Population: 1,847 | Buildings: 234 | Events: 12 active
+                    </div>
+                </div>
+                <div class="world-item">
+                    <div class="world-name">
+                        <span class="status-indicator status-vr"></span>
+                        Processing Network Space
+                    </div>
+                    <div class="world-stats">
+                        AI Nodes: 2,341 | Learning: Active | Complexity: High
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>🔍 3D Blockchain Viewer</h3>
+            <div class="vr-viewer" id="vrViewer">
+                <div class="vr-content">
+                    <h2>🌐 3D Blockchain Network</h2>
+                    <p>Interactive 3D visualization of blockchain nodes</p>
+                    <p><em>Click "Enable 3D Mode" to activate</em></p>
+                </div>
+                <div class="floating-cube" style="top: 20%; left: 20%;"></div>
+                <div class="floating-cube" style="top: 60%; right: 20%; animation-delay: 1s;"></div>
+                <div class="floating-cube" style="bottom: 20%; left: 50%; animation-delay: 2s;"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>🌐 Metaverse Network Status</h3>
+            <div class="network-status">
+                <div class="network-item">
+                    <span class="status-indicator status-active"></span>
+                    <strong>VR Gateway:</strong> 2,847 concurrent users connected
+                </div>
+                <div class="network-item">
+                    <span class="status-indicator status-vr"></span>
+                    <strong>AR Overlay:</strong> Mixed reality mode active - 47 locations
+                </div>
+                <div class="network-item">
+                    <span class="status-indicator status-active"></span>
+                    <strong>3D Engine:</strong> WebGL renderer - 60 FPS stable
+                </div>
+                <div class="network-item">
+                    <span class="status-indicator status-loading"></span>
+                    <strong>Spatial Computing:</strong> Room mapping in progress
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>💻 VR Console</h3>
+            <div class="vr-console" id="vrConsole">
+                <div class="console-line vr">[VR] Metaverse gateway initialized - 2,847 users online</div>
+                <div class="console-line success">[3D] Blockchain visualization rendered - 1,247 nodes</div>
+                <div class="console-line">[AR] Augmented reality overlay active in 47 locations</div>
+                <div class="console-line success">[WORLD] CryptoMetropolis loaded - 847 active users</div>
+                <div class="console-line vr">[HAPTIC] Force feedback calibrated for VR controllers</div>
+                <div class="console-line warning">[RENDER] GPU utilization at 87% - optimizing</div>
+                <div class="console-line success">[SPATIAL] Room-scale tracking active - 6DoF confirmed</div>
+                <div class="console-line vr">[SOCIAL] Voice chat enabled in 12 virtual worlds</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize metaverse background
+        function initMetaverseBg() {
+            const bg = document.getElementById('metaverseBg');
+            
+            // Create grid lines
+            for (let i = 0; i < 20; i++) {
+                const line = document.createElement('div');
+                line.className = 'grid-line';
+                line.style.top = (i * 5) + '%';
+                line.style.animationDelay = (i * 0.5) + 's';
+                bg.appendChild(line);
+            }
+            
+            for (let i = 0; i < 15; i++) {
+                const line = document.createElement('div');
+                line.className = 'grid-line grid-vertical';
+                line.style.left = (i * 6.66) + '%';
+                line.style.animationDelay = (i * 0.7) + 's';
+                bg.appendChild(line);
+            }
+        }
+
+        // Update metrics in real-time
+        function updateMetrics() {
+            document.getElementById('vrUsers').textContent = Math.floor(Math.random() * 500) + 2500;
+            document.getElementById('vrWorlds').textContent = Math.floor(Math.random() * 20) + 40;
+            document.getElementById('immersion').textContent = (92 + Math.random() * 6).toFixed(1) + '%';
+            document.getElementById('nodes3D').textContent = Math.floor(Math.random() * 300) + 1200;
+            document.getElementById('connections').textContent = Math.floor(Math.random() * 2000) + 8000;
+        }
+
+        // Add console messages
+        function addConsoleMessage(message, type = '') {
+            const console = document.getElementById('vrConsole');
+            const line = document.createElement('div');
+            line.className = `console-line ${type}`;
+            line.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            console.appendChild(line);
+            console.scrollTop = console.scrollHeight;
+            
+            // Keep only last 15 messages
+            while (console.children.length > 15) {
+                console.removeChild(console.firstChild);
+            }
+        }
+
+        // Interactive functions
+        function launchVR() {
+            addConsoleMessage('Initializing VR interface...', 'vr');
+            setTimeout(() => {
+                addConsoleMessage('🥽 VR mode activated - Immersion level: 98.2%', 'success');
+                updateMetrics();
+            }, 2000);
+        }
+
+        function createWorld() {
+            addConsoleMessage('Creating new virtual world...', 'vr');
+            setTimeout(() => {
+                addConsoleMessage('🌍 New world "Quantum Realm" created successfully', 'success');
+            }, 3500);
+        }
+
+        function enable3D() {
+            const viewer = document.getElementById('vrViewer');
+            viewer.innerHTML = `
+                <div class="vr-content">
+                    <h2>🌐 3D Mode Active</h2>
+                    <p>Real-time blockchain network visualization</p>
+                    <p><strong>Nodes:</strong> 1,247 | <strong>Connections:</strong> 8,934</p>
+                    <p><strong>Performance:</strong> 60 FPS</p>
+                </div>
+                <div class="floating-cube" style="top: 10%; left: 15%; animation-delay: 0s;"></div>
+                <div class="floating-cube" style="top: 30%; right: 25%; animation-delay: 0.5s;"></div>
+                <div class="floating-cube" style="top: 70%; left: 60%; animation-delay: 1s;"></div>
+                <div class="floating-cube" style="bottom: 15%; right: 15%; animation-delay: 1.5s;"></div>
+                <div class="floating-cube" style="top: 50%; left: 30%; animation-delay: 2s;"></div>
+            `;
+            addConsoleMessage('🔮 3D blockchain visualization activated', 'success');
+        }
+
+        function optimizeRender() {
+            addConsoleMessage('Optimizing 3D rendering pipeline...', 'vr');
+            setTimeout(() => {
+                addConsoleMessage('⚡ Rendering optimized - FPS locked at 60', 'success');
+                document.getElementById('renderFPS').textContent = '60';
+            }, 2000);
+        }
+
+        // Initialize everything
+        initMetaverseBg();
+        
+        // Update metrics every 7 seconds
+        setInterval(updateMetrics, 7000);
+        
+        // Add random VR console messages
+        setInterval(() => {
+            const messages = [
+                { msg: 'New user joined CryptoMetropolis', type: 'success' },
+                { msg: 'Haptic feedback calibration complete', type: 'vr' },
+                { msg: '3D asset streaming optimized', type: 'success' },
+                { msg: 'Spatial audio synchronized', type: 'vr' },
+                { msg: 'Cross-platform VR session established', type: 'success' }
+            ];
+            const selected = messages[Math.floor(Math.random() * messages.length)];
+            addConsoleMessage(selected.msg, selected.type);
+        }, 9000);
+    </script>
+</body>
+</html>

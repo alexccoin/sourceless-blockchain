@@ -26,7 +26,7 @@ node launch-all-updated.js
 
 ### 🎯 TYPE 2: AresLang Integration  
 - **8 smart contract types** including ZKT13, wNFT, Gaming, Oracle, Bridge
-- **Quantum-enhanced compiler** with AI assistance
+- **Quantum-enhanced compiler** with ARES assistance
 - **Zero-knowledge proof support** throughout
 - **Real-time development environment**
 
