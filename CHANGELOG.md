@@ -170,3 +170,34 @@ All notable changes to Sourceless Blockchain will be documented in this file.
 **Trademarks:** Sourceless™, Stratus™, STR Protocol™, STARW™, ARES Forge™, ZK13STR™
 
 Made with ❤️ by Alexandru Marius Stratulat and Sourceless Team
+---
+
+## [0.22.1] - Validator Network Patch - 2025-11-19
+
+### Fixed
+- Resolved "Error loading validators" in `vision-sourceless-dashboard.html` by replacing invalid `SourceLess.validators.getValidatorsByType('all')` call with `SourceLess.network.getSTARWEcosystem()` overview.
+- Display now correctly reflects genesis, supernode, mini validator, and STARW worker counts (21 / 156 / 847 / 289) sourced from ecosystem network manager.
+- Added tooltip `title` attribute to each validator card for accessibility and quick count context.
+- Added console error logging for failed load attempts to aid future diagnostics.
+
+### Notes
+- Root cause: stale reference to deprecated `validators` manager after global `window.SourceLess` reinitialization by `sourceless-ecosystem-core.js`.
+- Network overview API provides authoritative 1313 validator breakdown; individual validator listing remains simulated in `NetworkManager.getValidators()`.
+
+## [0.22.2] - Accessibility & Style Refactor - 2025-11-19
+
+### Changed
+- Removed remaining inline styles from `ultimate-superadmin-dashboard.html` (iframe containers, activity feeds, proof validation box, ecosystem showcase heading) replacing them with semantic utility classes: `.iframe-tall`, `.activity-scroll`, `.panel-section-box`, `.ecosystem-heading-wrap`, `.ecosystem-heading`.
+- Added descriptive `title` attributes to embedded iframes for assistive technologies: Vision UI Main Dashboard, AresLang Smart Contract IDE, SourceLess Ultimate Wallet.
+- Converted inline "Healthy" status style to semantic class `status-good` for consistency with existing status color classes.
+
+### Added
+- New CSS utility classes for repeated layout/styling patterns to improve maintainability and reduce duplication.
+
+### Accessibility
+- Improves screen reader context for embedded application regions via iframe `title` attributes.
+- Removes style duplication aiding future audits and styling changes without altering existing functional components (non-invasive per directive).
+
+### Notes
+- No functional logic changed; purely structural & accessibility improvements.
+- Next planned enhancement: extend same refactor to other dashboards if needed and harmonize STR.Domain cost documentation (999 STR vs legacy examples).
