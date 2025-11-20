@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SourceLess Mini Nodes | Distributed Computing Network</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: linear-gradient(310deg, #7928CA 0%, #FF0080 100%);
+            --secondary: linear-gradient(310deg, #2152FF 0%, #21D4FD 100%);
+            --success: linear-gradient(310deg, #17AD37 0%, #98EC2D 100%);
+            --warning: linear-gradient(310deg, #F53939 0%, #FBCF33 100%);
+            --dark: linear-gradient(310deg, #141727 0%, #3A416F 100%);
+            --background: linear-gradient(310deg, #141727 0%, #3A416F 100%);
+            --surface: rgba(255, 255, 255, 0.1);
+            --border: rgba(255, 255, 255, 0.2);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-top: 2rem;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: var(--primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .header .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .network-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .stat-card:hover::before {
+            left: 100%;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: var(--success);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 2rem;
+        }
+
+        .nodes-section {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .controls-panel {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .control-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .control-btn.primary {
+            background: var(--primary);
+        }
+
+        .control-btn.success {
+            background: var(--success);
+        }
+
+        .control-btn.warning {
+            background: var(--warning);
+        }
+
+        .nodes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .node-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .node-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .node-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .node-id {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .node-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-online {
+            background: var(--success);
+            color: white;
+        }
+
+        .status-offline {
+            background: #6c757d;
+            color: white;
+        }
+
+        .status-syncing {
+            background: var(--warning);
+            color: white;
+        }
+
+        .node-info {
+            margin-bottom: 1rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .info-label {
+            color: var(--text-secondary);
+        }
+
+        .info-value {
+            font-weight: 500;
+        }
+
+        .node-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .node-btn {
+            flex: 1;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.5rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.75rem;
+            text-align: center;
+        }
+
+        .node-btn:hover {
+            background: var(--primary);
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .setup-panel {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+
+        .setup-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .form-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #7928CA;
+            box-shadow: 0 0 0 2px rgba(121, 40, 202, 0.2);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--success);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .metrics-panel {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .metric-item {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #51cf66;
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .rewards-panel {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+
+        .reward-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .reward-item:last-child {
+            border-bottom: none;
+        }
+
+        .reward-amount {
+            font-weight: 600;
+            color: #51cf66;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            border-top-color: var(--text-primary);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <a href="superadmin-panel.html" class="back-btn">
+        <i class="fas fa-arrow-left"></i>
+        Back to Admin
+    </a>
+
+    <div class="container">
+        <header class="header">
+            <h1>⚡ SourceLess Mini Nodes</h1>
+            <p class="subtitle">Distributed Computing Network - 847 Active Mini Nodes</p>
+            
+            <div class="network-stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-nodes">847</div>
+                    <div class="stat-label">Active Nodes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="total-hashpower">2.34 TH/s</div>
+                    <div class="stat-label">Total Hashpower</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="rewards-today">145.7 STR</div>
+                    <div class="stat-label">Rewards Today</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="network-uptime">99.4%</div>
+                    <div class="stat-label">Network Uptime</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avg-latency">23ms</div>
+                    <div class="stat-label">Avg Latency</div>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="nodes-section">
+                <div class="section-header">
+                    <h2 class="section-title">🖥️ Mini Node Network</h2>
+                    <div class="controls-panel">
+                        <button class="control-btn success" onclick="deployNewNode()">
+                            <i class="fas fa-plus"></i>
+                            Deploy Node
+                        </button>
+                        <button class="control-btn primary" onclick="refreshNodes()">
+                            <i class="fas fa-sync-alt"></i>
+                            Refresh
+                        </button>
+                        <button class="control-btn warning" onclick="bulkActions()">
+                            <i class="fas fa-cogs"></i>
+                            Bulk Actions
+                        </button>
+                    </div>
+                </div>
+
+                <div class="nodes-grid" id="nodes-grid">
+                    <!-- Nodes will be dynamically loaded -->
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <!-- Node Setup Panel -->
+                <div class="setup-panel">
+                    <h3 class="setup-title">
+                        <i class="fas fa-server"></i>
+                        Deploy New Node
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Node Type</label>
+                        <select class="form-input" id="node-type">
+                            <option value="mini">Mini Node (2 CPU, 4GB RAM)</option>
+                            <option value="standard">Standard Node (4 CPU, 8GB RAM)</option>
+                            <option value="premium">Premium Node (8 CPU, 16GB RAM)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Region</label>
+                        <select class="form-input" id="node-region">
+                            <option value="us-east">US East (Virginia)</option>
+                            <option value="us-west">US West (California)</option>
+                            <option value="eu-west">EU West (Ireland)</option>
+                            <option value="asia-pacific">Asia Pacific (Singapore)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Node Name</label>
+                        <input type="text" class="form-input" id="node-name" placeholder="Enter node name...">
+                    </div>
+                    
+                    <div class="progress-bar" id="deploy-progress" style="display: none;">
+                        <div class="progress-fill" style="width: 0%"></div>
+                    </div>
+                    
+                    <button class="control-btn success" onclick="startNodeDeployment()" style="width: 100%; justify-content: center;">
+                        <i class="fas fa-rocket"></i>
+                        Deploy Node
+                    </button>
+                </div>
+
+                <!-- Network Metrics -->
+                <div class="metrics-panel">
+                    <h3 class="setup-title">
+                        <i class="fas fa-chart-bar"></i>
+                        Network Metrics
+                    </h3>
+                    
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <div class="metric-value" id="blocks-validated">12,347</div>
+                            <div class="metric-label">Blocks Validated</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value" id="transactions-processed">89.2K</div>
+                            <div class="metric-label">Transactions</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value" id="data-processed">456 GB</div>
+                            <div class="metric-label">Data Processed</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value" id="consensus-time">1.2s</div>
+                            <div class="metric-label">Consensus Time</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rewards Panel -->
+                <div class="rewards-panel">
+                    <h3 class="setup-title">
+                        <i class="fas fa-coins"></i>
+                        Mining Rewards
+                    </h3>
+                    
+                    <div class="reward-item">
+                        <span>Today's Rewards</span>
+                        <span class="reward-amount">145.7 STR</span>
+                    </div>
+                    <div class="reward-item">
+                        <span>This Week</span>
+                        <span class="reward-amount">1,023.4 STR</span>
+                    </div>
+                    <div class="reward-item">
+                        <span>This Month</span>
+                        <span class="reward-amount">4,567.8 STR</span>
+                    </div>
+                    <div class="reward-item">
+                        <span>Total Earned</span>
+                        <span class="reward-amount">23,456.9 STR</span>
+                    </div>
+                    
+                    <button class="control-btn primary" onclick="claimRewards()" style="width: 100%; justify-content: center; margin-top: 1rem;">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        Claim Rewards
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include SourceLess Core -->
+    <script src="js/production-classes.js"></script>
+    <script src="js/sourceless-ecosystem-core.js"></script>
+
+    <script>
+        // Mini Nodes Controller
+        let sourcelessCore = null;
+        let nodes = [];
+        let updateInterval = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('⚡ Initializing SourceLess Mini Nodes...');
+            
+            // Initialize SourceLess Core
+            if (typeof SourceLessCore !== 'undefined') {
+                sourcelessCore = new SourceLessCore();
+                console.log('✅ Mini Nodes Core loaded');
+            }
+            
+            // Generate initial nodes
+            generateNodes();
+            
+            // Start real-time updates
+            updateInterval = setInterval(updateNetworkStats, 5000);
+            
+            console.log('🎉 Mini Nodes interface ready');
+        });
+
+        // Generate mock nodes data
+        function generateNodes() {
+            nodes = [];
+            const regions = ['US-East', 'US-West', 'EU-West', 'Asia-Pacific'];
+            const statuses = ['online', 'offline', 'syncing'];
+            const nodeTypes = ['mini', 'standard', 'premium'];
+            
+            for (let i = 1; i <= 20; i++) {
+                const node = {
+                    id: `NODE-${String(i).padStart(3, '0')}`,
+                    name: `MiniNode-${i}`,
+                    region: regions[Math.floor(Math.random() * regions.length)],
+                    status: statuses[Math.floor(Math.random() * statuses.length)],
+                    type: nodeTypes[Math.floor(Math.random() * nodeTypes.length)],
+                    hashpower: (Math.random() * 5 + 1).toFixed(2) + ' GH/s',
+                    uptime: (95 + Math.random() * 5).toFixed(1) + '%',
+                    blocks: Math.floor(Math.random() * 1000 + 500),
+                    rewards: (Math.random() * 50 + 10).toFixed(2) + ' STR',
+                    cpu: Math.floor(Math.random() * 80 + 20) + '%',
+                    memory: Math.floor(Math.random() * 70 + 30) + '%',
+                    network: (Math.random() * 100 + 50).toFixed(1) + ' Mbps'
+                };
+                nodes.push(node);
+            }
+            
+            renderNodes();
+        }
+
+        // Render nodes grid
+        function renderNodes() {
+            const grid = document.getElementById('nodes-grid');
+            grid.innerHTML = '';
+            
+            nodes.forEach(node => {
+                const statusClass = `status-${node.status}`;
+                const statusIcon = node.status === 'online' ? 'fas fa-circle' : 
+                                 node.status === 'syncing' ? 'fas fa-sync-alt fa-spin' : 'fas fa-circle';
+                
+                const nodeCard = document.createElement('div');
+                nodeCard.className = 'node-card';
+                nodeCard.innerHTML = `
+                    <div class="node-header">
+                        <div class="node-id">${node.id}</div>
+                        <div class="node-status ${statusClass}">
+                            <i class="${statusIcon}"></i>
+                            ${node.status.toUpperCase()}
+                        </div>
+                    </div>
+                    
+                    <div class="node-info">
+                        <div class="info-row">
+                            <span class="info-label">Name:</span>
+                            <span class="info-value">${node.name}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Region:</span>
+                            <span class="info-value">${node.region}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Hashpower:</span>
+                            <span class="info-value">${node.hashpower}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Uptime:</span>
+                            <span class="info-value">${node.uptime}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Blocks:</span>
+                            <span class="info-value">${node.blocks}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Rewards:</span>
+                            <span class="info-value">${node.rewards}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="node-actions">
+                        <button class="node-btn" onclick="viewNodeDetails('${node.id}')">
+                            <i class="fas fa-eye"></i>
+                            Details
+                        </button>
+                        <button class="node-btn" onclick="restartNode('${node.id}')">
+                            <i class="fas fa-redo"></i>
+                            Restart
+                        </button>
+                        <button class="node-btn" onclick="stopNode('${node.id}')">
+                            <i class="fas fa-stop"></i>
+                            Stop
+                        </button>
+                    </div>
+                `;
+                
+                grid.appendChild(nodeCard);
+            });
+        }
+
+        // Update network statistics
+        function updateNetworkStats() {
+            // Update main stats with slight variations
+            const stats = {
+                'total-nodes': Math.floor(847 + (Math.random() - 0.5) * 10),
+                'total-hashpower': (2.34 + (Math.random() - 0.5) * 0.2).toFixed(2) + ' TH/s',
+                'rewards-today': (145.7 + Math.random() * 5).toFixed(1) + ' STR',
+                'network-uptime': (99.4 + (Math.random() - 0.5) * 0.2).toFixed(1) + '%',
+                'avg-latency': Math.floor(23 + (Math.random() - 0.5) * 10) + 'ms'
+            };
+            
+            Object.keys(stats).forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = stats[id];
+                }
+            });
+            
+            // Update metrics
+            const metrics = {
+                'blocks-validated': Math.floor(12347 + Math.random() * 10),
+                'transactions-processed': (89.2 + Math.random() * 2).toFixed(1) + 'K',
+                'data-processed': Math.floor(456 + Math.random() * 50) + ' GB',
+                'consensus-time': (1.2 + (Math.random() - 0.5) * 0.3).toFixed(1) + 's'
+            };
+            
+            Object.keys(metrics).forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = metrics[id];
+                }
+            });
+        }
+
+        // Node Management Functions
+        function deployNewNode() {
+            showNotification('Opening node deployment interface...', 'info');
+            document.querySelector('.setup-panel').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function refreshNodes() {
+            showNotification('Refreshing node status...', 'info');
+            
+            setTimeout(() => {
+                // Simulate some status changes
+                nodes.forEach(node => {
+                    if (Math.random() > 0.9) {
+                        const statuses = ['online', 'syncing'];
+                        node.status = statuses[Math.floor(Math.random() * statuses.length)];
+                        
+                        if (node.status === 'online') {
+                            node.blocks += Math.floor(Math.random() * 5 + 1);
+                            const rewardValue = parseFloat(node.rewards);
+                            node.rewards = (rewardValue + Math.random() * 2).toFixed(2) + ' STR';
+                        }
+                    }
+                });
+                
+                renderNodes();
+                showNotification('Node status updated successfully', 'success');
+            }, 1500);
+        }
+
+        function bulkActions() {
+            const actions = ['Restart All Nodes', 'Update All Nodes', 'Backup All Configs', 'Sync All Nodes'];
+            const action = prompt(`Select bulk action:\n${actions.map((a, i) => `${i + 1}. ${a}`).join('\n')}\n\nEnter number (1-4):`);
+            
+            if (action && action >= 1 && action <= 4) {
+                showNotification(`Executing: ${actions[action - 1]}...`, 'info');
+                
+                setTimeout(() => {
+                    showNotification(`✅ ${actions[action - 1]} completed successfully`, 'success');
+                }, 3000);
+            }
+        }
+
+        function startNodeDeployment() {
+            const nodeType = document.getElementById('node-type').value;
+            const region = document.getElementById('node-region').value;
+            const name = document.getElementById('node-name').value || `MiniNode-${nodes.length + 1}`;
+            
+            showNotification('Starting node deployment...', 'info');
+            
+            const progressBar = document.getElementById('deploy-progress');
+            const progressFill = progressBar.querySelector('.progress-fill');
+            
+            progressBar.style.display = 'block';
+            
+            let progress = 0;
+            const deployInterval = setInterval(() => {
+                progress += Math.random() * 15 + 5;
+                if (progress > 100) progress = 100;
+                
+                progressFill.style.width = progress + '%';
+                
+                if (progress >= 100) {
+                    clearInterval(deployInterval);
+                    
+                    // Add new node
+                    const newNode = {
+                        id: `NODE-${String(nodes.length + 1).padStart(3, '0')}`,
+                        name: name,
+                        region: region,
+                        status: 'syncing',
+                        type: nodeType,
+                        hashpower: (Math.random() * 5 + 1).toFixed(2) + ' GH/s',
+                        uptime: '0.0%',
+                        blocks: 0,
+                        rewards: '0.00 STR',
+                        cpu: Math.floor(Math.random() * 30 + 10) + '%',
+                        memory: Math.floor(Math.random() * 40 + 20) + '%',
+                        network: (Math.random() * 100 + 50).toFixed(1) + ' Mbps'
+                    };
+                    
+                    nodes.push(newNode);
+                    renderNodes();
+                    
+                    setTimeout(() => {
+                        progressBar.style.display = 'none';
+                        progressFill.style.width = '0%';
+                        document.getElementById('node-name').value = '';
+                        showNotification(`✅ Node "${name}" deployed successfully`, 'success');
+                        
+                        // Simulate node coming online
+                        setTimeout(() => {
+                            newNode.status = 'online';
+                            newNode.uptime = '100.0%';
+                            renderNodes();
+                            showNotification(`🟢 Node "${name}" is now online`, 'success');
+                        }, 5000);
+                    }, 1000);
+                }
+            }, 200);
+        }
+
+        function viewNodeDetails(nodeId) {
+            const node = nodes.find(n => n.id === nodeId);
+            if (node) {
+                alert(`📊 Node Details: ${nodeId}
+
+Name: ${node.name}
+Region: ${node.region}
+Status: ${node.status.toUpperCase()}
+Type: ${node.type}
+
+Performance:
+• Hashpower: ${node.hashpower}
+• Uptime: ${node.uptime}
+• CPU Usage: ${node.cpu}
+• Memory Usage: ${node.memory}
+• Network Speed: ${node.network}
+
+Statistics:
+• Blocks Validated: ${node.blocks}
+• Rewards Earned: ${node.rewards}
+
+Last Update: ${new Date().toLocaleString()}`);
+            }
+        }
+
+        function restartNode(nodeId) {
+            const node = nodes.find(n => n.id === nodeId);
+            if (node) {
+                showNotification(`Restarting node ${nodeId}...`, 'info');
+                
+                node.status = 'syncing';
+                renderNodes();
+                
+                setTimeout(() => {
+                    node.status = 'online';
+                    node.uptime = '100.0%';
+                    renderNodes();
+                    showNotification(`✅ Node ${nodeId} restarted successfully`, 'success');
+                }, 3000);
+            }
+        }
+
+        function stopNode(nodeId) {
+            const node = nodes.find(n => n.id === nodeId);
+            if (node && confirm(`Are you sure you want to stop node ${nodeId}?`)) {
+                showNotification(`Stopping node ${nodeId}...`, 'warning');
+                
+                node.status = 'offline';
+                node.uptime = '0.0%';
+                renderNodes();
+                
+                showNotification(`⏹️ Node ${nodeId} stopped`, 'warning');
+            }
+        }
+
+        function claimRewards() {
+            showNotification('Processing reward claim...', 'info');
+            
+            setTimeout(() => {
+                const totalRewards = '145.7 STR';
+                showNotification(`✅ Rewards claimed successfully! ${totalRewards} transferred to your wallet.`, 'success');
+                
+                // Reset today's rewards
+                document.getElementById('rewards-today').textContent = '0.0 STR';
+            }, 2000);
+        }
+
+        // Notification system
+        function showNotification(message, type) {
+            if (sourcelessCore && sourcelessCore.notificationSystem) {
+                switch(type) {
+                    case 'success':
+                        sourcelessCore.notificationSystem.success(message);
+                        break;
+                    case 'error':
+                        sourcelessCore.notificationSystem.error(message);
+                        break;
+                    case 'warning':
+                        sourcelessCore.notificationSystem.warning(message);
+                        break;
+                    default:
+                        sourcelessCore.notificationSystem.info(message);
+                }
+            } else {
+                console.log(`${type.toUpperCase()}: ${message}`);
+            }
+        }
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (updateInterval) {
+                clearInterval(updateInterval);
+            }
+        });
+    </script>
+</body>
+</html>

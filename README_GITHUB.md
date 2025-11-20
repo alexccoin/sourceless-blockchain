@@ -19,7 +19,8 @@ Created with ❤️ by **Alexandru Marius Stratulat** and **Sourceless Team**
 
 - **1313 Genesis STARW Validation Nodes**
 - **6 Specialized Multi-Ledgers** (Main, Asset, Contract, Governance, CCOIN, CCOS)
-- **5-Token Economy** (STR, CCOS, WSTR, ARSS, ESTR)
+- **6-Token Economy** (STR, CCOS, CCOIN, WSTR, ARSS, ESTR)
+- **CCOIN Financial Core** (PoE-based post mining, ecosystem integration)
 - **131 TPMS Capacity** (131,300 TPS)
 - **Instant Finality** via Sourceless Proof-of-Validation (SPoV)
 - **Enterprise Security** with comprehensive error handling and input validation

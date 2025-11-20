@@ -657,9 +657,9 @@ zkt13_token {{tokenName}} {
         commitments.insert(commitment)
         zk_proofs[nullifier] = proof
         
-        // Mint CCOIN rewards privately
-        zk_ccoin_amount = calculate_privacy_reward(amount_encrypted)
-        CCOIN.zk_mint(commitment.owner, zk_ccoin_amount)
+        // Execute private PoE post mining
+        zk_ccoin_amount = execute_privacy_poe_post_mining(amount_encrypted, commitment)
+        CCOIN.zk_post_mine(commitment.owner, zk_ccoin_amount)
         
         emit ZKTransfer(nullifier, commitment)
         emit CCOINPrivacyReward(commitment.owner, zk_ccoin_amount)

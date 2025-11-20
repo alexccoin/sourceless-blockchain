@@ -61,10 +61,11 @@ The Sourceless Blockchain is a **production-ready**, **enterprise-grade** decent
 - 1313 Genesis Nodes
 
 **Tokens:**
-- STR (Sourceless) - Native token
-- CCOS (CCOIN Network) - Consensus token
-- ARSS (ARES) - Ecosystem token
-- wSTR, eSTR, $TR - Arguable tokens
+- STR (Sourceless) - Native token with CCOIN enhancement
+- CCOS (CCOIN Network) - Consensus token with CCOIN boost
+- CCOIN (Crypto Coin) - Financial core engine (PoE post mining)
+- ARSS (ARES) - Ecosystem token with CCOIN optimization
+- wSTR, eSTR, $TR - Arguable tokens with CCOIN integration
 
 ---
 

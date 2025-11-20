@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STARW VM & Validator Network - SourceLess Professional</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #64748b;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --purple: #8b5cf6;
+            --dark: #0f172a;
+            --darker: #020617;
+            --card: #1e293b;
+            --border: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            
+            /* Validator type colors */
+            --genesis: #dc2626;
+            --supernode: #7c3aed;
+            --mini: var(--primary);
+            --starw: var(--success);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--darker);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--dark), var(--darker));
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .logo i {
+            color: var(--primary);
+            font-size: 2rem;
+        }
+
+        .network-badge {
+            background: linear-gradient(135deg, var(--starw), #047857);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .validator-count {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .count-item {
+            text-align: center;
+        }
+
+        .count-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .count-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .grid {
+            display: grid;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .grid-2 { grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); }
+        .grid-3 { grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); }
+        .grid-4 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            border-color: var(--primary);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card-title i {
+            color: var(--primary);
+        }
+
+        .card-badge {
+            background: var(--primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Validator type specific cards */
+        .validator-type-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .validator-type-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+        }
+
+        .validator-type-card.genesis::before { background: var(--genesis); }
+        .validator-type-card.supernode::before { background: var(--supernode); }
+        .validator-type-card.mini::before { background: var(--mini); }
+        .validator-type-card.starw::before { background: var(--starw); }
+
+        .validator-network {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .validator-node {
+            background: var(--darker);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .validator-node:hover {
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        .validator-node.online {
+            border-color: var(--success);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.1);
+        }
+
+        .validator-node.offline {
+            border-color: var(--danger);
+            opacity: 0.6;
+        }
+
+        .node-id {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .node-stake {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+
+        .node-status {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-left: 0.5rem;
+        }
+
+        .node-status.online { background: var(--success); animation: pulse 2s infinite; }
+        .node-status.offline { background: var(--danger); }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* STARW VM specific styling */
+        .starw-vm-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .vm-instance {
+            background: var(--darker);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+
+        .vm-instance.active {
+            border-color: var(--starw);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.1);
+        }
+
+        .vm-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .vm-id {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .vm-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .vm-status.running {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .vm-status.idle {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .vm-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .vm-metric {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+        }
+
+        .vm-metric-label {
+            color: var(--text-secondary);
+        }
+
+        .vm-metric-value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th {
+            background: var(--darker);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 1rem 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        .table tr:hover {
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .hash {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .hash:hover {
+            text-decoration: underline;
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .badge-info {
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--accent);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        /* Chart containers */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 1rem;
+        }
+
+        /* Performance indicators */
+        .performance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .performance-card {
+            text-align: center;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+
+        .performance-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .performance-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .performance-change {
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+
+        .positive { color: var(--success); }
+        .negative { color: var(--danger); }
+
+        /* Section headers */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 3rem 0 1.5rem 0;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title i {
+            color: var(--primary);
+        }
+
+        .section-badge {
+            background: var(--primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Loading states */
+        .loading {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 2rem;
+        }
+
+        .loading i {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .validator-count {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .grid-2, .grid-3, .grid-4 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animation classes */
+        .fade-in {
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-up {
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-microchip"></i>
+                <div>
+                    <div>STARW Virtual Machine</div>
+                    <div class="network-badge">1313 Validator Network</div>
+                </div>
+            </div>
+            <div class="validator-count">
+                <div class="count-item">
+                    <div class="count-number" style="color: var(--genesis);">21</div>
+                    <div class="count-label">Genesis</div>
+                </div>
+                <div class="count-item">
+                    <div class="count-number" style="color: var(--supernode);">156</div>
+                    <div class="count-label">Supernodes</div>
+                </div>
+                <div class="count-item">
+                    <div class="count-number" style="color: var(--mini);">847</div>
+                    <div class="count-label">Mini</div>
+                </div>
+                <div class="count-item">
+                    <div class="count-number" style="color: var(--starw);">289</div>
+                    <div class="count-label">STARW</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Performance Overview -->
+        <div class="performance-grid fade-in">
+            <div class="performance-card">
+                <div class="performance-value" id="totalCompute">1.2 PF</div>
+                <div class="performance-label">Total Compute</div>
+                <div class="performance-change positive">+5.2% (24h)</div>
+            </div>
+            <div class="performance-card">
+                <div class="performance-value" id="totalStorage">500 TB</div>
+                <div class="performance-label">Storage</div>
+                <div class="performance-change positive">+2.1% (24h)</div>
+            </div>
+            <div class="performance-card">
+                <div class="performance-value" id="networkUtilization">73%</div>
+                <div class="performance-label">Network Utilization</div>
+                <div class="performance-change positive">Optimal</div>
+            </div>
+            <div class="performance-card">
+                <div class="performance-value" id="totalRewards">1.2M</div>
+                <div class="performance-label">ARSS Rewards</div>
+                <div class="performance-change positive">+3.4% (24h)</div>
+            </div>
+            <div class="performance-card">
+                <div class="performance-value" id="activeVMs">789</div>
+                <div class="performance-label">Active VMs</div>
+                <div class="performance-change positive">98.2% Online</div>
+            </div>
+            <div class="performance-card">
+                <div class="performance-value" id="onlineValidators">1,287</div>
+                <div class="performance-label">Online Validators</div>
+                <div class="performance-change positive">98.0% Uptime</div>
+            </div>
+        </div>
+
+        <!-- Validator Network Overview -->
+        <div class="section-header slide-up">
+            <h2 class="section-title">
+                <i class="fas fa-server"></i>
+                Validator Network Hierarchy
+            </h2>
+            <div class="section-badge">1313 Total Nodes</div>
+        </div>
+
+        <div class="grid grid-4 slide-up">
+            <!-- Genesis Nodes -->
+            <div class="card validator-type-card genesis">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-crown" style="color: var(--genesis);"></i>
+                        Genesis Nodes
+                    </div>
+                    <div class="card-badge" style="background: var(--genesis);">21</div>
+                </div>
+                <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                    Genesis Authority Nodes with maximum voting power and special network privileges.
+                </p>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Voting Power</td>
+                                <td style="font-weight: 600;">100</td>
+                            </tr>
+                            <tr>
+                                <td>Avg Stake</td>
+                                <td>2.86B STR</td>
+                            </tr>
+                            <tr>
+                                <td>Uptime</td>
+                                <td style="color: var(--success);">99.98%</td>
+                            </tr>
+                            <tr>
+                                <td>Block Rewards</td>
+                                <td>125K STR</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Supernodes -->
+            <div class="card validator-type-card supernode">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-server" style="color: var(--supernode);"></i>
+                        Supernodes
+                    </div>
+                    <div class="card-badge" style="background: var(--supernode);">156</div>
+                </div>
+                <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                    High-Performance Validators with enhanced capabilities and significant stake requirements.
+                </p>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Voting Power</td>
+                                <td style="font-weight: 600;">50</td>
+                            </tr>
+                            <tr>
+                                <td>Avg Stake</td>
+                                <td>64.1M STR</td>
+                            </tr>
+                            <tr>
+                                <td>Uptime</td>
+                                <td style="color: var(--success);">99.85%</td>
+                            </tr>
+                            <tr>
+                                <td>Block Rewards</td>
+                                <td>85K STR</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Mini Validators -->
+            <div class="card validator-type-card mini">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-cubes" style="color: var(--mini);"></i>
+                        Mini Validators
+                    </div>
+                    <div class="card-badge" style="background: var(--mini);">847</div>
+                </div>
+                <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                    Distributed Mini Validators ensuring network decentralization and accessibility.
+                </p>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Voting Power</td>
+                                <td style="font-weight: 600;">10</td>
+                            </tr>
+                            <tr>
+                                <td>Avg Stake</td>
+                                <td>11.8M STR</td>
+                            </tr>
+                            <tr>
+                                <td>Uptime</td>
+                                <td style="color: var(--success);">99.72%</td>
+                            </tr>
+                            <tr>
+                                <td>Block Rewards</td>
+                                <td>15K STR</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- STARW Workers -->
+            <div class="card validator-type-card starw">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-microchip" style="color: var(--starw);"></i>
+                        STARW Workers
+                    </div>
+                    <div class="card-badge" style="background: var(--starw);">289</div>
+                </div>
+                <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                    STARW Computation Workers providing VM hosting and contract execution services.
+                </p>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Voting Power</td>
+                                <td style="font-weight: 600;">5</td>
+                            </tr>
+                            <tr>
+                                <td>Avg Stake</td>
+                                <td>3.5M STR</td>
+                            </tr>
+                            <tr>
+                                <td>Compute Power</td>
+                                <td style="color: var(--starw);">4.2 TFLOPS</td>
+                            </tr>
+                            <tr>
+                                <td>ARSS Rewards</td>
+                                <td>432 ARSS</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Validator Network -->
+        <div class="section-header slide-up">
+            <h2 class="section-title">
+                <i class="fas fa-network-wired"></i>
+                Live Validator Network
+            </h2>
+            <div class="section-badge">Real-time</div>
+        </div>
+
+        <div class="grid grid-2 slide-up">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-crown"></i>
+                        Genesis Validators (21)
+                    </div>
+                </div>
+                <div class="validator-network" id="genesisValidators">
+                    <div class="loading"><i class="fas fa-spinner"></i> Loading Genesis validators...</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-server"></i>
+                        Supernodes (156)
+                    </div>
+                </div>
+                <div class="validator-network" id="supernodeValidators">
+                    <div class="loading"><i class="fas fa-spinner"></i> Loading Supernodes...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STARW VM Ecosystem -->
+        <div class="section-header slide-up">
+            <h2 class="section-title">
+                <i class="fas fa-microchip"></i>
+                STARW Virtual Machine Ecosystem
+            </h2>
+            <div class="section-badge">AppLess Contracts</div>
+        </div>
+
+        <div class="grid grid-2 slide-up">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-server"></i>
+                        Active STARW VMs
+                    </div>
+                    <div class="card-badge">789</div>
+                </div>
+                <div class="starw-vm-grid" id="starwVMs">
+                    <div class="loading"><i class="fas fa-spinner"></i> Loading STARW VMs...</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-chart-area"></i>
+                        VM Performance Metrics
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="vmPerformanceChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- AppLess Contracts -->
+        <div class="section-header slide-up">
+            <h2 class="section-title">
+                <i class="fas fa-code"></i>
+                AppLess Smart Contracts
+            </h2>
+            <div class="section-badge">Zero-Knowledge</div>
+        </div>
+
+        <div class="card slide-up">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="fas fa-file-code"></i>
+                    Active AppLess Contracts
+                </div>
+            </div>
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Contract Name</th>
+                            <th>STARW Worker</th>
+                            <th>Executions</th>
+                            <th>Gas Usage</th>
+                            <th>ARSS Earned</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="applessContracts">
+                        <tr><td colspan="6" class="loading"><i class="fas fa-spinner"></i> Loading AppLess contracts...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Network Statistics -->
+        <div class="section-header slide-up">
+            <h2 class="section-title">
+                <i class="fas fa-chart-line"></i>
+                Network Statistics & Analytics
+            </h2>
+            <div class="section-badge">24h Data</div>
+        </div>
+
+        <div class="grid grid-2 slide-up">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-tachometer-alt"></i>
+                        Validator Performance
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="validatorPerformanceChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-coins"></i>
+                        Staking Distribution
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="stakingChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load the complete ecosystem library -->
+    <script src="js/sourceless-ecosystem-core.js"></script>
+    <script>
+        let vmPerformanceChart, validatorPerformanceChart, stakingChart;
+
+        // Initialize charts
+        function initializeCharts() {
+            // VM Performance Chart
+            const vmCtx = document.getElementById('vmPerformanceChart').getContext('2d');
+            vmPerformanceChart = new Chart(vmCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'CPU Usage %',
+                            data: [],
+                            borderColor: '#2563eb',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Memory Usage %',
+                            data: [],
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Network I/O',
+                            data: [],
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: { color: '#cbd5e1' }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { color: '#334155' }, ticks: { color: '#cbd5e1' }},
+                        y: { grid: { color: '#334155' }, ticks: { color: '#cbd5e1' }}
+                    }
+                }
+            });
+
+            // Validator Performance Chart
+            const validatorCtx = document.getElementById('validatorPerformanceChart').getContext('2d');
+            validatorPerformanceChart = new Chart(validatorCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Genesis', 'Supernodes', 'Mini Validators', 'STARW Workers'],
+                    datasets: [{
+                        label: 'Uptime %',
+                        data: [99.98, 99.85, 99.72, 99.45],
+                        backgroundColor: [
+                            'rgba(220, 38, 38, 0.8)',
+                            'rgba(124, 58, 237, 0.8)',
+                            'rgba(37, 99, 235, 0.8)',
+                            'rgba(16, 185, 129, 0.8)'
+                        ],
+                        borderColor: [
+                            '#dc2626',
+                            '#7c3aed',
+                            '#2563eb',
+                            '#10b981'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { grid: { color: '#334155' }, ticks: { color: '#cbd5e1' }},
+                        y: { 
+                            grid: { color: '#334155' }, 
+                            ticks: { color: '#cbd5e1' },
+                            min: 99,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            // Staking Distribution Chart
+            const stakingCtx = document.getElementById('stakingChart').getContext('2d');
+            stakingChart = new Chart(stakingCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Genesis (21)', 'Supernodes (156)', 'Mini Validators (847)', 'STARW Workers (289)'],
+                    datasets: [{
+                        data: [60.1, 35.2, 10.0, 1.0],
+                        backgroundColor: [
+                            '#dc2626',
+                            '#7c3aed',
+                            '#2563eb',
+                            '#10b981'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#334155'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#cbd5e1' }
+                        }
+                    }
+                }
+            });
+
+            updateCharts();
+        }
+
+        // Update charts with real-time data
+        function updateCharts() {
+            if (vmPerformanceChart) {
+                const now = new Date();
+                const timeLabel = now.toLocaleTimeString();
+                
+                vmPerformanceChart.data.labels.push(timeLabel);
+                vmPerformanceChart.data.datasets[0].data.push(Math.random() * 30 + 50);
+                vmPerformanceChart.data.datasets[1].data.push(Math.random() * 25 + 60);
+                vmPerformanceChart.data.datasets[2].data.push(Math.random() * 40 + 30);
+
+                // Keep only last 20 points
+                if (vmPerformanceChart.data.labels.length > 20) {
+                    vmPerformanceChart.data.labels.shift();
+                    vmPerformanceChart.data.datasets.forEach(dataset => dataset.data.shift());
+                }
+
+                vmPerformanceChart.update('none');
+            }
+        }
+
+        // Load Genesis validators
+        async function loadGenesisValidators() {
+            try {
+                const validators = await SourceLess.validators.getValidatorsByType('genesis');
+                const container = document.getElementById('genesisValidators');
+                
+                container.innerHTML = validators.map(validator => `
+                    <div class="validator-node ${validator.online ? 'online' : 'offline'}">
+                        <div class="node-id">Genesis-${validator.id}</div>
+                        <div class="node-stake">${validator.stake}</div>
+                        <div>
+                            Power: ${validator.votingPower}
+                            <span class="node-status ${validator.online ? 'online' : 'offline'}"></span>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                document.getElementById('genesisValidators').innerHTML = '<div class="loading">Error loading Genesis validators</div>';
+            }
+        }
+
+        // Load Supernode validators
+        async function loadSupernodeValidators() {
+            try {
+                const validators = await SourceLess.validators.getValidatorsByType('supernode');
+                const container = document.getElementById('supernodeValidators');
+                
+                container.innerHTML = validators.slice(0, 12).map(validator => `
+                    <div class="validator-node ${validator.online ? 'online' : 'offline'}">
+                        <div class="node-id">Super-${validator.id}</div>
+                        <div class="node-stake">${validator.stake}</div>
+                        <div>
+                            Power: ${validator.votingPower}
+                            <span class="node-status ${validator.online ? 'online' : 'offline'}"></span>
+                        </div>
+                    </div>
+                `).join('') + `<div class="validator-node" style="background: var(--card); color: var(--text-secondary); display: flex; align-items: center; justify-content: center;">+${validators.length - 12} more</div>`;
+            } catch (error) {
+                document.getElementById('supernodeValidators').innerHTML = '<div class="loading">Error loading Supernode validators</div>';
+            }
+        }
+
+        // Load STARW VMs
+        async function loadSTARWVMs() {
+            try {
+                const vms = await SourceLess.starw.getVMInstances();
+                const container = document.getElementById('starwVMs');
+                
+                container.innerHTML = vms.slice(0, 8).map(vm => `
+                    <div class="vm-instance ${vm.status === 'running' ? 'active' : ''}">
+                        <div class="vm-header">
+                            <div class="vm-id">VM-${vm.id}</div>
+                            <div class="vm-status ${vm.status}">${vm.status}</div>
+                        </div>
+                        <div class="vm-metrics">
+                            <div class="vm-metric">
+                                <span class="vm-metric-label">CPU:</span>
+                                <span class="vm-metric-value">${vm.cpu}%</span>
+                            </div>
+                            <div class="vm-metric">
+                                <span class="vm-metric-label">Memory:</span>
+                                <span class="vm-metric-value">${vm.memory}%</span>
+                            </div>
+                            <div class="vm-metric">
+                                <span class="vm-metric-label">Contracts:</span>
+                                <span class="vm-metric-value">${vm.contracts}</span>
+                            </div>
+                            <div class="vm-metric">
+                                <span class="vm-metric-label">ARSS:</span>
+                                <span class="vm-metric-value">${vm.arssEarned}</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('') + `<div class="vm-instance" style="background: var(--card); color: var(--text-secondary); display: flex; align-items: center; justify-content: center;">+${vms.length - 8} more VMs</div>`;
+            } catch (error) {
+                document.getElementById('starwVMs').innerHTML = '<div class="loading">Error loading STARW VMs</div>';
+            }
+        }
+
+        // Load AppLess contracts
+        async function loadAppLessContracts() {
+            try {
+                const contracts = await SourceLess.starw.getAppLessContracts();
+                const tbody = document.getElementById('applessContracts');
+                
+                tbody.innerHTML = contracts.map(contract => `
+                    <tr>
+                        <td>
+                            <div style="font-weight: 600;">${contract.name}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">${contract.category}</div>
+                        </td>
+                        <td><span class="hash">STARW-${contract.workerId}</span></td>
+                        <td>${contract.executions.toLocaleString()}</td>
+                        <td>${contract.gas}</td>
+                        <td style="color: var(--success); font-weight: 600;">${contract.arssEarned} ARSS</td>
+                        <td>${contract.verified ? '<span class="badge badge-success">Verified</span>' : '<span class="badge badge-warning">Unverified</span>'}</td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                document.getElementById('applessContracts').innerHTML = '<tr><td colspan="6" class="loading">Error loading contracts</td></tr>';
+            }
+        }
+
+        // Real-time updates
+        function setupRealTimeUpdates() {
+            // Subscribe to real-time events
+            SourceLess.realtime.subscribe('validatorUpdate', (data) => {
+                console.log('Validator update:', data);
+                // Refresh validator displays
+                loadGenesisValidators();
+                loadSupernodeValidators();
+            });
+
+            SourceLess.realtime.subscribe('vmUpdate', (data) => {
+                console.log('VM update:', data);
+                loadSTARWVMs();
+            });
+        }
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Wait for SourceLess ecosystem to be ready
+            while (!window.SourceLess) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            
+            console.log('Initializing STARW VM & Validator Network Dashboard...');
+            
+            // Initialize all components
+            initializeCharts();
+            await loadGenesisValidators();
+            await loadSupernodeValidators();
+            await loadSTARWVMs();
+            await loadAppLessContracts();
+            
+            // Setup real-time updates
+            setupRealTimeUpdates();
+            
+            // Set up refresh intervals
+            setInterval(updateCharts, 3000);
+            setInterval(loadSTARWVMs, 10000);
+            setInterval(loadAppLessContracts, 15000);
+            
+            console.log('✅ STARW VM & Validator Network Dashboard initialized successfully!');
+            console.log('🌟 Monitoring 1313 validators and 789 STARW VMs');
+        });
+
+        // Add animation classes as elements come into view
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all cards for animation
+        document.querySelectorAll('.card').forEach(card => {
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>

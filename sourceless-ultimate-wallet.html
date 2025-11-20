@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SourceLess Ultimate Wallet | Multi-Cryptocurrency & Mini Node</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);
+            --success-color: #00ff41;
+            --warning-color: #ffb547;
+            --danger-color: #ff4757;
+            --info-color: #17c1e8;
+            --dark-bg: #0a0a0a;
+            --darker-bg: #000000;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --card-bg: rgba(15, 15, 35, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #000000 0%, #0a0a0a 50%, #1a1a1a 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(0, 212, 255, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+            animation: bgPulse 15s ease-in-out infinite;
+        }
+
+        @keyframes bgPulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Header */
+        .wallet-header {
+            background: rgba(0,0,0,0.95);
+            padding: 20px 40px;
+            border-bottom: 3px solid var(--success-color);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 4px 30px rgba(0, 255, 65, 0.2);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-section img {
+            height: 40px;
+            width: auto;
+            filter: brightness(1.2) drop-shadow(0 0 10px rgba(0, 255, 65, 0.5));
+        }
+
+        .logo-text h1 {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--success-color), #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-text .subtitle {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .network-badge {
+            background: var(--glass-bg);
+            border: 1px solid var(--success-color);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success-color);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: black;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Main Container */
+        .wallet-container {
+            max-width: 1800px;
+            margin: 30px auto;
+            padding: 0 40px;
+        }
+
+        /* Tab Navigation */
+        .tab-navigation {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--glass-border);
+            padding-bottom: 15px;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px 10px 0 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tab-btn:hover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: var(--info-color);
+        }
+
+        .tab-btn.active {
+            background: var(--primary-gradient);
+            border-color: transparent;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        /* Balance Card */
+        .balance-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .balance-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 255, 65, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .balance-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .balance-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .balance-amount {
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--success-color);
+            margin-bottom: 10px;
+        }
+
+        .balance-usd {
+            font-size: 18px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .balance-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 15px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .action-btn:hover {
+            background: var(--primary-gradient);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .action-btn i {
+            font-size: 24px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        /* Quick Stats */
+        .quick-stats {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(20px);
+        }
+
+        .stat-item {
+            padding: 15px 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--success-color);
+        }
+
+        /* Cryptocurrency List */
+        .crypto-list {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(20px);
+        }
+
+        .crypto-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .crypto-header h3 {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .crypto-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .crypto-item:hover {
+            border-color: var(--success-color);
+            transform: translateX(5px);
+            box-shadow: 0 5px 20px rgba(0, 255, 65, 0.2);
+        }
+
+        .crypto-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .crypto-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--primary-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 800;
+        }
+
+        .crypto-details h4 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .crypto-details p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .crypto-values {
+            text-align: right;
+        }
+
+        .crypto-balance {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .crypto-usd {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Transaction History */
+        .transaction-list {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(20px);
+        }
+
+        .tx-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .tx-item:hover {
+            border-color: var(--info-color);
+            transform: translateX(3px);
+        }
+
+        .tx-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .tx-icon.send {
+            background: rgba(255, 71, 87, 0.2);
+            color: var(--danger-color);
+        }
+
+        .tx-icon.receive {
+            background: rgba(0, 255, 65, 0.2);
+            color: var(--success-color);
+        }
+
+        .tx-info {
+            flex: 1;
+            margin-left: 15px;
+        }
+
+        .tx-type {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .tx-date {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .tx-amount {
+            text-align: right;
+        }
+
+        .tx-amount-value {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .tx-amount-usd {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* Mini Node Panel */
+        .mini-node-panel {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(20px);
+        }
+
+        .node-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .node-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .node-indicator .status-dot {
+            width: 12px;
+            height: 12px;
+        }
+
+        .node-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .metric-box {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .metric-box:hover {
+            border-color: var(--success-color);
+            transform: scale(1.05);
+        }
+
+        .metric-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--success-color);
+            margin-bottom: 8px;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .node-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        /* Ledger Viewer */
+        .ledger-viewer {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(20px);
+        }
+
+        .ledger-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+
+        .ledger-tab {
+            padding: 10px 20px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .ledger-tab:hover {
+            border-color: var(--info-color);
+        }
+
+        .ledger-tab.active {
+            background: var(--secondary-gradient);
+            border-color: transparent;
+        }
+
+        .ledger-content {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .ledger-entry {
+            padding: 15px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--success-color);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00d4ff;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            backdrop-filter: blur(20px);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .modal-header h3 {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--success-color);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .wallet-container {
+                padding: 0 20px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .tab-navigation {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="wallet-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <img src="https://cdn.prod.website-files.com/6761a2c6913e66c7e863de66/67739a0ea120050e95603449_PrimarywhiteLogo1-ezgif.com-png-to-webp-converter.avif" alt="SourceLess Logo">
+                <div class="logo-text">
+                    <h1>🌟 SourceLess Ultimate Wallet</h1>
+                    <div class="subtitle">Multi-Cryptocurrency & Mini Validation Node</div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="network-badge">
+                    <div class="status-dot"></div>
+                    <span>MainNet Active</span>
+                </div>
+                <button class="btn btn-success" onclick="connectWallet()">
+                    <i class="fas fa-wallet"></i> Connect Wallet
+                </button>
+                <button class="btn btn-primary" onclick="openSettings()">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="wallet-container">
+        
+        <!-- Tab Navigation -->
+        <div class="tab-navigation">
+            <div class="tab-btn active" onclick="switchTab('dashboard')">
+                <i class="fas fa-home"></i> Dashboard
+            </div>
+            <div class="tab-btn" onclick="switchTab('cryptocurrencies')">
+                <i class="fas fa-coins"></i> Cryptocurrencies
+            </div>
+            <div class="tab-btn" onclick="switchTab('transactions')">
+                <i class="fas fa-exchange-alt"></i> Transactions
+            </div>
+            <div class="tab-btn" onclick="switchTab('mini-node')">
+                <i class="fas fa-network-wired"></i> Mini Node
+            </div>
+            <div class="tab-btn" onclick="switchTab('ledgers')">
+                <i class="fas fa-book"></i> Ledgers
+            </div>
+            <div class="tab-btn" onclick="switchTab('staking')">
+                <i class="fas fa-seedling"></i> Staking
+            </div>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="dashboard-grid">
+                <div class="balance-card">
+                    <div class="balance-content">
+                        <div class="balance-label">Total Portfolio Value</div>
+                        <div class="balance-amount" id="totalBalance">47,285.50 STR</div>
+                        <div class="balance-usd">≈ $9,885,155.50 USD</div>
+                        
+                        <div class="balance-actions">
+                            <div class="action-btn" onclick="openModal('send')">
+                                <i class="fas fa-paper-plane"></i>
+                                Send
+                            </div>
+                            <div class="action-btn" onclick="openModal('receive')">
+                                <i class="fas fa-qrcode"></i>
+                                Receive
+                            </div>
+                            <div class="action-btn" onclick="openModal('swap')">
+                                <i class="fas fa-exchange-alt"></i>
+                                Swap
+                            </div>
+                            <div class="action-btn" onclick="openModal('buy')">
+                                <i class="fas fa-credit-card"></i>
+                                Buy
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quick-stats">
+                    <h3 style="margin-bottom: 20px; font-size: 18px;">Quick Stats</h3>
+                    <div class="stat-item">
+                        <div class="stat-label">CCOIN Balance</div>
+                        <div class="stat-value" id="ccoinBalance">2,487,293</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Wrapped STR (WSTR)</div>
+                        <div class="stat-value" id="wstrBalance">3,247.60</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">NFTs (WNFT)</div>
+                        <div class="stat-value" id="nftCount">847</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Stablecoins ($TR)</div>
+                        <div class="stat-value" id="stableBalance">50,000</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Network TPMS</div>
+                        <div class="stat-value" id="networkTpms">127,483</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="transaction-list">
+                <div class="crypto-header">
+                    <h3>Recent Transactions</h3>
+                    <button class="btn btn-primary" style="padding: 8px 16px; font-size: 13px;">View All</button>
+                </div>
+                <div id="recentTransactions">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Cryptocurrencies Tab -->
+        <div id="cryptocurrencies" class="tab-content">
+            <div class="crypto-list">
+                <div class="crypto-header">
+                    <h3>Your Cryptocurrencies</h3>
+                    <button class="btn btn-success" onclick="openModal('addCrypto')">
+                        <i class="fas fa-plus"></i> Add Cryptocurrency
+                    </button>
+                </div>
+                <div id="cryptoList">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Transactions Tab -->
+        <div id="transactions" class="tab-content">
+            <div class="transaction-list">
+                <div class="crypto-header">
+                    <h3>All Transactions</h3>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-primary" style="padding: 8px 16px; font-size: 13px;">
+                            <i class="fas fa-filter"></i> Filter
+                        </button>
+                        <button class="btn btn-primary" style="padding: 8px 16px; font-size: 13px;">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                </div>
+                <div id="allTransactions">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Mini Node Tab -->
+        <div id="mini-node" class="tab-content">
+            <div class="dashboard-grid">
+                <div class="mini-node-panel">
+                    <div class="node-status">
+                        <div class="node-indicator">
+                            <div class="status-dot"></div>
+                            <h3>Mini Validation Node</h3>
+                        </div>
+                        <span style="color: var(--success-color); font-weight: 700;">ACTIVE</span>
+                    </div>
+
+                    <div class="node-metrics">
+                        <div class="metric-box">
+                            <div class="metric-value" id="nodeUptime">99.97%</div>
+                            <div class="metric-label">Uptime</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-value" id="validations">12,483</div>
+                            <div class="metric-label">Validations</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-value" id="wstrEarned">847.5</div>
+                            <div class="metric-label">WSTR Earned</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-value" id="peerCount">1,313</div>
+                            <div class="metric-label">Peers</div>
+                        </div>
+                    </div>
+
+                    <div class="node-actions">
+                        <button class="btn btn-success" onclick="startNode()">
+                            <i class="fas fa-play"></i> Start Node
+                        </button>
+                        <button class="btn btn-danger" onclick="stopNode()">
+                            <i class="fas fa-stop"></i> Stop Node
+                        </button>
+                        <button class="btn btn-primary" onclick="viewNodeLogs()">
+                            <i class="fas fa-file-alt"></i> View Logs
+                        </button>
+                        <button class="btn btn-primary" onclick="nodeSettings()">
+                            <i class="fas fa-cog"></i> Settings
+                        </button>
+                    </div>
+
+                    <div style="margin-top: 25px; padding: 20px; background: var(--glass-bg); border-radius: 12px;">
+                        <h4 style="margin-bottom: 15px; font-size: 15px;">Node Information</h4>
+                        <div style="font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.8;">
+                            <div><strong>Node ID:</strong> ZK13STR-NODE-1847293</div>
+                            <div><strong>Version:</strong> v2.0.0</div>
+                            <div><strong>Sync Status:</strong> <span style="color: var(--success-color);">100% Synced</span></div>
+                            <div><strong>Block Height:</strong> 1,847,293</div>
+                            <div><strong>Network:</strong> SourceLess MainNet</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mini-node-panel">
+                    <h3 style="margin-bottom: 20px;">Validation Rewards (WSTR)</h3>
+                    <div style="text-align: center; padding: 30px; background: var(--glass-bg); border-radius: 15px; margin-bottom: 20px;">
+                        <div style="font-size: 48px; font-weight: 800; color: var(--success-color); margin-bottom: 10px;">
+                            2,487.75 WSTR
+                        </div>
+                        <div style="font-size: 16px; color: var(--text-secondary);">
+                            Total Rewards Earned
+                        </div>
+                    </div>
+
+                    <div class="stat-item">
+                        <div class="stat-label">Today's Rewards</div>
+                        <div class="stat-value" style="font-size: 20px;">47.5 WSTR</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Average PoE Score</div>
+                        <div class="stat-value" style="font-size: 20px;">87.5%</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Validation Success</div>
+                        <div class="stat-value" style="font-size: 20px;">94.2%</div>
+                    </div>
+
+                    <button class="btn btn-success" style="width: 100%; margin-top: 20px;" onclick="claimRewards()">
+                        <i class="fas fa-coins"></i> Claim WSTR Rewards
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ledgers Tab -->
+        <div id="ledgers" class="tab-content">
+            <div class="ledger-viewer">
+                <div class="crypto-header">
+                    <h3>SourceLess Ledgers</h3>
+                    <button class="btn btn-primary" onclick="refreshLedgers()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+
+                <div class="ledger-tabs">
+                    <div class="ledger-tab active" onclick="switchLedger('main')">Main Ledger</div>
+                    <div class="ledger-tab" onclick="switchLedger('asset')">Asset Ledger</div>
+                    <div class="ledger-tab" onclick="switchLedger('contract')">Contract Ledger</div>
+                    <div class="ledger-tab" onclick="switchLedger('governance')">Governance Ledger</div>
+                    <div class="ledger-tab" onclick="switchLedger('ccoin')">CCOIN Ledger</div>
+                    <div class="ledger-tab" onclick="switchLedger('ccos')">CCOS Ledger</div>
+                </div>
+
+                <div class="ledger-content" id="ledgerContent">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Staking Tab -->
+        <div id="staking" class="tab-content">
+            <div class="dashboard-grid">
+                <div class="balance-card">
+                    <div class="balance-content">
+                        <div class="balance-label">Staked STR</div>
+                        <div class="balance-amount">12,847.50 STR</div>
+                        <div class="balance-usd">≈ $775,293.50 USD</div>
+                        
+                        <div class="stat-item" style="margin-top: 25px; border: none; padding: 15px 0;">
+                            <div class="stat-label">APY</div>
+                            <div class="stat-value" style="font-size: 32px;">12.5%</div>
+                        </div>
+
+                        <div class="balance-actions">
+                            <div class="action-btn" onclick="openModal('stake')">
+                                <i class="fas fa-seedling"></i>
+                                Stake More
+                            </div>
+                            <div class="action-btn" onclick="openModal('unstake')">
+                                <i class="fas fa-hand-holding-usd"></i>
+                                Unstake
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quick-stats">
+                    <h3 style="margin-bottom: 20px; font-size: 18px;">Staking Rewards (WSTR)</h3>
+                    <div class="stat-item">
+                        <div class="stat-label">Total Earned</div>
+                        <div class="stat-value">1,847.50 WSTR</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Today's Rewards</div>
+                        <div class="stat-value">4.32 WSTR</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Pending Rewards</div>
+                        <div class="stat-value">23.75 WSTR</div>
+                    </div>
+                    <button class="btn btn-success" style="width: 100%; margin-top: 15px;">
+                        <i class="fas fa-coins"></i> Claim WSTR Rewards
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modals -->
+    <div id="sendModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Send Cryptocurrency</h3>
+                <button class="close-btn" onclick="closeModal('send')">&times;</button>
+            </div>
+            <form onsubmit="sendCrypto(event)">
+                <div class="form-group">
+                    <label class="form-label">Cryptocurrency</label>
+                    <select class="form-input" required>
+                        <option>STR - SourceLess</option>
+                        <option>CCOS - CCOIN Network</option>
+                        <option>ARSS - Ares Token</option>
+                        <option>ESTR - Energy STR</option>
+                        <option>$TR - SourceLess Stable</option>
+                        <option>WSTR - Wrapped STR</option>
+                        <option>WNFT - Wrapped NFT</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Recipient Address (ZK13STR)</label>
+                    <input type="text" class="form-input" placeholder="ZK13STR..." required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Amount</label>
+                    <input type="number" class="form-input" placeholder="0.00" step="0.01" required>
+                </div>
+                <button type="submit" class="btn btn-success" style="width: 100%;">
+                    <i class="fas fa-paper-plane"></i> Send Transaction
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="receiveModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Receive Cryptocurrency</h3>
+                <button class="close-btn" onclick="closeModal('receive')">&times;</button>
+            </div>
+            <div style="text-align: center; padding: 30px;">
+                <div style="width: 200px; height: 200px; background: white; margin: 0 auto 20px; border-radius: 15px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-qrcode" style="font-size: 150px; color: #000;"></i>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Your ZK13STR Address</label>
+                    <input type="text" class="form-input" value="ZK13STR-ABCD-1234-EFGH-5678" readonly>
+                </div>
+                <button class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-copy"></i> Copy Address
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab Switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.closest('.tab-btn').classList.add('active');
+        }
+
+        // Modal Functions
+        function openModal(modalName) {
+            document.getElementById(modalName + 'Modal').classList.add('active');
+        }
+
+        function closeModal(modalName) {
+            document.getElementById(modalName + 'Modal').classList.remove('active');
+        }
+
+        // Initialize Cryptocurrencies - SourceLess Ecosystem
+        const cryptocurrencies = [
+            { symbol: 'STR', name: 'SourceLess', balance: 47285.50, usd: 2847293.50, icon: 'S', color: '#00ff41' },
+            { symbol: 'CCOS', name: 'CCOIN Network', balance: 12847.75, usd: 847293.50, icon: 'N', color: '#00d4ff' },
+            { symbol: 'ARSS', name: 'Ares Token', balance: 8473.25, usd: 423662.50, icon: 'A', color: '#ff0080' },
+            { symbol: 'ESTR', name: 'Energy STR', balance: 15234.80, usd: 914088.00, icon: 'E', color: '#ffb547' },
+            { symbol: '$TR', name: 'SourceLess Stable', balance: 50000.00, usd: 50000.00, icon: '$', color: '#17c1e8' },
+            { symbol: 'WSTR', name: 'Wrapped STR', balance: 3247.60, usd: 194856.00, icon: 'W', color: '#764ba2' },
+            { symbol: 'WNFT', name: 'Wrapped NFT', balance: 847, usd: 0, icon: '🎨', color: '#ff4757' },
+        ];
+
+        function renderCryptoList() {
+            const container = document.getElementById('cryptoList');
+            container.innerHTML = cryptocurrencies.map(crypto => `
+                <div class="crypto-item">
+                    <div class="crypto-info">
+                        <div class="crypto-icon" style="background: ${crypto.color}">${crypto.icon}</div>
+                        <div class="crypto-details">
+                            <h4>${crypto.name}</h4>
+                            <p>${crypto.symbol}</p>
+                        </div>
+                    </div>
+                    <div class="crypto-values">
+                        <div class="crypto-balance">${crypto.balance.toLocaleString()} ${crypto.symbol}</div>
+                        ${crypto.usd > 0 ? `<div class="crypto-usd">$${crypto.usd.toLocaleString()}</div>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Initialize Transactions
+        const transactions = [
+            { type: 'Received', crypto: 'STR', amount: 847.50, usd: 51082.50, date: '2 hours ago', direction: 'receive' },
+            { type: 'Staking Reward', crypto: 'WSTR', amount: 23.75, usd: 1425.00, date: '3 hours ago', direction: 'receive' },
+            { type: 'Sent', crypto: 'CCOS', amount: 450, usd: 29700, date: '5 hours ago', direction: 'send' },
+            { type: 'Received', crypto: '$TR', amount: 5000, usd: 5000, date: '8 hours ago', direction: 'receive' },
+            { type: 'Node Reward', crypto: 'WSTR', amount: 47.5, usd: 2850.00, date: '12 hours ago', direction: 'receive' },
+            { type: 'Swap', crypto: 'ESTR', amount: 250, usd: 15000, date: '1 day ago', direction: 'receive' },
+            { type: 'Sent', crypto: 'ARSS', amount: 100, usd: 5000, date: '1 day ago', direction: 'send' },
+            { type: 'Validation Reward', crypto: 'WSTR', amount: 85.3, usd: 5118, date: '2 days ago', direction: 'receive' },
+            { type: 'Received', crypto: 'CCOS', amount: 450, usd: 29700, date: '2 days ago', direction: 'receive' },
+            { type: 'NFT Wrap', crypto: 'WNFT', amount: 12, usd: 0, date: '3 days ago', direction: 'receive' },
+        ];
+
+        function renderTransactions(container, txList = transactions) {
+            const txContainer = document.getElementById(container);
+            txContainer.innerHTML = txList.map(tx => `
+                <div class="tx-item">
+                    <div class="tx-icon ${tx.direction}">
+                        <i class="fas fa-arrow-${tx.direction === 'send' ? 'up' : 'down'}"></i>
+                    </div>
+                    <div class="tx-info">
+                        <div class="tx-type">${tx.type} - ${tx.crypto}</div>
+                        <div class="tx-date">${tx.date}</div>
+                    </div>
+                    <div class="tx-amount">
+                        <div class="tx-amount-value" style="color: ${tx.direction === 'receive' ? 'var(--success-color)' : 'var(--danger-color)'}">
+                            ${tx.direction === 'receive' ? '+' : '-'}${tx.amount.toLocaleString()} ${tx.crypto}
+                        </div>
+                        ${tx.usd > 0 ? `<div class="tx-amount-usd">$${tx.usd.toLocaleString()}</div>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Ledger Functions
+        function switchLedger(ledgerType) {
+            document.querySelectorAll('.ledger-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            loadLedgerData(ledgerType);
+        }
+
+        function loadLedgerData(ledgerType) {
+            const container = document.getElementById('ledgerContent');
+            const sampleData = Array(10).fill(0).map((_, i) => ({
+                block: 1847293 - i,
+                hash: 'ZK13-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+                txCount: Math.floor(Math.random() * 100) + 50,
+                timestamp: new Date(Date.now() - i * 600000).toLocaleString()
+            }));
+
+            container.innerHTML = sampleData.map(data => `
+                <div class="ledger-entry">
+                    <strong>${ledgerType.toUpperCase()} LEDGER</strong> - Block #${data.block}<br>
+                    Hash: ${data.hash}<br>
+                    Transactions: ${data.txCount} | Time: ${data.timestamp}
+                </div>
+            `).join('');
+        }
+
+        // Wallet Functions
+        function connectWallet() {
+            alert('🔗 Connecting to SourceLess Wallet...\n\n✅ ZK13STR Address: ZK13STR-ABCD-1234-EFGH-5678\n✅ Network: MainNet\n✅ Status: Connected');
+        }
+
+        function sendCrypto(event) {
+            event.preventDefault();
+            alert('✅ Transaction Submitted!\n\nYour cryptocurrency transfer is being processed on the SourceLess blockchain.');
+            closeModal('send');
+        }
+
+        function startNode() {
+            alert('🚀 Starting Mini Validation Node...\n\n✅ Node activated\n✅ Syncing with network\n✅ Ready to validate transactions');
+        }
+
+        function stopNode() {
+            if (confirm('⚠️ Stop Mini Node?\n\nThis will pause validation and reward earnings.')) {
+                alert('🛑 Node stopped successfully');
+            }
+        }
+
+        function claimRewards() {
+            alert('💰 Claiming Rewards!\n\n✅ 47.5 WSTR (Wrapped STR) transferred to your wallet\n✅ Transaction confirmed\n✅ Rewards automatically wrapped for easy staking');
+        }
+
+        function refreshLedgers() {
+            alert('🔄 Refreshing ledger data...');
+            loadLedgerData('main');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            renderCryptoList();
+            renderTransactions('recentTransactions', transactions.slice(0, 3));
+            renderTransactions('allTransactions');
+            loadLedgerData('main');
+            
+            // Update metrics
+            setInterval(() => {
+                document.getElementById('networkTpms').textContent = (127483 + Math.floor(Math.random() * 1000)).toLocaleString();
+                document.getElementById('validations').textContent = (12483 + Math.floor(Math.random() * 10)).toLocaleString();
+            }, 5000);
+
+            console.log('%c🌟 SOURCELESS ULTIMATE WALLET', 'font-size: 20px; font-weight: bold; color: #00ff41;');
+            console.log('%cMulti-Cryptocurrency & Mini Validation Node', 'font-size: 14px; color: #00d4ff;');
+            console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #00ff41;');
+            console.log('%c✅ 7 Native Cryptocurrencies', 'color: #00ff41;');
+            console.log('%c✅ All Ledgers Integrated', 'color: #00ff41;');
+            console.log('%c✅ Mini Node Active', 'color: #00ff41;');
+            console.log('%c✅ CCOIN Post-Mining (Hidden Background Feature)', 'color: #667eea;');
+            console.log('%c✅ ZK13STR Address Support', 'color: #00ff41;');
+        });
+    </script>
+</body>
+<script src="js/sourceless-config.js"></script>
+<script src="js/dashboard-live-refresh.js"></script>
+</html>

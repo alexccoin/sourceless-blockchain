@@ -93,7 +93,7 @@ export class FeelessTransactionEngine extends EventEmitter {
 
       // Step 5: Handle post-transaction CCOIN minting
       if (txResult.success) {
-        await this.handlePostTransactionCCOINMinting(txResult);
+        await this.handlePostTransactionCCOINPostMining(txResult);
       }
 
       // Step 6: Update sponsorship pool
@@ -163,9 +163,9 @@ export class FeelessTransactionEngine extends EventEmitter {
   }
 
   /**
-   * Handle CCOIN minting after successful transactions
+   * Handle CCOIN post mining after successful PoE validation
    */
-  private async handlePostTransactionCCOINMinting(txResult: TransactionResult): Promise<void> {
+  private async handlePostTransactionCCOINPostMining(txResult: TransactionResult): Promise<void> {
     if (txResult.type === 'contract_deployment' || txResult.value?.gt(0)) {
       const mintingAmount = await this.calculateCCOINMinting(txResult);
       

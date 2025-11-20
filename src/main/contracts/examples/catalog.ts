@@ -7,7 +7,7 @@ export interface AresExample {
   id: string;
   name: string;
   description: string;
-  language: 'ares' | 'solidity';
+  language: 'ares' | 'areslang' | 'solidity';
   code: string;
   category?: string;
   features?: string[];
@@ -41,17 +41,29 @@ export const ARES_EXAMPLES: AresExample[] = [
   },
   {
     id: 'ex03',
-    name: 'TokenMinimal',
-    description: 'Minimal token logic',
+    name: 'NativeSTRToken',
+    description: 'Native SourceLess STR token',
     language: 'ares',
-    code: `contract TokenMinimal {
-    mapping(address => uint256) public balances;
-    uint256 public totalSupply;
-    constructor(uint256 initial) { totalSupply = initial; balances[msg.sender] = initial; }
-    function transfer(address to, uint256 amount) public {
-        require(balances[msg.sender] >= amount, "Insufficient");
+    code: `// Native SourceLess STR Token
+token_contract NativeSTRToken {
+    balances: mapping<zk13str_address, uint256>;
+    total_supply: uint256;
+    decimals: uint8 = 13;
+    
+    constructor(uint256 initial) { 
+        total_supply = initial; 
+        balances[msg.sender] = initial;
+        enable_hostless_mode();  // Gas-free for CCOS holders
+    }
+    
+    function transfer(zk13str_address to, uint256 amount) public hostless {
+        require(balances[msg.sender] >= amount, "Insufficient STR");
         balances[msg.sender] -= amount;
         balances[to] += amount;
+        
+        # Execute PoE-based CCOIN post mining
+        ccoin.post_mint(msg.sender, execute_poe_post_mining(msg.sender, amount));
+        emit STRTransfer(msg.sender, to, amount);
     }
 }`
   },
@@ -222,21 +234,33 @@ export const ARES_EXAMPLES: AresExample[] = [
   },
   {
     id: 'ex13',
-    name: 'NFTBasic',
-    description: 'Basic NFT operations',
+    name: 'SourceLessNFT',
+    description: 'Native SourceLess NFT with STR.domain integration',
     language: 'ares',
-    code: `contract NFTBasic {
-    uint256 public nextId = 1;
-    mapping(uint256 => address) public owners;
-    mapping(uint256 => string) public uris;
-    function mint(string memory uri) public {
-        owners[nextId] = msg.sender;
-        uris[nextId] = uri;
-        nextId++;
+    code: `// Native SourceLess NFT Contract
+nft_contract SourceLessNFT {
+    next_token_id: uint256 = 1;
+    owners: mapping<uint256, zk13str_address>;
+    token_uris: mapping<uint256, string>;
+    str_domains: mapping<uint256, str_domain>;  # Link NFTs to STR.domains
+    
+    # Mint NFT with automatic STR.domain integration
+    function mint(string memory uri, str_domain domain) public hostless {
+        owners[next_token_id] = msg.sender;
+        token_uris[next_token_id] = uri;
+        str_domains[next_token_id] = domain;
+        
+        # Auto-mint CCOIN for NFT creation (2.5% fixed rate)
+        ccoin.mint_nft_reward(msg.sender, 25);  # 2.5% in basis points
+        
+        emit SourceLessNFTMinted(msg.sender, next_token_id, domain);
+        next_token_id++;
     }
-    function transfer(uint256 tokenId, address to) public {
-        require(owners[tokenId] == msg.sender, "Not owner");
-        owners[tokenId] = to;
+    
+    function transfer(uint256 token_id, zk13str_address to) public hostless {
+        require(owners[token_id] == msg.sender, "Not NFT owner");
+        owners[token_id] = to;
+        emit SourceLessNFTTransfer(msg.sender, to, token_id);
     }
 }`
   },
@@ -478,17 +502,24 @@ export const ARES_EXAMPLES: AresExample[] = [
   },
   {
     id: 'ex26',
-    name: 'Crowdfund',
-    description: 'Basic crowdfunding',
-    language: 'ares',
-    code: `contract Crowdfund {
-    uint256 public goal;
-    uint256 public raised;
-    uint256 public deadline;
-    mapping(address => uint256) public contributions;
-    constructor(uint256 _goal, uint256 duration) { goal = _goal; deadline = block.timestamp + duration; }
-    function contribute(uint256 amount) public {
-        require(block.timestamp < deadline);
+    name: 'STRCrowdfund',
+    description: 'Native SourceLess STR crowdfunding',
+    language: 'areslang',
+    code: `# Native SourceLess Crowdfunding Contract
+crowdfund_contract STRCrowdfund {
+    goal: uint256;
+    raised: uint256;
+    deadline: uint256;
+    contributions: mapping<zk13str_address, uint256>;
+    
+    constructor(uint256 _goal, uint256 duration) {
+        goal = _goal;
+        deadline = block.timestamp + duration;
+        enable_hostless_mode();  # Gas-free for CCOS holders
+    }
+    
+    function contribute(uint256 str_amount) public hostless {
+        require(block.timestamp < deadline, "Campaign ended");
         contributions[msg.sender] += amount;
         raised += amount;
     }

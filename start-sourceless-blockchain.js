@@ -98,13 +98,13 @@ class SourcelessBlockchain {
         // All transactions are feeless in sourceless blockchain
         transaction.fee = 0;
         transaction.sponsored = true;
-        transaction.ccoinReward = this.calculateTransactionReward(transaction);
+        transaction.ccoinPostMined = this.executePoEPostMining(transaction);
         
         this.pendingTransactions.push(transaction);
         blockchainState.transactions.push(transaction);
         
-        // Mint CCOIN rewards
-        this.mintCCOIN(transaction.from, transaction.ccoinReward);
+        // Execute CCOIN post mining
+        this.postMintCCOIN(transaction.from, transaction.ccoinPostMined);
         
         return transaction;
     }

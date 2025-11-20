@@ -5,32 +5,147 @@ export interface AresForgeExample {
   id: string;
   name: string;
   description: string;
-  language: 'ares' | 'solidity';
+  language: 'areslang';  // Native SourceLess AresLang only
   category: 'quantum' | 'entropy' | 'defi' | 'nft';
   code: string;
   features: string[];
+  addressFormat: 'zk13str';  // ZK13STR addresses only
+  gasEstimate: number;  // 0 for HOSTLESS mode
 }
 
 export const ARES_FORGE_QUANTUM_EXAMPLES: AresForgeExample[] = [
   {
     id: 'quantum01',
     name: 'QuantumSafeToken',
-    description: 'ERC20 token with post-quantum cryptography protection',
-    language: 'solidity',
+    description: 'Native SourceLess quantum-safe STR token with post-quantum cryptography',
+    language: 'areslang',
     category: 'quantum',
-    features: ['CRYSTALS-Kyber encryption', 'Quantum-safe transfers', 'Lattice-based signatures'],
-    code: `// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
-
-import "@areslang/contracts/security/QuantumSafe.sol";
-
-contract QuantumSafeToken is QuantumSafe {
-    string public name = "SourceLess Quantum Token";
-    string public symbol = "SQTK";
-    uint8 public decimals = 18;
-    uint256 public totalSupply;
+    addressFormat: 'zk13str',
+    gasEstimate: 0,  // HOSTLESS mode enabled
+    features: ['CRYSTALS-Kyber encryption', 'Quantum-safe ZK13STR transfers', 'Lattice-based signatures', 'Native CCOIN rewards'],
+    code: `// Native SourceLess Quantum-Safe STR Token
+quantum_token_contract SourceLessQuantumToken {
+    name: string = "SourceLess Quantum STR";
+    symbol: string = "QSTR";
+    decimals: uint8 = 13;  # Native SourceLess precision
+    total_supply: uint256;
+    quantum_enabled: bool = true;
     
-    mapping(address => uint256) public balanceOf;
+    # Quantum-safe balance storage with ZK13STR addresses
+    balances: quantum_mapping<zk13str_address, uint256>;
+    quantum_keys: mapping<zk13str_address, crystals_kyber_key>;
+    dilithium_sigs: mapping<zk13str_address, dilithium_signature>;
+    
+    # CCOIN integration for quantum transactions
+    ccoin_rewards: mapping<zk13str_address, uint256>;
+    
+    constructor(uint256 _initial_supply) {
+        total_supply = _initial_supply;
+        balances[msg.sender] = _initial_supply;
+        
+        # Generate quantum-safe key pair for contract owner
+        quantum_keys[msg.sender] = crystals_kyber.generate_keypair();
+        
+        # Enable HOSTLESS gas-free transactions
+        enable_hostless_mode();
+        
+        # Setup CCOIN quantum reward system (5% for quantum transactions)
+        setup_quantum_ccoin_rewards(5.0);
+        
+        emit QuantumTokenDeployed(msg.sender, _initial_supply);
+    }
+    
+    # Quantum-safe transfer with post-quantum cryptography
+    function quantum_transfer(
+        zk13str_address to, 
+        uint256 amount, 
+        crystals_kyber_ciphertext encrypted_amount
+    ) public hostless returns (bool) {
+        require(validate_zk13str(to), "Invalid ZK13STR recipient");
+        require(balances[msg.sender] >= amount, "Insufficient quantum balance");
+        
+        # Verify quantum-safe signature
+        require(dilithium.verify_signature(
+            quantum_keys[msg.sender], 
+            encrypted_amount
+        ), "Invalid quantum signature");
+        
+        # Execute quantum-safe transfer
+        balances[msg.sender] -= amount;
+        balances[to] += amount;
+        
+        # Mint enhanced CCOIN rewards for quantum transactions (5%)
+        ccoin.mint_quantum_reward(msg.sender, amount * 0.05);
+        
+        emit QuantumTransfer(msg.sender, to, amount);
+        return true;
+    }
+    
+    # Generate quantum-safe proof for private transactions
+    function generate_quantum_proof(uint256 amount) public view returns (quantum_proof) {
+        return quantum_zkp.generate_proof(
+            amount, 
+            quantum_keys[msg.sender],
+            msg.sender
+        );
+    }
+}
+    dilithium_sigs: mapping<zk13str_address, dilithium_signature>;
+    
+    # CCOIN integration for quantum transactions
+    ccoin_rewards: mapping<zk13str_address, uint256>;
+    
+    constructor(uint256 _initial_supply) {
+        total_supply = _initial_supply;
+        balances[msg.sender] = _initial_supply;
+        
+        # Generate quantum-safe key pair for contract owner
+        quantum_keys[msg.sender] = crystals_kyber.generate_keypair();
+        
+        # Enable HOSTLESS gas-free transactions
+        enable_hostless_mode();
+        
+        # Setup CCOIN quantum reward system (5% for quantum transactions)
+        setup_quantum_ccoin_rewards(5.0);
+        
+        emit QuantumTokenDeployed(msg.sender, _initial_supply);
+    }
+    
+    # Quantum-safe transfer with post-quantum cryptography
+    function quantum_transfer(
+        zk13str_address to, 
+        uint256 amount, 
+        crystals_kyber_ciphertext encrypted_amount
+    ) public hostless returns (bool) {
+        require(validate_zk13str(to), "Invalid ZK13STR recipient");
+        require(balances[msg.sender] >= amount, "Insufficient quantum balance");
+        
+        # Verify quantum-safe signature
+        require(dilithium.verify_signature(
+            quantum_keys[msg.sender], 
+            encrypted_amount
+        ), "Invalid quantum signature");
+        
+        # Execute quantum-safe transfer
+        balances[msg.sender] -= amount;
+        balances[to] += amount;
+        
+        # Mint enhanced CCOIN rewards for quantum transactions (5%)
+        ccoin.mint_quantum_reward(msg.sender, amount * 0.05);
+        
+        emit QuantumTransfer(msg.sender, to, amount);
+        return true;
+    }
+    
+    # Generate quantum-safe proof for private transactions
+    function generate_quantum_proof(uint256 amount) public view returns (quantum_proof) {
+        return quantum_zkp.generate_proof(
+            amount, 
+            quantum_keys[msg.sender],
+            msg.sender
+        );
+    }
+}
     mapping(address => mapping(address => uint256)) public allowance;
     
     // Quantum-safe transfer signatures
@@ -97,8 +212,10 @@ contract QuantumSafeToken is QuantumSafe {
     id: 'entropy01',
     name: 'EarthquakeDiceGame',
     description: 'Provably fair dice game using real seismic entropy',
-    language: 'solidity',
+    language: 'areslang',
     category: 'entropy',
+    addressFormat: 'zk13str',
+    gasEstimate: 0,
     features: ['Earthquake entropy', 'Provably fair randomness', 'Seismic data verification'],
     code: `// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
@@ -205,8 +322,10 @@ contract EarthquakeDiceGame is EarthquakeOracle {
     id: 'defi01',
     name: 'QuantumDEX',
     description: 'Decentralized exchange with quantum-safe atomic swaps',
-    language: 'solidity',
+    language: 'areslang',
     category: 'defi',
+    addressFormat: 'zk13str',
+    gasEstimate: 0,
     features: ['Atomic swaps', 'Quantum-safe trading', 'Cross-chain bridges'],
     code: `// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
@@ -387,18 +506,26 @@ contract QuantumDEX is QuantumSwap, QuantumSafe {
     id: 'nft01',
     name: 'QuantumNFT',
     description: 'NFT collection with quantum-safe minting and earthquake entropy traits',
-    language: 'solidity',
+    language: 'areslang',
     category: 'nft',
+    addressFormat: 'zk13str',
+    gasEstimate: 0,
     features: ['ERC721', 'Quantum-safe minting', 'Earthquake-generated traits', 'ZK proofs'],
-    code: `// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
-
-import "@areslang/contracts/token/QuantumERC721.sol";
-import "@areslang/contracts/entropy/EarthquakeOracle.sol";
-
-contract QuantumNFT is QuantumERC721, EarthquakeOracle {
-    uint256 public nextTokenId = 1;
-    uint256 public maxSupply = 10000;
+    code: `// Native SourceLess Quantum NFT Contract
+nft_contract QuantumNFT {
+    name: string = "Quantum Earthquake NFT";
+    symbol: string = "QNFT";
+    max_supply: uint256 = 10000;
+    next_token_id: uint256 = 1;
+    
+    # Native ZK13STR address mappings
+    owners: mapping<uint256, zk13str_address>;
+    token_uris: mapping<uint256, string>;
+    str_domains: mapping<uint256, str_domain>;
+    
+    # SourceLess native events
+    event QuantumNFTMinted(zk13str_address indexed to, uint256 indexed tokenId, str_domain domain);
+    event QuantumNFTTransfer(zk13str_address indexed from, zk13str_address indexed to, uint256 indexed tokenId);
     uint256 public mintPrice = 0.05 ether;
     
     struct NFTTraits {

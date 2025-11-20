@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SourceLess Complete Professional Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --darker: #020617;
+            --card: #1e293b;
+            --border: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--darker);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .table th {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .hash {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .hash:hover {
+            text-decoration: underline;
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .badge-info {
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--accent);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            background: var(--primary);
+            color: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--card);
+            border: 1px solid var(--border);
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 1rem;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.9rem;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 1rem;
+        }
+
+        .loading {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 2rem;
+        }
+
+        .network-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Component -->
+    <div id="navigationComponent"></div>
+
+    <div class="container">
+        <!-- Network Status -->
+        <div class="network-status">
+            <div class="status-dot"></div>
+            <span>SourceLess Network - All Systems Operational</span>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalBlocks">6,234,567</div>
+                <div class="stat-label">Total Blocks</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalTransactions">284M</div>
+                <div class="stat-label">Total Transactions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="activeValidators">156</div>
+                <div class="stat-label">Active Validators</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="networkTPS">4,231</div>
+                <div class="stat-label">Network TPS</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="strPrice">$17.42</div>
+                <div class="stat-label">STR Price</div>
+            </div>
+        </div>
+
+        <!-- Main Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Recent Blocks -->
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-cubes"></i> Recent Blocks
+                </div>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Block</th>
+                                <th>Age</th>
+                                <th>Txns</th>
+                                <th>Validator</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentBlocks">
+                            <tr><td colspan="4" class="loading">Loading blocks...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-exchange-alt"></i> Recent Transactions
+                </div>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Hash</th>
+                                <th>Method</th>
+                                <th>Block</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentTransactions">
+                            <tr><td colspan="4" class="loading">Loading transactions...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Network Performance -->
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-chart-line"></i> Network Performance
+                </div>
+                <div class="chart-container">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Validator Status -->
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-server"></i> Top Validators
+                </div>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Validator</th>
+                                <th>Stake</th>
+                                <th>Commission</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="topValidators">
+                            <tr><td colspan="4" class="loading">Loading validators...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interface Shortcuts -->
+        <div class="card">
+            <div class="card-title">
+                <i class="fas fa-th-large"></i> Interface Suite
+            </div>
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('explorer')">Block Explorer</button>
+                <button class="tab" onclick="switchTab('wallet')">MagnetWallet Pro</button>
+                <button class="tab" onclick="switchTab('monitor')">Network Monitor</button>
+            </div>
+            
+            <div class="tab-content active" id="explorer">
+                <p>Professional blockchain explorer with Subscan-inspired design. Search blocks, transactions, and addresses with real-time data updates.</p>
+                <button class="btn" onclick="openInterface('sourceless-explorer-subscan.html')">
+                    <i class="fas fa-search"></i> Open Block Explorer
+                </button>
+            </div>
+            
+            <div class="tab-content" id="wallet">
+                <p>Advanced wallet management with DeFi portfolio tracking, NFT collection, staking pools, and hardware wallet integration.</p>
+                <button class="btn" onclick="openInterface('magnet-wallet-pro.html')">
+                    <i class="fas fa-wallet"></i> Open MagnetWallet Pro
+                </button>
+            </div>
+            
+            <div class="tab-content" id="monitor">
+                <p>Real-time network monitoring with performance metrics, validator tracking, and interactive network visualization.</p>
+                <button class="btn" onclick="openInterface('network-monitor-pro.html')">
+                    <i class="fas fa-chart-bar"></i> Open Network Monitor
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load shared JavaScript -->
+    <script src="js/sourceless-core.js"></script>
+    <script>
+        let performanceChart;
+
+        // Load navigation component
+        async function loadNavigation() {
+            try {
+                const response = await fetch('components/navigation.html');
+                const navigationHTML = await response.text();
+                document.getElementById('navigationComponent').innerHTML = navigationHTML;
+            } catch (error) {
+                console.error('Failed to load navigation:', error);
+            }
+        }
+
+        // Initialize performance chart
+        function initializePerformanceChart() {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            
+            performanceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'TPS',
+                        data: [],
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: '#334155'
+                            },
+                            ticks: {
+                                color: '#cbd5e1'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: '#334155'
+                            },
+                            ticks: {
+                                color: '#cbd5e1'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Add initial data points
+            updatePerformanceChart();
+        }
+
+        // Update performance chart
+        function updatePerformanceChart() {
+            if (!performanceChart) return;
+
+            const now = new Date();
+            const timeLabel = now.toLocaleTimeString();
+            const tpsValue = Math.floor(Math.random() * 2000) + 3000;
+
+            performanceChart.data.labels.push(timeLabel);
+            performanceChart.data.datasets[0].data.push(tpsValue);
+
+            // Keep only last 20 points
+            if (performanceChart.data.labels.length > 20) {
+                performanceChart.data.labels.shift();
+                performanceChart.data.datasets[0].data.shift();
+            }
+
+            performanceChart.update();
+        }
+
+        // Load recent blocks
+        async function loadRecentBlocks() {
+            try {
+                const blocks = await SourceLess.blockchain.getBlocks(5);
+                const tbody = document.getElementById('recentBlocks');
+                
+                tbody.innerHTML = blocks.map(block => `
+                    <tr>
+                        <td><span class="hash" onclick="viewBlock(${block.number})">${block.number.toLocaleString()}</span></td>
+                        <td>${Utils.formatTime(block.timestamp)}</td>
+                        <td><span class="badge badge-info">${block.transactions}</span></td>
+                        <td><span class="hash">${Utils.formatAddress(block.validator)}</span></td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                document.getElementById('recentBlocks').innerHTML = '<tr><td colspan="4" class="loading">Error loading blocks</td></tr>';
+            }
+        }
+
+        // Load recent transactions
+        async function loadRecentTransactions() {
+            try {
+                const transactions = await SourceLess.blockchain.getTransactions(5);
+                const tbody = document.getElementById('recentTransactions');
+                
+                tbody.innerHTML = transactions.map(tx => `
+                    <tr>
+                        <td><span class="hash" onclick="viewTransaction('${tx.hash}')">${Utils.formatAddress(tx.hash)}</span></td>
+                        <td><span class="badge badge-success">${tx.method}</span></td>
+                        <td><span class="hash">${tx.block.toLocaleString()}</span></td>
+                        <td><strong>${tx.value}</strong></td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                document.getElementById('recentTransactions').innerHTML = '<tr><td colspan="4" class="loading">Error loading transactions</td></tr>';
+            }
+        }
+
+        // Load top validators
+        async function loadTopValidators() {
+            try {
+                const validators = await SourceLess.network.getValidators(5);
+                const tbody = document.getElementById('topValidators');
+                
+                tbody.innerHTML = validators.map(validator => `
+                    <tr>
+                        <td><span class="hash">${Utils.formatAddress(validator.address)}</span></td>
+                        <td><strong>${validator.stake}</strong></td>
+                        <td>${validator.commission}%</td>
+                        <td><span class="badge badge-success">${validator.status}</span></td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                document.getElementById('topValidators').innerHTML = '<tr><td colspan="4" class="loading">Error loading validators</td></tr>';
+            }
+        }
+
+        // Update network stats
+        async function updateNetworkStats() {
+            try {
+                const stats = await SourceLess.blockchain.getNetworkStats();
+                
+                document.getElementById('totalBlocks').textContent = stats.totalBlocks.toLocaleString();
+                document.getElementById('totalTransactions').textContent = Utils.formatNumber(stats.totalTransactions);
+                document.getElementById('activeValidators').textContent = stats.activeValidators.toLocaleString();
+                document.getElementById('networkTPS').textContent = stats.networkTPS.toLocaleString();
+                document.getElementById('strPrice').textContent = `$${stats.strPrice}`;
+            } catch (error) {
+                console.error('Failed to update network stats:', error);
+            }
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Remove active class from all tabs and contents
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Add active class to clicked tab and corresponding content
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // Open interface in new window
+        function openInterface(url) {
+            window.open(url, '_blank', 'width=1200,height=800');
+        }
+
+        // View functions (navigation to detailed views)
+        function viewBlock(blockNumber) {
+            window.open(`sourceless-explorer-subscan.html#block/${blockNumber}`, '_blank');
+        }
+
+        function viewTransaction(hash) {
+            window.open(`sourceless-explorer-subscan.html#tx/${hash}`, '_blank');
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadNavigation();
+            
+            // Wait for SourceLess core to be ready
+            while (!window.SourceLess) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            
+            // Initialize all components
+            initializePerformanceChart();
+            await updateNetworkStats();
+            await loadRecentBlocks();
+            await loadRecentTransactions();
+            await loadTopValidators();
+            
+            // Set up refresh intervals
+            setInterval(updatePerformanceChart, 5000);
+            setInterval(updateNetworkStats, 10000);
+            setInterval(loadRecentBlocks, 15000);
+            setInterval(loadRecentTransactions, 12000);
+            setInterval(loadTopValidators, 30000);
+        });
+    </script>
+</body>
+</html>

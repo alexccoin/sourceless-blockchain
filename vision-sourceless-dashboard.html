@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SourceLess Vision Dashboard - Professional Blockchain Interface</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Vision UI Dashboard PRO Inspired Styles */
+        :root {
+            /* Vision UI Color Palette */
+            --vision-primary: #0075FF;
+            --vision-secondary: #7C3AED;
+            --vision-success: #01B574;
+            --vision-warning: #FFB547;
+            --vision-danger: #E31A1A;
+            --vision-info: #17C1E8;
+            --vision-purple: #8B5CF6;
+            --vision-pink: #EC4899;
+            --vision-cyan: #06B6D4;
+            --vision-teal: #14B8A6;
+            
+            /* Background Gradients */
+            --vision-bg-primary: linear-gradient(127.09deg, rgba(6, 11, 40, 0.94) 19.41%, rgba(10, 14, 35, 0.49) 76.65%);
+            --vision-bg-secondary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --vision-bg-card: rgba(255, 255, 255, 0.02);
+            --vision-bg-overlay: rgba(6, 11, 40, 0.8);
+            
+            /* Glass Effects */
+            --vision-glass: rgba(255, 255, 255, 0.05);
+            --vision-glass-border: rgba(255, 255, 255, 0.1);
+            --vision-backdrop: blur(20px);
+            
+            /* Text Colors */
+            --vision-text-primary: #FFFFFF;
+            --vision-text-secondary: rgba(255, 255, 255, 0.7);
+            --vision-text-muted: rgba(255, 255, 255, 0.5);
+            
+            /* Spacing */
+            --vision-space-xs: 0.5rem;
+            --vision-space-sm: 1rem;
+            --vision-space-md: 1.5rem;
+            --vision-space-lg: 2rem;
+            --vision-space-xl: 3rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--vision-bg-primary);
+            background-attachment: fixed;
+            color: var(--vision-text-primary);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Background Pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(124, 58, 237, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(6, 182, 212, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            background: var(--vision-glass);
+            backdrop-filter: var(--vision-backdrop);
+            border-right: 1px solid var(--vision-glass-border);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: var(--vision-space-lg);
+            border-bottom: 1px solid var(--vision-glass-border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: var(--vision-space-sm);
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--vision-text-primary);
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--vision-primary), var(--vision-secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .nav-menu {
+            padding: var(--vision-space-md);
+        }
+
+        .nav-section {
+            margin-bottom: var(--vision-space-lg);
+        }
+
+        .nav-section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--vision-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: var(--vision-space-sm);
+            padding: 0 var(--vision-space-sm);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: var(--vision-space-sm);
+            padding: var(--vision-space-sm);
+            border-radius: 12px;
+            color: var(--vision-text-secondary);
+            text-decoration: none;
+            margin-bottom: var(--vision-space-xs);
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: var(--vision-glass);
+            color: var(--vision-text-primary);
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(0, 117, 255, 0.2), rgba(124, 58, 237, 0.2));
+            border: 1px solid rgba(0, 117, 255, 0.3);
+        }
+
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            min-height: 100vh;
+            padding: var(--vision-space-lg);
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--vision-space-xl);
+            background: var(--vision-glass);
+            backdrop-filter: var(--vision-backdrop);
+            border: 1px solid var(--vision-glass-border);
+            border-radius: 16px;
+            padding: var(--vision-space-md);
+        }
+
+        .header-left h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--vision-primary), var(--vision-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-subtitle {
+            color: var(--vision-text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: var(--vision-space-sm);
+        }
+
+        .header-stats {
+            display: flex;
+            gap: var(--vision-space-lg);
+        }
+
+        .header-stat {
+            text-align: center;
+        }
+
+        .header-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--vision-text-primary);
+        }
+
+        .header-stat-label {
+            font-size: 0.8rem;
+            color: var(--vision-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Vision Cards */
+        .vision-card {
+            background: var(--vision-glass);
+            backdrop-filter: var(--vision-backdrop);
+            border: 1px solid var(--vision-glass-border);
+            border-radius: 20px;
+            padding: var(--vision-space-lg);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .vision-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--vision-primary), var(--vision-secondary), var(--vision-cyan));
+        }
+
+        .vision-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 117, 255, 0.1);
+            border-color: rgba(0, 117, 255, 0.3);
+        }
+
+        /* Grid System */
+        .grid {
+            display: grid;
+            gap: var(--vision-space-lg);
+            margin-bottom: var(--vision-space-xl);
+        }
+
+        .grid-1 { grid-template-columns: 1fr; }
+        .grid-2 { grid-template-columns: repeat(2, 1fr); }
+        .grid-3 { grid-template-columns: repeat(3, 1fr); }
+        .grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+        @media (max-width: 1200px) {
+            .grid-4 { grid-template-columns: repeat(2, 1fr); }
+            .grid-3 { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .grid-2, .grid-3, .grid-4 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Stat Cards */
+        .stat-card {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--vision-primary), var(--vision-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: var(--vision-text-secondary);
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-change {
+            font-size: 0.85rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .stat-change.positive {
+            background: rgba(1, 181, 116, 0.1);
+            color: var(--vision-success);
+            border: 1px solid rgba(1, 181, 116, 0.2);
+        }
+
+        .stat-change.negative {
+            background: rgba(227, 26, 26, 0.1);
+            color: var(--vision-danger);
+            border: 1px solid rgba(227, 26, 26, 0.2);
+        }
+
+        /* Ledger Cards */
+        .ledger-card {
+            position: relative;
+        }
+
+        .ledger-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--vision-space-md);
+        }
+
+        .ledger-title {
+            display: flex;
+            align-items: center;
+            gap: var(--vision-space-sm);
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .ledger-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .ledger-badge {
+            background: var(--vision-glass);
+            border: 1px solid var(--vision-glass-border);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--vision-text-primary);
+        }
+
+        .ledger-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--vision-space-sm);
+        }
+
+        .ledger-stat {
+            text-align: center;
+        }
+
+        .ledger-stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--vision-text-primary);
+        }
+
+        .ledger-stat-label {
+            font-size: 0.8rem;
+            color: var(--vision-text-secondary);
+        }
+
+        /* Specific Ledger Colors */
+        .ledger-main .ledger-icon { background: linear-gradient(135deg, var(--vision-primary), #0056CC); }
+        .ledger-asset .ledger-icon { background: linear-gradient(135deg, var(--vision-cyan), #0891B2); }
+        .ledger-contract .ledger-icon { background: linear-gradient(135deg, var(--vision-success), #059669); }
+        .ledger-governance .ledger-icon { background: linear-gradient(135deg, var(--vision-warning), #D97706); }
+        .ledger-ccoin .ledger-icon { background: linear-gradient(135deg, var(--vision-secondary), #5B21B6); }
+        .ledger-ccos .ledger-icon { background: linear-gradient(135deg, var(--vision-danger), #B91C1C); }
+
+        /* Validator Cards */
+        .validator-card {
+            background: var(--vision-glass);
+            backdrop-filter: var(--vision-backdrop);
+            border: 1px solid var(--vision-glass-border);
+            border-radius: 16px;
+            padding: var(--vision-space-md);
+            margin-bottom: var(--vision-space-sm);
+            transition: all 0.3s ease;
+        }
+
+        .validator-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(4px);
+        }
+
+        .validator-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--vision-space-sm);
+        }
+
+        .validator-name {
+            font-weight: 700;
+            color: var(--vision-text-primary);
+        }
+
+        .validator-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--vision-success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .validator-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--vision-space-sm);
+            text-align: center;
+        }
+
+        .validator-metric-value {
+            font-weight: 600;
+            color: var(--vision-text-primary);
+        }
+
+        .validator-metric-label {
+            font-size: 0.75rem;
+            color: var(--vision-text-muted);
+        }
+
+        /* Tables */
+        .vision-table {
+            background: var(--vision-glass);
+            backdrop-filter: var(--vision-backdrop);
+            border: 1px solid var(--vision-glass-border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .table-header {
+            background: rgba(0, 117, 255, 0.1);
+            padding: var(--vision-space-md);
+            border-bottom: 1px solid var(--vision-glass-border);
+        }
+
+        .table-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--vision-text-primary);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th {
+            background: var(--vision-glass);
+            color: var(--vision-text-secondary);
+            font-weight: 600;
+            padding: var(--vision-space-md);
+            text-align: left;
+            border-bottom: 1px solid var(--vision-glass-border);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .table td {
+            padding: var(--vision-space-md);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--vision-text-primary);
+        }
+
+        .table tr:hover {
+            background: rgba(0, 117, 255, 0.05);
+        }
+
+        .hash {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--vision-primary);
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .hash:hover {
+            text-decoration: underline;
+        }
+
+        /* Badges */
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .badge-success {
+            background: rgba(1, 181, 116, 0.1);
+            color: var(--vision-success);
+            border: 1px solid rgba(1, 181, 116, 0.2);
+        }
+
+        .badge-warning {
+            background: rgba(255, 181, 71, 0.1);
+            color: var(--vision-warning);
+            border: 1px solid rgba(255, 181, 71, 0.2);
+        }
+
+        .badge-info {
+            background: rgba(23, 193, 232, 0.1);
+            color: var(--vision-info);
+            border: 1px solid rgba(23, 193, 232, 0.2);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: var(--vision-space-md);
+        }
+
+        /* Buttons */
+        .vision-btn {
+            background: linear-gradient(135deg, var(--vision-primary), var(--vision-secondary));
+            border: none;
+            color: white;
+            padding: var(--vision-space-sm) var(--vision-space-lg);
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--vision-space-xs);
+        }
+
+        .vision-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 117, 255, 0.3);
+        }
+
+        .vision-btn-outline {
+            background: transparent;
+            border: 1px solid var(--vision-glass-border);
+            color: var(--vision-text-primary);
+        }
+
+        .vision-btn-outline:hover {
+            background: var(--vision-glass);
+            border-color: var(--vision-primary);
+        }
+
+        /* Loading Animation */
+        .loading {
+            text-align: center;
+            color: var(--vision-text-muted);
+            padding: var(--vision-space-lg);
+        }
+
+        .loading i {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-up {
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--vision-glass);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-cube"></i>
+                </div>
+                <div>
+                    <div>SourceLess</div>
+                    <div style="font-size: 0.7rem; color: var(--vision-text-muted); font-weight: 400;">Vision Dashboard</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-menu">
+            <div class="nav-section">
+                <div class="nav-section-title">Main</div>
+                <a href="#overview" class="nav-item active">
+                    <div class="nav-icon"><i class="fas fa-th-large"></i></div>
+                    Dashboard
+                </a>
+                <a href="#analytics" class="nav-item">
+                    <div class="nav-icon"><i class="fas fa-chart-line"></i></div>
+                    Analytics
+                </a>
+                <a href="#wallet" class="nav-item">
+                    <div class="nav-icon"><i class="fas fa-wallet"></i></div>
+                    Wallet
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Blockchain</div>
+                <a href="#ledgers" class="nav-item">
+                    <div class="nav-icon"><i class="fas fa-layer-group"></i></div>
+                    6 Ledgers
+                </a>
+                <a href="#validators" class="nav-item">
+                    <div class="nav-icon"><i class="fas fa-server"></i></div>
+                    Validators
+                </a>
+                <a href="#starw" class="nav-item">
+                    <div class="nav-icon"><i class="fas fa-microchip"></i></div>
+                    STARW VMs
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">DeFi</div>
+                <a href="#defi" class="nav-item">
+                    <div class="nav-icon"><i class="fas fa-exchange-alt"></i></div>
+                    DEX Trading
+                </a>
+                <a href="#bridge" class="nav-item">
+                    <div class="nav-icon"><i class="fas fa-bridge"></i></div>
+                    Cross-Chain
+                </a>
+                <a href="#dao" class="nav-item">
+                    <div class="nav-icon"><i class="fas fa-vote-yea"></i></div>
+                    DAO Governance
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Assets</div>
+                <a href="#domains" class="nav-item">
+                    <div class="nav-icon"><i class="fas fa-globe"></i></div>
+                    STR.Domains
+                </a>
+                <a href="#nfts" class="nav-item">
+                    <div class="nav-icon"><i class="fas fa-images"></i></div>
+                    NFTs
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <div class="header fade-in">
+            <div class="header-left">
+                <h1>SourceLess Vision Dashboard</h1>
+                <p class="header-subtitle">Complete 6-Ledger Blockchain Ecosystem</p>
+            </div>
+            <div class="header-right">
+                <div class="header-stats">
+                    <div class="header-stat">
+                        <div class="header-stat-value" id="networkTPS">9,247</div>
+                        <div class="header-stat-label">Total TPS</div>
+                    </div>
+                    <div class="header-stat">
+                        <div class="header-stat-value" id="activeValidators">1,287</div>
+                        <div class="header-stat-label">Validators</div>
+                    </div>
+                    <div class="header-stat">
+                        <div class="header-stat-value" id="networkHealth">98.2%</div>
+                        <div class="header-stat-label">Health</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="grid grid-4 slide-up">
+            <div class="vision-card stat-card">
+                <div class="stat-value" id="totalBlocks">9.3M</div>
+                <div class="stat-label">Total Blocks</div>
+                <div class="stat-change positive">+0.5% (24h)</div>
+            </div>
+            <div class="vision-card stat-card">
+                <div class="stat-value" id="totalTransactions">45.2M</div>
+                <div class="stat-label">Transactions</div>
+                <div class="stat-change positive">+2.1% (24h)</div>
+            </div>
+            <div class="vision-card stat-card">
+                <div class="stat-value" id="marketCap">$727.8B</div>
+                <div class="stat-label">Market Cap</div>
+                <div class="stat-change positive">+2.34% (24h)</div>
+            </div>
+            <div class="vision-card stat-card">
+                <div class="stat-value" id="tvl">$42.3B</div>
+                <div class="stat-label">Total Value Locked</div>
+                <div class="stat-change positive">+1.2% (24h)</div>
+            </div>
+        </div>
+
+        <!-- 6-Ledger Architecture -->
+        <div class="grid grid-3 slide-up">
+            <div class="vision-card ledger-card ledger-main">
+                <div class="ledger-header">
+                    <div class="ledger-title">
+                        <div class="ledger-icon">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        Main Ledger
+                    </div>
+                    <div class="ledger-badge">Primary</div>
+                </div>
+                <div class="ledger-stats">
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">1.55M</div>
+                        <div class="ledger-stat-label">Blocks</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">4,231</div>
+                        <div class="ledger-stat-label">TPS</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">42.3B</div>
+                        <div class="ledger-stat-label">STR Staked</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">67.3%</div>
+                        <div class="ledger-stat-label">Ratio</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="vision-card ledger-card ledger-asset">
+                <div class="ledger-header">
+                    <div class="ledger-title">
+                        <div class="ledger-icon">
+                            <i class="fas fa-gem"></i>
+                        </div>
+                        Asset Ledger
+                    </div>
+                    <div class="ledger-badge">NFTs & Domains</div>
+                </div>
+                <div class="ledger-stats">
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">1.55M</div>
+                        <div class="ledger-stat-label">Blocks</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">1,876</div>
+                        <div class="ledger-stat-label">TPS</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">125K</div>
+                        <div class="ledger-stat-label">Domains</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">457K</div>
+                        <div class="ledger-stat-label">NFTs</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="vision-card ledger-card ledger-contract">
+                <div class="ledger-header">
+                    <div class="ledger-title">
+                        <div class="ledger-icon">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        Contract Ledger
+                    </div>
+                    <div class="ledger-badge">STARW</div>
+                </div>
+                <div class="ledger-stats">
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">1.55M</div>
+                        <div class="ledger-stat-label">Blocks</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">987</div>
+                        <div class="ledger-stat-label">TPS</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">23.5K</div>
+                        <div class="ledger-stat-label">Contracts</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">789</div>
+                        <div class="ledger-stat-label">VMs</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="vision-card ledger-card ledger-governance">
+                <div class="ledger-header">
+                    <div class="ledger-title">
+                        <div class="ledger-icon">
+                            <i class="fas fa-vote-yea"></i>
+                        </div>
+                        Governance
+                    </div>
+                    <div class="ledger-badge">DAO</div>
+                </div>
+                <div class="ledger-stats">
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">1.55M</div>
+                        <div class="ledger-stat-label">Blocks</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">234</div>
+                        <div class="ledger-stat-label">TPS</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">456</div>
+                        <div class="ledger-stat-label">Proposals</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">67.8%</div>
+                        <div class="ledger-stat-label">Participation</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="vision-card ledger-card ledger-ccoin">
+                <div class="ledger-header">
+                    <div class="ledger-title">
+                        <div class="ledger-icon">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        CCOIN Financial Core
+                    </div>
+                    <div class="ledger-badge">PoE Mining</div>
+                </div>
+                <div class="ledger-stats">
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value" id="ccoin-total-supply">23.5M</div>
+                        <div class="ledger-stat-label">Total Supply</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value" id="ccoin-post-mined">2.48M</div>
+                        <div class="ledger-stat-label">Post Mined</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value" id="ccoin-poe-score">87.5%</div>
+                        <div class="ledger-stat-label">Avg PoE Score</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value" id="ccoin-validators">156</div>
+                        <div class="ledger-stat-label">Active Validators</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="vision-card ledger-card ledger-ccos">
+                <div class="ledger-header">
+                    <div class="ledger-title">
+                        <div class="ledger-icon">
+                            <i class="fas fa-gamepad"></i>
+                        </div>
+                        CCOS Ledger
+                    </div>
+                    <div class="ledger-badge">Gaming</div>
+                </div>
+                <div class="ledger-stats">
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">1.55M</div>
+                        <div class="ledger-stat-label">Blocks</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">567</div>
+                        <div class="ledger-stat-label">TPS</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">123</div>
+                        <div class="ledger-stat-label">Platforms</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">234K</div>
+                        <div class="ledger-stat-label">Users</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Validator Network -->
+        <div class="grid grid-2 slide-up">
+            <div class="vision-card">
+                <div class="table-header">
+                    <div class="table-title">1313 Validator Network</div>
+                </div>
+                <div id="validatorNetwork">
+                    <div class="loading"><i class="fas fa-spinner"></i> Loading validator network...</div>
+                </div>
+            </div>
+
+            <div class="vision-card">
+                <div class="table-header">
+                    <div class="table-title">Performance Analytics</div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="vision-table slide-up">
+            <div class="table-header">
+                <div class="table-title">Recent Network Activity</div>
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Block</th>
+                        <th>Ledger</th>
+                        <th>Validator</th>
+                        <th>Transactions</th>
+                        <th>Age</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="recentActivity">
+                    <tr><td colspan="6" class="loading"><i class="fas fa-spinner"></i> Loading recent activity...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Load the ecosystem library -->
+    <script src="js/sourceless-ecosystem-core.js"></script>
+    <script>
+        let performanceChart;
+
+        // Initialize Vision UI Dashboard
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🌟 Initializing SourceLess Vision UI Dashboard...');
+            
+            // Wait for SourceLess ecosystem to be ready
+            while (!window.SourceLess) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+
+            // Initialize components
+            initializePerformanceChart();
+            await loadValidatorNetwork();
+            await loadRecentActivity();
+            
+            // Set up real-time updates
+            setInterval(updateStats, 5000);
+            setInterval(updatePerformanceChart, 3000);
+            
+            console.log('✅ Vision UI Dashboard initialized successfully!');
+        });
+
+        // Initialize performance chart
+        function initializePerformanceChart() {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            
+            performanceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Network TPS',
+                            data: [],
+                            borderColor: '#0075FF',
+                            backgroundColor: 'rgba(0, 117, 255, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            borderWidth: 3
+                        },
+                        {
+                            label: 'Active Validators',
+                            data: [],
+                            borderColor: '#7C3AED',
+                            backgroundColor: 'rgba(124, 58, 237, 0.1)',
+                            tension: 0.4,
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: 'rgba(255, 255, 255, 0.7)',
+                                font: {
+                                    family: 'Plus Jakarta Sans',
+                                    weight: 600
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.5)',
+                                font: {
+                                    family: 'Plus Jakarta Sans'
+                                }
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.5)',
+                                font: {
+                                    family: 'Plus Jakarta Sans'
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            updatePerformanceChart();
+        }
+
+        // Update performance chart
+        function updatePerformanceChart() {
+            if (!performanceChart) return;
+
+            const now = new Date();
+            const timeLabel = now.toLocaleTimeString();
+            const networkTPS = Math.floor(Math.random() * 2000) + 8000;
+            const activeValidators = Math.floor(Math.random() * 50) + 1260;
+
+            performanceChart.data.labels.push(timeLabel);
+            performanceChart.data.datasets[0].data.push(networkTPS);
+            performanceChart.data.datasets[1].data.push(activeValidators);
+
+            // Keep only last 15 points
+            if (performanceChart.data.labels.length > 15) {
+                performanceChart.data.labels.shift();
+                performanceChart.data.datasets.forEach(dataset => dataset.data.shift());
+            }
+
+            performanceChart.update('none');
+        }
+
+        // Load validator network
+        async function loadValidatorNetwork() {
+            try {
+                // Use the ecosystem network overview instead of a non-existent validators API
+                const overview = await SourceLess.network.getSTARWEcosystem();
+                const container = document.getElementById('validatorNetwork');
+
+                const validatorTypes = [
+                    { type: 'genesis', count: overview.genesisNodes, color: '#E31A1A', name: 'Genesis Nodes' },
+                    { type: 'supernode', count: overview.supernodes, color: '#7C3AED', name: 'Supernodes' },
+                    { type: 'mini', count: overview.miniValidators, color: '#0075FF', name: 'Mini Validators' },
+                    { type: 'starw', count: overview.starwWorkers, color: '#01B574', name: 'STARW Workers' }
+                ];
+
+                container.innerHTML = validatorTypes.map(validator => `
+                    <div class="validator-card" title="${validator.name} - ${validator.count} active">
+                        <div class="validator-header">
+                            <div class="validator-name" style="color: ${validator.color};">${validator.name}</div>
+                            <div class="validator-status"></div>
+                        </div>
+                        <div class="validator-metrics">
+                            <div>
+                                <div class="validator-metric-value">${validator.count}</div>
+                                <div class="validator-metric-label">Nodes</div>
+                            </div>
+                            <div>
+                                <div class="validator-metric-value">99.${Math.floor(Math.random() * 9) + 1}%</div>
+                                <div class="validator-metric-label">Uptime</div>
+                            </div>
+                            <div>
+                                <div class="validator-metric-value">${Math.floor(Math.random() * 50) + 50}</div>
+                                <div class="validator-metric-label">Power</div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Validator network load failed:', error);
+                document.getElementById('validatorNetwork').innerHTML = '<div class="loading">Error loading validators</div>';
+            }
+        }
+
+        // Load recent activity
+        async function loadRecentActivity() {
+            try {
+                const blocks = await SourceLess.blockchain.getBlocks(8);
+                const tbody = document.getElementById('recentActivity');
+                
+                tbody.innerHTML = blocks.map(block => {
+                    const ledgerNames = ['Main', 'Asset', 'Contract', 'Governance', 'CCOIN', 'CCOS'];
+                    const ledgerColors = ['#0075FF', '#06B6D4', '#01B574', '#FFB547', '#7C3AED', '#E31A1A'];
+                    const ledgerIndex = Math.floor(Math.random() * ledgerNames.length);
+                    
+                    return `
+                        <tr>
+                            <td><span class="hash">${block.number.toLocaleString()}</span></td>
+                            <td><span class="badge" style="background: ${ledgerColors[ledgerIndex]}20; color: ${ledgerColors[ledgerIndex]}; border: 1px solid ${ledgerColors[ledgerIndex]}40;">${ledgerNames[ledgerIndex]}</span></td>
+                            <td><span class="hash">${block.validator.substring(0, 8)}...${block.validator.substring(block.validator.length - 6)}</span></td>
+                            <td><span class="badge badge-info">${block.transactions}</span></td>
+                            <td>${block.age}</td>
+                            <td><span class="badge badge-success">Finalized</span></td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (error) {
+                document.getElementById('recentActivity').innerHTML = '<tr><td colspan="6" class="loading">Error loading activity</td></tr>';
+            }
+        }
+
+        // Update stats
+        function updateStats() {
+            document.getElementById('networkTPS').textContent = (Math.floor(Math.random() * 1000) + 8500).toLocaleString();
+            document.getElementById('activeValidators').textContent = (Math.floor(Math.random() * 50) + 1260).toLocaleString();
+            document.getElementById('networkHealth').textContent = (99 + Math.random() * 1).toFixed(1) + '%';
+        }
+
+        // Navigation functionality
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Add smooth scrolling and animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.vision-card, .vision-table').forEach(card => {
+            observer.observe(card);
+        });
+
+        // CCOIN Financial Core Real-time Updates
+        async function updateCCOINStats() {
+            try {
+                if (window.WalletAPI && window.WalletAPI.getCCOINTotalSupply) {
+                    const totalSupply = await window.WalletAPI.getCCOINTotalSupply();
+                    const supplyElement = document.getElementById('ccoin-total-supply');
+                    if (supplyElement && totalSupply > 0) {
+                        supplyElement.textContent = (totalSupply / 1000000).toFixed(1) + 'M';
+                    }
+
+                    // Mock real-time data for demo
+                    const postMinedElement = document.getElementById('ccoin-post-mined');
+                    const poeScoreElement = document.getElementById('ccoin-poe-score');
+                    const validatorsElement = document.getElementById('ccoin-validators');
+                    
+                    if (postMinedElement) {
+                        const postMined = Math.floor(totalSupply * 0.105); // ~10.5% post mined
+                        postMinedElement.textContent = (postMined / 1000000).toFixed(2) + 'M';
+                    }
+                    
+                    if (poeScoreElement) {
+                        const poeScore = 85 + Math.random() * 10; // 85-95%
+                        poeScoreElement.textContent = poeScore.toFixed(1) + '%';
+                    }
+                    
+                    if (validatorsElement) {
+                        const validators = 145 + Math.floor(Math.random() * 20); // 145-165
+                        validatorsElement.textContent = validators.toString();
+                    }
+                }
+            } catch (error) {
+                console.log('CCOIN stats update error (using defaults):', error);
+            }
+        }
+
+        // Update CCOIN stats every 30 seconds
+        updateCCOINStats();
+        setInterval(updateCCOINStats, 30000);
+    </script>
+</body>
+</html>

@@ -7,13 +7,13 @@ import { Transaction } from '../core/Transaction';
 export class CcosLedger extends Blockchain {
   constructor(difficulty: number = 3) {
     super('ccos', difficulty);
-    this.miningReward = 15; // CCOS mining reward
+    this.miningReward = 15; // CCOS post mining base
   }
 
   /**
-   * Mint CCOS tokens to an address
+   * Post mine CCOS tokens based on PoE validation
    */
-  mint(to: string, amount: number): boolean {
+  postMint(to: string, amount: number, proofStrength: number): boolean {
     const tx = new Transaction(
       'system',
       to,

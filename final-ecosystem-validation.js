@@ -151,10 +151,10 @@ function validateCrossContractIntegration() {
 }
 
 function validateCCOINRewardSystem() {
-    console.log('\n\n💰 CCOIN REWARD SYSTEM VALIDATION:');
+    console.log('💰 CCOIN POST MINING SYSTEM VALIDATION:');
     console.log('━'.repeat(50));
     
-    const rewardRates = [
+    const postMiningRates = [
         { contract: 'ZKT13 Privacy Transactions', rate: '3.5% + privacy bonus', details: 'Enhanced rewards for private transactions' },
         { contract: 'wNFT Identity Activities', rate: '2.5% fixed', details: 'Consistent rewards for identity verification' },
         { contract: 'Gaming Activities', rate: '2.5% + rarity bonus', details: 'Bonus rewards based on item rarity' },

@@ -874,10 +874,10 @@ contract {{daoName}}DAO {
         return address(this).balance;
     }
     
-    // Built-in CCOIN integration for DAO activities
-    function triggerCCOINMintingFromProposal() internal {
-        uint256 ccoinAmount = CCOINMinter.mintFromDAOProposal(address(this), 50 * 10**18); // 50 CCOIN per proposal
-        emit CCOINMinted(msg.sender, ccoinAmount);
+    // Built-in CCOIN post mining for DAO activities
+    function triggerCCOINPostMiningFromProposal() internal {
+        uint256 ccoinAmount = CCOINPostMiner.postMineFromDAOProof(address(this), msg.sender); // PoE-based amount
+        emit CCOINPostMined(msg.sender, ccoinAmount);
     }
     
     function triggerCCOINMintingFromVoting(uint256 votingPower) internal {

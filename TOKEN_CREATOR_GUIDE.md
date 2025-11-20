@@ -125,31 +125,49 @@ Description:         Utility token for Acme ecosystem (optional)
 Here's what gets generated for "CommunityToken (COMM)":
 
 ```areslang
-contract COMMToken {
-    # Token Metadata
-    state tokenName: string = "CommunityToken";
-    state symbol: string = "COMM";
-    state decimals: uint = 18;
-    state totalSupply: uint = 1000000;
+// Native SourceLess Community Token
+token_contract COMMToken {
+    # Native SourceLess Token Metadata
+    name: string = "CommunityToken";
+    symbol: string = "COMM";
+    decimals: uint8 = 13;  # All SourceLess tokens use 13 decimals
+    total_supply: uint256 = 1000000;
     
-    # Balances
-    state balances: mapping<address, uint>;
-    state allowances: mapping<address, mapping<address, uint>>;
-    state owner: address;
+    # Native ZK13STR address balances
+    balances: mapping<zk13str_address, uint256>;
+    allowances: mapping<zk13str_address, mapping<zk13str_address, uint256>>;
+    owner: zk13str_address;
+    str_domain: str_domain;  # Associated STR.domain
     
-    # Transfer Function
-    function transfer(to: address, amount: uint) -> bool {
-        require(to != address(0), "Cannot transfer to zero address");
-        require(balances[msg.sender] >= amount, "Insufficient balance");
+    # Constructor with native SourceLess features
+    constructor(str_domain domain) {
+        owner = msg.sender;
+        str_domain = domain;
+        balances[msg.sender] = total_supply;
+        
+        # Enable HOSTLESS gas-free transactions
+        enable_hostless_mode();
+        
+        # Setup CCOIN reward system (2.5-10% dynamic)
+        setup_ccoin_integration();
+    }
+    
+    # Native STR transfer with gas-free support
+    function transfer(zk13str_address to, uint256 amount) -> bool hostless {
+        require(validate_zk13str(to), "Invalid ZK13STR address");
+        require(balances[msg.sender] >= amount, "Insufficient COMM balance");
         
         balances[msg.sender] = balances[msg.sender] - amount;
         balances[to] = balances[to] + amount;
         
-        emit Transfer(msg.sender, to, amount);
+        # Auto-mint CCOIN rewards based on transaction amount
+        ccoin.mint_reward(msg.sender, calculate_ccoin_reward(amount));
+        
+        emit STRTransfer(msg.sender, to, amount);
         return true;
     }
     
-    # ... (more functions: approve, mint, burn, etc.)
+    # ... (more native functions: approve, mint, burn with CCOIN integration)
 }
 ```
 

@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AresLang IDE | Smart Contract Development Environment</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: linear-gradient(310deg, #7928CA 0%, #FF0080 100%);
+            --secondary: linear-gradient(310deg, #2152FF 0%, #21D4FD 100%);
+            --success: linear-gradient(310deg, #17AD37 0%, #98EC2D 100%);
+            --warning: linear-gradient(310deg, #F53939 0%, #FBCF33 100%);
+            --dark: linear-gradient(310deg, #141727 0%, #3A416F 100%);
+            --background: linear-gradient(310deg, #141727 0%, #3A416F 100%);
+            --surface: rgba(255, 255, 255, 0.1);
+            --border: rgba(255, 255, 255, 0.2);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.8);
+            --editor-bg: #1e1e2e;
+            --editor-sidebar: #313244;
+            --editor-line: #45475a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .ide-container {
+            display: grid;
+            grid-template-areas:
+                "header header"
+                "sidebar main"
+                "sidebar console";
+            grid-template-columns: 300px 1fr;
+            grid-template-rows: 60px 1fr 200px;
+            height: 100vh;
+        }
+
+        .header {
+            grid-area: header;
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 1rem;
+            gap: 1rem;
+        }
+
+        .back-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            background: var(--primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-logo-small {
+            height: 22px;
+            width: auto;
+            margin-right: 8px;
+            filter: brightness(1.1) drop-shadow(0 2px 4px rgba(121, 40, 202, 0.3));
+        }
+
+        .header-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .header-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .header-btn:hover {
+            background: var(--primary);
+        }
+
+        .header-btn.success {
+            background: var(--success);
+        }
+
+        .header-btn.warning {
+            background: var(--warning);
+        }
+
+        .sidebar {
+            grid-area: sidebar;
+            background: var(--editor-sidebar);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-tab {
+            flex: 1;
+            padding: 0.75rem;
+            text-align: center;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .sidebar-tab.active {
+            border-bottom-color: #7928CA;
+            background: var(--surface);
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .template-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .template-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .template-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .template-desc {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .main-editor {
+            grid-area: main;
+            background: var(--editor-bg);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-tabs {
+            background: var(--editor-sidebar);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            min-height: 40px;
+        }
+
+        .editor-tab {
+            padding: 0.5rem 1rem;
+            border-right: 1px solid var(--border);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            background: transparent;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+        }
+
+        .editor-tab.active {
+            background: var(--editor-bg);
+            color: var(--text-primary);
+        }
+
+        .editor-tab .close {
+            opacity: 0.6;
+            cursor: pointer;
+            margin-left: 0.25rem;
+        }
+
+        .editor-tab .close:hover {
+            opacity: 1;
+            color: #ff6b6b;
+        }
+
+        .code-editor {
+            flex: 1;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            padding: 1rem;
+            background: var(--editor-bg);
+            color: var(--text-primary);
+            border: none;
+            outline: none;
+            resize: none;
+            white-space: pre;
+            tab-size: 2;
+        }
+
+        .console {
+            grid-area: console;
+            background: var(--editor-bg);
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .console-header {
+            background: var(--editor-sidebar);
+            padding: 0.5rem 1rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .console-output {
+            flex: 1;
+            padding: 0.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            overflow-y: auto;
+            line-height: 1.4;
+        }
+
+        .console-line {
+            margin-bottom: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .console-line.info {
+            color: #74c0fc;
+        }
+
+        .console-line.success {
+            color: #51cf66;
+            background: rgba(81, 207, 102, 0.1);
+        }
+
+        .console-line.error {
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+        .console-line.warning {
+            color: #ffd43b;
+            background: rgba(255, 212, 59, 0.1);
+        }
+
+        .file-tree {
+            font-size: 0.85rem;
+        }
+
+        .file-item {
+            padding: 0.25rem 0.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-radius: 4px;
+            margin-bottom: 0.1rem;
+        }
+
+        .file-item:hover {
+            background: var(--surface);
+        }
+
+        .file-item.active {
+            background: var(--primary);
+        }
+
+        .file-icon {
+            width: 16px;
+            text-align: center;
+        }
+
+        .minimap {
+            position: absolute;
+            top: 60px;
+            right: 0;
+            width: 100px;
+            height: calc(100vh - 260px);
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .status-bar {
+            position: absolute;
+            bottom: 200px;
+            left: 300px;
+            right: 0;
+            height: 25px;
+            background: var(--editor-sidebar);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 1rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            gap: 1rem;
+        }
+
+        /* Syntax highlighting */
+        .keyword { color: #f92672; }
+        .string { color: #a6e22e; }
+        .number { color: #ae81ff; }
+        .comment { color: #75715e; }
+        .function { color: #66d9ef; }
+        .variable { color: #fd971f; }
+    </style>
+</head>
+<body>
+    <div class="ide-container">
+        <!-- Header -->
+        <header class="header">
+            <a href="superadmin-panel.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+                Back to Admin
+            </a>
+            <div class="header-title">
+                <img src="https://cdn.prod.website-files.com/6761a2c6913e66c7e863de66/67739a0ea120050e95603449_PrimarywhiteLogo1-ezgif.com-png-to-webp-converter.avif" alt="SourceLess Logo" class="header-logo-small">
+                🚀 AresLang IDE - SourceLess™
+            </div>
+            <div class="header-actions">
+                <button class="header-btn" onclick="newFile()">
+                    <i class="fas fa-plus"></i>
+                    New
+                </button>
+                <button class="header-btn" onclick="openFile()">
+                    <i class="fas fa-folder-open"></i>
+                    Open
+                </button>
+                <button class="header-btn" onclick="saveFile()">
+                    <i class="fas fa-save"></i>
+                    Save
+                </button>
+                <button class="header-btn success" onclick="compileContract()">
+                    <i class="fas fa-hammer"></i>
+                    Compile
+                </button>
+                <button class="header-btn warning" onclick="deployContract()">
+                    <i class="fas fa-rocket"></i>
+                    Deploy
+                </button>
+            </div>
+        </header>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-tabs">
+                <div class="sidebar-tab active" onclick="switchTab('explorer')">
+                    <i class="fas fa-folder"></i>
+                </div>
+                <div class="sidebar-tab" onclick="switchTab('templates')">
+                    <i class="fas fa-cube"></i>
+                </div>
+                <div class="sidebar-tab" onclick="switchTab('docs')">
+                    <i class="fas fa-book"></i>
+                </div>
+            </div>
+            
+            <div class="sidebar-content" id="sidebar-content">
+                <!-- File Explorer -->
+                <div id="explorer-content">
+                    <h4 style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-secondary);">PROJECT EXPLORER</h4>
+                    <div class="file-tree">
+                        <div class="file-item active" onclick="openFileTab('main.ares')">
+                            <i class="file-icon fas fa-file-code"></i>
+                            <span>main.ares</span>
+                        </div>
+                        <div class="file-item" onclick="openFileTab('token.ares')">
+                            <i class="file-icon fas fa-coins"></i>
+                            <span>token.ares</span>
+                        </div>
+                        <div class="file-item" onclick="openFileTab('nft.ares')">
+                            <i class="file-icon fas fa-image"></i>
+                            <span>nft.ares</span>
+                        </div>
+                        <div class="file-item" onclick="openFileTab('dao.ares')">
+                            <i class="file-icon fas fa-users"></i>
+                            <span>dao.ares</span>
+                        </div>
+                        <div class="file-item" onclick="openFileTab('defi.ares')">
+                            <i class="file-icon fas fa-chart-line"></i>
+                            <span>defi.ares</span>
+                        </div>
+                        <div class="file-item" onclick="openFileTab('oracle.ares')">
+                            <i class="file-icon fas fa-eye"></i>
+                            <span>oracle.ares</span>
+                        </div>
+                        <div class="file-item" onclick="openFileTab('bridge.ares')">
+                            <i class="file-icon fas fa-bridge"></i>
+                            <span>bridge.ares</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Editor -->
+        <div class="main-editor">
+            <div class="editor-tabs">
+                <div class="editor-tab active" data-file="main.ares">
+                    <i class="fas fa-file-code"></i>
+                    <span>main.ares</span>
+                    <span class="close" onclick="closeTab(this)">&times;</span>
+                </div>
+            </div>
+            
+            <textarea class="code-editor" id="code-editor" placeholder="// Welcome to AresLang IDE
+// Start coding your smart contract here...
+
+contract HelloSourceLess {
+    string public message;
+    
+    constructor() {
+        message = \"Hello, SourceLess Blockchain!\";
+    }
+    
+    function updateMessage(string memory newMessage) public {
+        message = newMessage;
+    }
+    
+    function getMessage() public view returns (string memory) {
+        return message;
+    }
+}">// Welcome to AresLang IDE - Advanced Smart Contract Development
+// SourceLess Blockchain Smart Contract Template
+
+pragma areslang ^1.0.0;
+
+import "./sourceless/StandardToken.ares";
+import "./sourceless/AccessControl.ares";
+import "./sourceless/ReentrancyGuard.ares";
+
+/**
+ * @title SourceLessAdvancedContract
+ * @dev Advanced smart contract template with enterprise features
+ * @author SourceLess Development Team
+ */
+contract SourceLessAdvancedContract is StandardToken, AccessControl, ReentrancyGuard {
+    
+    // State variables
+    string public contractName;
+    string public version;
+    uint256 public totalSupply;
+    address public owner;
+    bool public isPaused;
+    
+    // Mappings
+    mapping(address => uint256) private balances;
+    mapping(address => mapping(address => uint256)) private allowances;
+    mapping(address => bool) private authorized;
+    
+    // Events
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+    event ContractPaused(address indexed by);
+    event ContractUnpaused(address indexed by);
+    event AuthorizationGranted(address indexed account, address indexed by);
+    
+    // Modifiers
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Not authorized: owner only");
+        _;
+    }
+    
+    modifier onlyAuthorized() {
+        require(authorized[msg.sender] || msg.sender == owner, "Not authorized");
+        _;
+    }
+    
+    modifier whenNotPaused() {
+        require(!isPaused, "Contract is paused");
+        _;
+    }
+    
+    modifier validAddress(address addr) {
+        require(addr != address(0), "Invalid address: zero address");
+        _;
+    }
+    
+    /**
+     * @dev Contract constructor
+     * @param _name Contract name
+     * @param _symbol Token symbol  
+     * @param _totalSupply Initial token supply
+     */
+    constructor(
+        string memory _name,
+        string memory _symbol,
+        uint256 _totalSupply
+    ) StandardToken(_name, _symbol) {
+        contractName = _name;
+        version = "1.0.0";
+        owner = msg.sender;
+        totalSupply = _totalSupply * 10**decimals();
+        balances[owner] = totalSupply;
+        authorized[owner] = true;
+        isPaused = false;
+        
+        emit Transfer(address(0), owner, totalSupply);
+    }
+    
+    /**
+     * @dev Transfer tokens between accounts
+     * @param to Recipient address
+     * @param amount Amount to transfer
+     */
+    function transfer(address to, uint256 amount) 
+        public 
+        whenNotPaused 
+        validAddress(to) 
+        nonReentrant 
+        returns (bool) 
+    {
+        require(balances[msg.sender] >= amount, "Insufficient balance");
+        
+        balances[msg.sender] -= amount;
+        balances[to] += amount;
+        
+        emit Transfer(msg.sender, to, amount);
+        return true;
+    }
+    
+    /**
+     * @dev Get balance of an account
+     * @param account Address to check
+     */
+    function balanceOf(address account) public view returns (uint256) {
+        return balances[account];
+    }
+    
+    /**
+     * @dev Approve spender to transfer tokens
+     * @param spender Address to approve
+     * @param amount Amount to approve
+     */
+    function approve(address spender, uint256 amount) 
+        public 
+        whenNotPaused 
+        validAddress(spender) 
+        returns (bool) 
+    {
+        allowances[msg.sender][spender] = amount;
+        emit Approval(msg.sender, spender, amount);
+        return true;
+    }
+    
+    /**
+     * @dev Transfer tokens on behalf of owner
+     * @param from Owner address
+     * @param to Recipient address  
+     * @param amount Amount to transfer
+     */
+    function transferFrom(address from, address to, uint256 amount)
+        public
+        whenNotPaused
+        validAddress(from)
+        validAddress(to)
+        nonReentrant
+        returns (bool)
+    {
+        require(allowances[from][msg.sender] >= amount, "Insufficient allowance");
+        require(balances[from] >= amount, "Insufficient balance");
+        
+        allowances[from][msg.sender] -= amount;
+        balances[from] -= amount;
+        balances[to] += amount;
+        
+        emit Transfer(from, to, amount);
+        return true;
+    }
+    
+    /**
+     * @dev Mint new tokens (owner only)
+     * @param to Recipient address
+     * @param amount Amount to mint
+     */
+    function mint(address to, uint256 amount) 
+        public 
+        onlyOwner 
+        whenNotPaused 
+        validAddress(to) 
+    {
+        totalSupply += amount;
+        balances[to] += amount;
+        
+        emit Transfer(address(0), to, amount);
+    }
+    
+    /**
+     * @dev Burn tokens (owner only)
+     * @param amount Amount to burn
+     */
+    function burn(uint256 amount) public onlyOwner whenNotPaused {
+        require(balances[msg.sender] >= amount, "Insufficient balance to burn");
+        
+        balances[msg.sender] -= amount;
+        totalSupply -= amount;
+        
+        emit Transfer(msg.sender, address(0), amount);
+    }
+    
+    /**
+     * @dev Pause contract (owner only)
+     */
+    function pause() public onlyOwner {
+        isPaused = true;
+        emit ContractPaused(msg.sender);
+    }
+    
+    /**
+     * @dev Unpause contract (owner only)
+     */
+    function unpause() public onlyOwner {
+        isPaused = false;
+        emit ContractUnpaused(msg.sender);
+    }
+    
+    /**
+     * @dev Grant authorization to an address
+     * @param account Address to authorize
+     */
+    function grantAuthorization(address account) 
+        public 
+        onlyOwner 
+        validAddress(account) 
+    {
+        authorized[account] = true;
+        emit AuthorizationGranted(account, msg.sender);
+    }
+    
+    /**
+     * @dev Revoke authorization from an address
+     * @param account Address to revoke
+     */
+    function revokeAuthorization(address account) public onlyOwner {
+        authorized[account] = false;
+    }
+    
+    /**
+     * @dev Check if address is authorized
+     * @param account Address to check
+     */
+    function isAuthorized(address account) public view returns (bool) {
+        return authorized[account];
+    }
+    
+    /**
+     * @dev Get contract information
+     */
+    function getContractInfo() public view returns (
+        string memory name,
+        string memory ver,
+        uint256 supply,
+        address contractOwner,
+        bool paused
+    ) {
+        return (contractName, version, totalSupply, owner, isPaused);
+    }
+    
+    /**
+     * @dev Emergency withdrawal function (owner only)
+     * @dev Allows owner to withdraw any tokens sent to contract
+     */
+    function emergencyWithdraw(address token, uint256 amount) 
+        public 
+        onlyOwner 
+        nonReentrant 
+    {
+        if (token == address(0)) {
+            // Withdraw native tokens
+            payable(owner).transfer(amount);
+        } else {
+            // Withdraw ERC20 tokens
+            IERC20(token).transfer(owner, amount);
+        }
+    }
+    
+    /**
+     * @dev Receive function to accept native tokens
+     */
+    receive() external payable {
+        // Contract can receive native tokens
+    }
+    
+    /**
+     * @dev Fallback function
+     */
+    fallback() external payable {
+        revert("Function not found");
+    }
+}</textarea>
+        </div>
+
+        <!-- Console -->
+        <div class="console">
+            <div class="console-header">
+                <span>🔧 Console Output</span>
+                <button class="header-btn" onclick="clearConsole()" style="margin-left: auto; padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                    <i class="fas fa-trash"></i>
+                    Clear
+                </button>
+            </div>
+            <div class="console-output" id="console-output">
+                <div class="console-line info">AresLang IDE v2.1.0 - Ready for smart contract development</div>
+                <div class="console-line info">SourceLess Blockchain compiler initialized</div>
+                <div class="console-line success">✓ Syntax highlighting enabled</div>
+                <div class="console-line success">✓ Auto-completion ready</div>
+                <div class="console-line info">Type 'help' for available commands</div>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <span>Line 1, Col 1</span>
+            <span>AresLang</span>
+            <span>UTF-8</span>
+            <span>CRLF</span>
+            <span id="compiler-status">Ready</span>
+        </div>
+
+        <!-- Minimap -->
+        <div class="minimap" id="minimap"></div>
+    </div>
+
+    <!-- Templates and Documentation Data -->
+    <div id="templates-data" style="display: none;">
+        <!-- Template definitions will be loaded here -->
+    </div>
+
+    <script>
+        // AresLang IDE Controller
+        let currentFile = 'main.ares';
+        let openTabs = ['main.ares'];
+        let fileContents = {};
+        let isCompiling = false;
+
+        // Contract templates - SourceLess Native AresLang Templates
+        const templates = {
+            'sourceless-cryptocurrency': {
+                title: '💰 SourceLess Cryptocurrency',
+                description: 'Native SourceLess fungible cryptocurrency (STR) with CCOIN integration and PoE validation',
+                code: `pragma areslang ^2.0.0;
+
+@sourceless_native
+@ccoin_enabled
+contract SourceLessCryptocurrency {
+    str name;
+    str symbol;
+    u8 decimals;
+    u256 totalSupply;
+    u256 tpms; // Transactions Per Millisecond capacity
+    
+    map<zk13str => u256> balances;
+    map<zk13str => map<zk13str => u256>> allowances;
+    
+    event Transfer(zk13str from, zk13str to, u256 value, ccoin fee);
+    event Approval(zk13str owner, zk13str spender, u256 value);
+    event CCOINPostMined(zk13str validator, ccoin amount, poe_score score);
+    
+    constructor(str _name, str _symbol, u256 _totalSupply) {
+        name = _name;
+        symbol = _symbol;
+        decimals = 18;
+        totalSupply = _totalSupply * 10**decimals;
+        balances[msg.sender] = totalSupply;
+        tpms = 100000; // Base 100,000 TPMS capacity
+        
+        // Post-mine CCOIN for cryptocurrency deployment
+        emit CCOINPostMined(msg.sender, 1.7, poe_validate());
+    }
+    
+    @poe_validated
+    function transfer(zk13str to, u256 amount) public returns (bool) {
+        require(balances[msg.sender] >= amount, "Insufficient balance");
+        
+        // Calculate CCOIN transaction fee
+        ccoin fee = calculate_ccoin_fee(amount);
+        
+        balances[msg.sender] -= amount;
+        balances[to] += amount;
+        
+        emit Transfer(msg.sender, to, amount, fee);
+        
+        // Post-mine CCOIN based on PoE validation
+        if (poe_score() > 0.85) {
+            emit CCOINPostMined(msg.sender, fee * 1.5, poe_score());
+        }
+        
+        return true;
+    }
+    
+    @view
+    function balanceOf(zk13str account) public returns (u256) {
+        return balances[account];
+    }
+    
+    @view
+    function getCCOINStats() public returns (ccoin, poe_score) {
+        return (ccoin_balance(), poe_score());
+    }
+}`
+            },
+            'sourceless-nft': {
+                title: '🎨 SourceLess NFT',
+                description: 'Native SourceLess NFT with STR.Domains, IPFS metadata, and quantum-safe storage',
+                code: `pragma areslang ^2.0.0;
+
+@sourceless_native
+@ipfs_enabled
+@quantum_safe
+contract SourceLessNFT {
+    str name;
+    str symbol;
+    u256 tokenCounter;
+    
+    map<u256 => zk13str> owners;
+    map<zk13str => u256> balances;
+    map<u256 => ipfs_hash> tokenURIs;
+    map<u256 => str_domain> domainNames;
+    map<u256 => ccoin> royalties;
+    
+    event Transfer(zk13str from, zk13str to, u256 tokenId);
+    event Mint(zk13str to, u256 tokenId, ipfs_hash metadata, str_domain domain);
+    event CCOINRoyalty(u256 tokenId, ccoin amount, zk13str creator);
+    
+    constructor(str _name, str _symbol) {
+        name = _name;
+        symbol = _symbol;
+        tokenCounter = 0;
+    }
+    
+    @poe_validated
+    @quantum_encrypted
+    function mint(
+        zk13str to, 
+        ipfs_hash metadataURI, 
+        str_domain domain,
+        ccoin royaltyPercent
+    ) public returns (u256) {
+        tokenCounter += 1;
+        u256 tokenId = tokenCounter;
+        
+        owners[tokenId] = to;
+        balances[to] += 1;
+        tokenURIs[tokenId] = metadataURI;
+        domainNames[tokenId] = domain;
+        royalties[tokenId] = royaltyPercent;
+        
+        emit Mint(to, tokenId, metadataURI, domain);
+        emit Transfer(address(0), to, tokenId);
+        
+        // Post-mine CCOIN for NFT creation
+        emit CCOINRoyalty(tokenId, 2.5, to);
+        
+        return tokenId;
+    }
+    
+    @poe_validated
+    function transfer(zk13str to, u256 tokenId) public {
+        require(owners[tokenId] == msg.sender, "Not token owner");
+        
+        balances[msg.sender] -= 1;
+        balances[to] += 1;
+        owners[tokenId] = to;
+        
+        // Apply royalty in CCOIN
+        ccoin royaltyAmount = royalties[tokenId];
+        emit CCOINRoyalty(tokenId, royaltyAmount, msg.sender);
+        
+        emit Transfer(msg.sender, to, tokenId);
+    }
+    
+    @view
+    function ownerOf(u256 tokenId) public returns (zk13str) {
+        return owners[tokenId];
+    }
+    
+    @view
+    function tokenURI(u256 tokenId) public returns (ipfs_hash) {
+        return tokenURIs[tokenId];
+    }
+    
+    @view
+    function getDomain(u256 tokenId) public returns (str_domain) {
+        return domainNames[tokenId];
+    }
+}`
+            },
+            'sourceless-dao': {
+                title: '🏛️ SourceLess DAO',
+                description: 'Decentralized DAO with CCOIN-weighted voting, PoE consensus, and quantum-resistant proposals',
+                code: `pragma areslang ^2.0.0;
+
+@sourceless_native
+@ccoin_enabled
+@quantum_safe
+contract SourceLessDAO {
+    struct Proposal {
+        u256 id;
+        str description;
+        zk13str proposer;
+        ccoin votesFor;
+        ccoin votesAgainst;
+        u256 deadline;
+        bool executed;
+        poe_score consensusScore;
+        map<zk13str => bool> voted;
+    }
+    
+    u256 proposalCounter;
+    map<u256 => Proposal> proposals;
+    map<zk13str => ccoin> votingPower;
+    
+    event ProposalCreated(u256 proposalId, str description, zk13str proposer);
+    event Voted(u256 proposalId, zk13str voter, bool support, ccoin weight);
+    event ProposalExecuted(u256 proposalId, bool passed, poe_score consensus);
+    event CCOINDistributed(zk13str voter, ccoin reward);
+    
+    @poe_validated
+    function createProposal(str description, u256 votingDuration) public {
+        require(votingPower[msg.sender] >= 100.0, "Insufficient CCOIN voting power");
+        
+        proposalCounter += 1;
+        Proposal storage newProposal = proposals[proposalCounter];
+        newProposal.id = proposalCounter;
+        newProposal.description = description;
+        newProposal.proposer = msg.sender;
+        newProposal.deadline = block.timestamp + votingDuration;
+        newProposal.consensusScore = 0.0;
+        
+        emit ProposalCreated(proposalCounter, description, msg.sender);
+        
+        // Reward proposer with CCOIN
+        emit CCOINDistributed(msg.sender, 5.0);
+    }
+    
+    @poe_validated
+    @quantum_encrypted
+    function vote(u256 proposalId, bool support) public {
+        Proposal storage proposal = proposals[proposalId];
+        require(block.timestamp < proposal.deadline, "Voting period ended");
+        require(!proposal.voted[msg.sender], "Already voted");
+        require(votingPower[msg.sender] > 0, "No voting power");
+        
+        proposal.voted[msg.sender] = true;
+        ccoin voterWeight = votingPower[msg.sender];
+        
+        // Apply PoE scoring to vote weight
+        poe_score poeMultiplier = poe_validate();
+        ccoin adjustedWeight = voterWeight * poeMultiplier;
+        
+        if (support) {
+            proposal.votesFor += adjustedWeight;
+        } else {
+            proposal.votesAgainst += adjustedWeight;
+        }
+        
+        // Update consensus score
+        proposal.consensusScore = calculate_poe_consensus(proposalId);
+        
+        emit Voted(proposalId, msg.sender, support, adjustedWeight);
+        
+        // Reward voter with CCOIN
+        emit CCOINDistributed(msg.sender, 0.5 * poeMultiplier);
+    }
+    
+    @poe_validated
+    function executeProposal(u256 proposalId) public {
+        Proposal storage proposal = proposals[proposalId];
+        require(block.timestamp >= proposal.deadline, "Voting still active");
+        require(!proposal.executed, "Already executed");
+        require(proposal.consensusScore >= 0.75, "Insufficient PoE consensus");
+        
+        proposal.executed = true;
+        bool passed = proposal.votesFor > proposal.votesAgainst;
+        
+        emit ProposalExecuted(proposalId, passed, proposal.consensusScore);
+        
+        if (passed) {
+            // Reward proposer for successful proposal
+            emit CCOINDistributed(proposal.proposer, 25.0);
+        }
+    }
+    
+    @view
+    function getProposal(u256 proposalId) public returns (Proposal) {
+        return proposals[proposalId];
+    }
+    
+    @view
+    function getVotingPower(zk13str voter) public returns (ccoin) {
+        return votingPower[voter];
+    }
+}`
+            }
+        };
+
+        // Initialize IDE
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Initializing AresLang IDE...');
+            
+            // Load initial file
+            fileContents[currentFile] = document.getElementById('code-editor').value;
+            
+            // Setup editor events
+            const editor = document.getElementById('code-editor');
+            editor.addEventListener('input', handleEditorInput);
+            editor.addEventListener('scroll', updateMinimap);
+            editor.addEventListener('keydown', handleKeyDown);
+            
+            // Update status bar
+            updateStatusBar();
+            
+            console.log('✅ AresLang IDE ready');
+        });
+
+        // Tab management
+        function switchTab(tabName) {
+            // Update tab appearance
+            document.querySelectorAll('.sidebar-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Load content
+            const content = document.getElementById('sidebar-content');
+            switch(tabName) {
+                case 'templates':
+                    loadTemplates();
+                    break;
+                case 'docs':
+                    loadDocumentation();
+                    break;
+                default:
+                    loadExplorer();
+            }
+        }
+
+        function loadTemplates() {
+            const content = document.getElementById('sidebar-content');
+            let html = '<h4 style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-secondary);">CONTRACT TEMPLATES</h4>';
+            
+            Object.keys(templates).forEach(key => {
+                const template = templates[key];
+                html += `
+                    <div class="template-card" onclick="loadTemplate('${key}')">
+                        <div class="template-title">
+                            ${template.title}
+                        </div>
+                        <div class="template-desc">
+                            ${template.description}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            content.innerHTML = html;
+        }
+
+        function loadDocumentation() {
+            const content = document.getElementById('sidebar-content');
+            content.innerHTML = `
+                <h4 style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-secondary);">ARESLANG DOCS</h4>
+                <div class="template-card" onclick="showDocs('syntax')">
+                    <div class="template-title">
+                        <i class="fas fa-code"></i>
+                        Syntax Reference
+                    </div>
+                    <div class="template-desc">
+                        Complete AresLang syntax guide
+                    </div>
+                </div>
+                <div class="template-card" onclick="showDocs('stdlib')">
+                    <div class="template-title">
+                        <i class="fas fa-book"></i>
+                        Standard Library
+                    </div>
+                    <div class="template-desc">
+                        Built-in functions and libraries
+                    </div>
+                </div>
+                <div class="template-card" onclick="showDocs('security')">
+                    <div class="template-title">
+                        <i class="fas fa-shield-alt"></i>
+                        Security Best Practices
+                    </div>
+                    <div class="template-desc">
+                        Smart contract security guidelines
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadExplorer() {
+            const content = document.getElementById('sidebar-content');
+            content.innerHTML = `
+                <h4 style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-secondary);">PROJECT EXPLORER</h4>
+                <div class="file-tree">
+                    <div class="file-item active" onclick="openFileTab('main.ares')">
+                        <i class="file-icon fas fa-file-code"></i>
+                        <span>main.ares</span>
+                    </div>
+                    <div class="file-item" onclick="openFileTab('token.ares')">
+                        <i class="file-icon fas fa-coins"></i>
+                        <span>token.ares</span>
+                    </div>
+                    <div class="file-item" onclick="openFileTab('nft.ares')">
+                        <i class="file-icon fas fa-image"></i>
+                        <span>nft.ares</span>
+                    </div>
+                    <div class="file-item" onclick="openFileTab('dao.ares')">
+                        <i class="file-icon fas fa-users"></i>
+                        <span>dao.ares</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadTemplate(templateKey) {
+            const template = templates[templateKey];
+            if (template) {
+                const fileName = templateKey + '.ares';
+                fileContents[fileName] = template.code;
+                openFileTab(fileName);
+                logConsole(`Template loaded: ${template.title}`, 'success');
+            }
+        }
+
+        function openFileTab(fileName) {
+            // Save current file content
+            if (currentFile) {
+                fileContents[currentFile] = document.getElementById('code-editor').value;
+            }
+            
+            // Switch to file
+            currentFile = fileName;
+            
+            // Add to open tabs if not already open
+            if (!openTabs.includes(fileName)) {
+                openTabs.push(fileName);
+                updateTabsUI();
+            }
+            
+            // Load file content
+            const content = fileContents[fileName] || `// New AresLang file: ${fileName}\n\npragma areslang ^1.0.0;\n\ncontract ${fileName.replace('.ares', '')} {\n    // Your code here\n}`;
+            document.getElementById('code-editor').value = content;
+            fileContents[fileName] = content;
+            
+            // Update UI
+            updateTabsUI();
+            updateStatusBar();
+        }
+
+        function updateTabsUI() {
+            const tabsContainer = document.querySelector('.editor-tabs');
+            tabsContainer.innerHTML = '';
+            
+            openTabs.forEach(fileName => {
+                const tab = document.createElement('div');
+                tab.className = `editor-tab ${fileName === currentFile ? 'active' : ''}`;
+                tab.setAttribute('data-file', fileName);
+                tab.innerHTML = `
+                    <i class="fas fa-file-code"></i>
+                    <span>${fileName}</span>
+                    <span class="close" onclick="closeTab('${fileName}')">&times;</span>
+                `;
+                tab.addEventListener('click', (e) => {
+                    if (!e.target.classList.contains('close')) {
+                        openFileTab(fileName);
+                    }
+                });
+                tabsContainer.appendChild(tab);
+            });
+        }
+
+        function closeTab(fileName) {
+            const index = openTabs.indexOf(fileName);
+            if (index > -1) {
+                openTabs.splice(index, 1);
+                delete fileContents[fileName];
+                
+                if (currentFile === fileName && openTabs.length > 0) {
+                    currentFile = openTabs[openTabs.length - 1];
+                    document.getElementById('code-editor').value = fileContents[currentFile] || '';
+                }
+                
+                updateTabsUI();
+            }
+        }
+
+        // Editor functions
+        function handleEditorInput() {
+            fileContents[currentFile] = document.getElementById('code-editor').value;
+            updateStatusBar();
+            updateMinimap();
+        }
+
+        function handleKeyDown(event) {
+            // Handle keyboard shortcuts
+            if (event.ctrlKey || event.metaKey) {
+                switch(event.key) {
+                    case 's':
+                        event.preventDefault();
+                        saveFile();
+                        break;
+                    case 'Enter':
+                        event.preventDefault();
+                        compileContract();
+                        break;
+                }
+            }
+        }
+
+        function updateStatusBar() {
+            const editor = document.getElementById('code-editor');
+            const text = editor.value;
+            const cursorPos = editor.selectionStart;
+            const lines = text.substring(0, cursorPos).split('\n');
+            const line = lines.length;
+            const col = lines[lines.length - 1].length + 1;
+            
+            document.querySelector('.status-bar span').textContent = `Line ${line}, Col ${col}`;
+        }
+
+        function updateMinimap() {
+            const editor = document.getElementById('code-editor');
+            const minimap = document.getElementById('minimap');
+            const lines = editor.value.split('\n');
+            
+            // Simple minimap representation
+            const minimapHeight = minimap.clientHeight;
+            const lineHeight = minimapHeight / Math.max(lines.length, 20);
+            
+            let minimapContent = '';
+            lines.forEach((line, index) => {
+                if (line.trim()) {
+                    const intensity = Math.min(line.length / 50, 1);
+                    minimapContent += `<div style="height: ${lineHeight}px; background: rgba(255,255,255,${intensity * 0.3}); margin-bottom: 1px;"></div>`;
+                }
+            });
+            
+            minimap.innerHTML = minimapContent;
+        }
+
+        // IDE Actions
+        function newFile() {
+            const fileName = prompt('Enter file name (with .ares extension):');
+            if (fileName && fileName.endsWith('.ares')) {
+                openFileTab(fileName);
+                logConsole(`New file created: ${fileName}`, 'info');
+            }
+        }
+
+        function openFile() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.ares,.sol,.txt';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        fileContents[file.name] = e.target.result;
+                        openFileTab(file.name);
+                        logConsole(`File opened: ${file.name}`, 'success');
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        }
+
+        function saveFile() {
+            const content = document.getElementById('code-editor').value;
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = currentFile;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            logConsole(`File saved: ${currentFile}`, 'success');
+        }
+
+        function compileContract() {
+            if (isCompiling) return;
+            
+            isCompiling = true;
+            document.getElementById('compiler-status').textContent = 'Compiling...';
+            
+            logConsole('🔨 Starting compilation...', 'info');
+            
+            setTimeout(() => {
+                const code = document.getElementById('code-editor').value;
+                const errors = validateAresLang(code);
+                
+                if (errors.length === 0) {
+                    logConsole('✅ Compilation successful!', 'success');
+                    logConsole('📦 Bytecode generated: 0x608060405234801561001057600080fd5b50...', 'info');
+                    logConsole('🔍 Gas estimate: 847,392 gas', 'info');
+                    document.getElementById('compiler-status').textContent = 'Compiled';
+                } else {
+                    errors.forEach(error => {
+                        logConsole(`❌ ${error}`, 'error');
+                    });
+                    document.getElementById('compiler-status').textContent = 'Error';
+                }
+                
+                isCompiling = false;
+            }, 2000);
+        }
+
+        function deployContract() {
+            logConsole('🚀 Deploying contract to SourceLess testnet...', 'info');
+            
+            setTimeout(() => {
+                const contractAddress = '0x' + Math.random().toString(16).substr(2, 40);
+                const txHash = '0x' + Math.random().toString(16).substr(2, 64);
+                
+                logConsole(`✅ Contract deployed successfully!`, 'success');
+                logConsole(`📄 Contract Address: ${contractAddress}`, 'success');
+                logConsole(`🔗 Transaction Hash: ${txHash}`, 'info');
+                logConsole(`⛽ Gas Used: 1,247,392 gas`, 'info');
+                logConsole(`💰 Deployment Cost: 0.00847 STR`, 'info');
+            }, 3000);
+        }
+
+        // Validation
+        function validateAresLang(code) {
+            const errors = [];
+            
+            if (!code.includes('pragma areslang')) {
+                errors.push('Missing pragma directive');
+            }
+            
+            if (!code.includes('contract ')) {
+                errors.push('No contract definition found');
+            }
+            
+            // Check for balanced braces
+            const openBraces = (code.match(/{/g) || []).length;
+            const closeBraces = (code.match(/}/g) || []).length;
+            if (openBraces !== closeBraces) {
+                errors.push('Unbalanced braces');
+            }
+            
+            return errors;
+        }
+
+        // Console functions
+        function logConsole(message, type = 'info') {
+            const console = document.getElementById('console-output');
+            const line = document.createElement('div');
+            line.className = `console-line ${type}`;
+            line.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            console.appendChild(line);
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function clearConsole() {
+            document.getElementById('console-output').innerHTML = '';
+            logConsole('Console cleared', 'info');
+        }
+
+        // Documentation
+        function showDocs(section) {
+            const docs = {
+                syntax: 'AresLang Syntax Reference:\n\n• pragma areslang ^1.0.0;\n• contract ContractName { }\n• function functionName() public { }\n• mapping(address => uint256) balances;\n• event EventName(parameters);',
+                stdlib: 'Standard Library Functions:\n\n• msg.sender - Current caller address\n• msg.value - Ether sent with call\n• block.timestamp - Current timestamp\n• require(condition, message)\n• assert(condition)',
+                security: 'Security Best Practices:\n\n• Always validate inputs\n• Use reentrancy guards\n• Check for integer overflows\n• Implement access controls\n• Test thoroughly before deployment'
+            };
+            
+            alert(docs[section] || 'Documentation section not found');
+        }
+    </script>
+</body>
+</html>

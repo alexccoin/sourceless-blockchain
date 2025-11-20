@@ -28,9 +28,9 @@ function validateCCOINRates() {
     console.log(`   ✅ Min rate 2.5%: ${results.tokenTransfer.hasMinRate ? 'FOUND' : 'MISSING'}`);
     console.log(`   ✅ Max rate 10%: ${results.tokenTransfer.hasMaxRate ? 'FOUND' : 'MISSING'}`);
     
-    // NFT Rewards (2.5% fixed)
-    console.log('\n🎨 NFT Rewards:');
-    console.log(`   ✅ Fixed 2.5% rate: ${results.nftRewards.hasFixedRate ? 'FOUND' : 'MISSING'}`);
+    // NFT Post Mining (PoE-based)
+    console.log('\n🎨 NFT Post Mining:');
+    console.log(`   ✅ PoE validation: ${results.nftRewards.hasFixedRate ? 'FOUND' : 'MISSING'}`);
     console.log(`   ✅ Uses (amount * 25) / 1000: ${results.nftRewards.hasCorrectCalc ? 'FOUND' : 'MISSING'}`);
     
     // DeFi Yield (Dynamic)

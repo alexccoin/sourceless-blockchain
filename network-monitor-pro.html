@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SourceLess Network Monitor - Real-Time Network Analytics</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --darker: #020617;
+            --card: #1e293b;
+            --border: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--darker);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated Network Background */
+        .network-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .network-node {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+
+        .network-line {
+            position: absolute;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            animation: pulse-line 3s infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(100px, -50px); }
+            50% { transform: translate(-50px, -100px); }
+            75% { transform: translate(-100px, 50px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        @keyframes pulse-line {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+
+        /* Header */
+        .header {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .logo i {
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .network-health {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            border-radius: 50px;
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        .health-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.2); }
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+            margin-top: 100px;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 400px;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Network Map */
+        .network-map {
+            grid-row: 1 / 3;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .map-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        .map-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .map-canvas {
+            width: 100%;
+            height: 400px;
+            background: var(--darker);
+            border-radius: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .node {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            background: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .node:hover {
+            transform: scale(1.5);
+            box-shadow: 0 0 20px var(--primary);
+        }
+
+        .node.validator {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .node.relay {
+            background: var(--warning);
+            border-color: var(--warning);
+        }
+
+        .connection {
+            position: absolute;
+            height: 1px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            opacity: 0.6;
+            z-index: 1;
+            animation: data-flow 2s infinite;
+        }
+
+        @keyframes data-flow {
+            0% { opacity: 0.3; }
+            50% { opacity: 1; }
+            100% { opacity: 0.3; }
+        }
+
+        /* Performance Chart */
+        .performance-chart {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1.5rem;
+            padding: 2rem;
+        }
+
+        .chart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+
+        /* Node Status */
+        .node-status {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1.5rem;
+            padding: 2rem;
+        }
+
+        .status-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 0.75rem;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .status-item:hover {
+            border-color: var(--border);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .status-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .status-icon {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: white;
+        }
+
+        .status-icon.online { background: var(--success); }
+        .status-icon.warning { background: var(--warning); }
+        .status-icon.offline { background: var(--danger); }
+
+        .status-details h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .status-details p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .status-value {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Metrics Cards */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .metric-header {
+            display: flex;
+            align-items: center;
+            justify-content: between;
+            margin-bottom: 1rem;
+        }
+
+        .metric-title {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-change {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .metric-change.positive {
+            color: var(--success);
+        }
+
+        .metric-change.negative {
+            color: var(--danger);
+        }
+
+        /* Live Feed */
+        .live-feed {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1.5rem;
+            padding: 2rem;
+        }
+
+        .feed-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .feed-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .feed-list {
+            max-height: 400px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .feed-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 0.75rem;
+            border-left: 3px solid var(--primary);
+            animation: slide-in 0.3s ease;
+        }
+
+        @keyframes slide-in {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .feed-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            min-width: 80px;
+        }
+
+        .feed-message {
+            flex: 1;
+            font-size: 0.9rem;
+        }
+
+        .feed-type {
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .feed-type.block { background: rgba(37, 99, 235, 0.2); color: var(--primary); }
+        .feed-type.tx { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .feed-type.validator { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+        .feed-type.error { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-stats {
+                display: none;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .container {
+                margin-top: 120px;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            background: var(--card);
+            color: var(--text-secondary);
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Network Background -->
+    <div class="network-bg" id="networkBg"></div>
+
+    <!-- Navigation Component -->
+    <div id="navigationComponent"></div>
+
+    <!-- Main Container -->
+    <main class="container">
+        <!-- Metrics Grid -->
+        <section class="metrics-grid" data-aos="fade-up">
+            <div class="metric-card">
+                <div class="metric-title">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Network TPS
+                </div>
+                <div class="metric-value" id="metricTps">4,231</div>
+                <div class="metric-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+12.5% from avg</span>
+                </div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-title">
+                    <i class="fas fa-clock"></i>
+                    Block Time
+                </div>
+                <div class="metric-value">2.1s</div>
+                <div class="metric-change positive">
+                    <i class="fas fa-arrow-down"></i>
+                    <span>-0.3s improved</span>
+                </div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-title">
+                    <i class="fas fa-users"></i>
+                    Active Validators
+                </div>
+                <div class="metric-value" id="metricValidators">156</div>
+                <div class="metric-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+3 joined</span>
+                </div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-title">
+                    <i class="fas fa-memory"></i>
+                    Memory Usage
+                </div>
+                <div class="metric-value">67%</div>
+                <div class="metric-change negative">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+5% from last hour</span>
+                </div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-title">
+                    <i class="fas fa-database"></i>
+                    Storage Used
+                </div>
+                <div class="metric-value">2.4TB</div>
+                <div class="metric-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>Growing steadily</span>
+                </div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-title">
+                    <i class="fas fa-shield-alt"></i>
+                    Security Score
+                </div>
+                <div class="metric-value">98.7%</div>
+                <div class="metric-change positive">
+                    <i class="fas fa-check"></i>
+                    <span>Excellent</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Grid -->
+        <section class="dashboard-grid" data-aos="fade-up" data-aos-delay="100">
+            <!-- Network Map -->
+            <div class="network-map">
+                <div class="map-header">
+                    <div class="map-title">
+                        <i class="fas fa-globe"></i>
+                        <span>Global Network Map</span>
+                    </div>
+                    <div class="controls">
+                        <button class="btn active" data-view="global">
+                            <i class="fas fa-globe"></i>
+                            <span>Global</span>
+                        </button>
+                        <button class="btn" data-view="regional">
+                            <i class="fas fa-map"></i>
+                            <span>Regional</span>
+                        </button>
+                        <button class="btn" onclick="refreshMap()">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="map-canvas" id="networkMapCanvas">
+                    <!-- Dynamic network nodes will be generated here -->
+                </div>
+            </div>
+
+            <!-- Performance Chart -->
+            <div class="performance-chart">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Network Performance</span>
+                    </div>
+                    <div class="controls">
+                        <button class="btn active" data-period="1h">1H</button>
+                        <button class="btn" data-period="24h">24H</button>
+                        <button class="btn" data-period="7d">7D</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Node Status -->
+            <div class="node-status">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <i class="fas fa-server"></i>
+                        <span>Node Status</span>
+                    </div>
+                </div>
+                <div class="status-grid" id="nodeStatusGrid">
+                    <!-- Dynamic content -->
+                </div>
+            </div>
+
+            <!-- Live Feed -->
+            <div class="live-feed">
+                <div class="feed-header">
+                    <div class="feed-title">
+                        <i class="fas fa-rss"></i>
+                        <span>Live Network Feed</span>
+                    </div>
+                    <div class="controls">
+                        <button class="btn" onclick="pauseFeed()" id="pauseBtn">
+                            <i class="fas fa-pause"></i>
+                        </button>
+                        <button class="btn" onclick="clearFeed()">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="feed-list" id="liveFeed">
+                    <!-- Dynamic feed items -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="js/sourceless-core.js"></script>
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+
+        // Global variables
+        let performanceChart;
+        let feedPaused = false;
+        let feedInterval;
+
+        // Generate animated background
+        function generateNetworkBackground() {
+            const bg = document.getElementById('networkBg');
+            const nodeCount = 20;
+            
+            for (let i = 0; i < nodeCount; i++) {
+                const node = document.createElement('div');
+                node.className = 'network-node';
+                node.style.left = Math.random() * 100 + '%';
+                node.style.top = Math.random() * 100 + '%';
+                node.style.animationDelay = Math.random() * 20 + 's';
+                bg.appendChild(node);
+                
+                // Add some connecting lines
+                if (i > 0 && Math.random() > 0.7) {
+                    const line = document.createElement('div');
+                    line.className = 'network-line';
+                    line.style.left = Math.random() * 100 + '%';
+                    line.style.top = Math.random() * 100 + '%';
+                    line.style.width = Math.random() * 200 + 100 + 'px';
+                    line.style.transform = `rotate(${Math.random() * 360}deg)`;
+                    line.style.animationDelay = Math.random() * 3 + 's';
+                    bg.appendChild(line);
+                }
+            }
+        }
+
+        // Generate network map
+        function generateNetworkMap() {
+            const canvas = document.getElementById('networkMapCanvas');
+            const nodeCount = 25;
+            
+            // Clear existing nodes
+            canvas.innerHTML = '';
+            
+            // Generate nodes
+            const nodes = [];
+            for (let i = 0; i < nodeCount; i++) {
+                const node = document.createElement('div');
+                const x = Math.random() * (canvas.offsetWidth - 20) + 10;
+                const y = Math.random() * (canvas.offsetHeight - 20) + 10;
+                
+                node.className = 'node';
+                if (i < 5) node.classList.add('validator');
+                else if (i < 12) node.classList.add('relay');
+                
+                node.style.left = x + 'px';
+                node.style.top = y + 'px';
+                node.title = `Node ${i + 1} - ${i < 5 ? 'Validator' : i < 12 ? 'Relay' : 'Regular'}`;
+                
+                canvas.appendChild(node);
+                nodes.push({ element: node, x: x, y: y });
+            }
+            
+            // Generate connections
+            nodes.forEach((nodeA, i) => {
+                nodes.forEach((nodeB, j) => {
+                    if (i < j && Math.random() > 0.7) {
+                        const connection = document.createElement('div');
+                        connection.className = 'connection';
+                        
+                        const distance = Math.sqrt(Math.pow(nodeB.x - nodeA.x, 2) + Math.pow(nodeB.y - nodeA.y, 2));
+                        const angle = Math.atan2(nodeB.y - nodeA.y, nodeB.x - nodeA.x) * 180 / Math.PI;
+                        
+                        connection.style.left = nodeA.x + 'px';
+                        connection.style.top = nodeA.y + 'px';
+                        connection.style.width = distance + 'px';
+                        connection.style.transform = `rotate(${angle}deg)`;
+                        connection.style.transformOrigin = '0 0';
+                        connection.style.animationDelay = Math.random() * 2 + 's';
+                        
+                        canvas.appendChild(connection);
+                    }
+                });
+            });
+        }
+
+        // Initialize performance chart
+        function initPerformanceChart() {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            
+            const labels = [];
+            const tpsData = [];
+            const blockTimeData = [];
+            
+            // Generate sample data for the last 24 hours
+            for (let i = 23; i >= 0; i--) {
+                labels.push(`${i}h ago`);
+                tpsData.push(Math.floor(Math.random() * 2000) + 3000);
+                blockTimeData.push((Math.random() * 1.5 + 1.5).toFixed(1));
+            }
+            
+            performanceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'TPS',
+                        data: tpsData,
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        tension: 0.4,
+                        yAxisID: 'y'
+                    }, {
+                        label: 'Block Time (s)',
+                        data: blockTimeData,
+                        borderColor: '#06b6d4',
+                        backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#cbd5e1'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#64748b' },
+                            grid: { color: '#334155' }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            ticks: { color: '#64748b' },
+                            grid: { color: '#334155' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            ticks: { color: '#64748b' },
+                            grid: { drawOnChartArea: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Generate node status
+        function generateNodeStatus() {
+            const grid = document.getElementById('nodeStatusGrid');
+            const statuses = [
+                { name: 'Primary Validators', count: '12/12', status: 'online', icon: 'fas fa-check-circle' },
+                { name: 'Backup Validators', count: '8/8', status: 'online', icon: 'fas fa-shield-alt' },
+                { name: 'Relay Nodes', count: '45/47', status: 'warning', icon: 'fas fa-exclamation-triangle' },
+                { name: 'Archive Nodes', count: '15/15', status: 'online', icon: 'fas fa-database' },
+                { name: 'RPC Nodes', count: '28/30', status: 'warning', icon: 'fas fa-server' },
+                { name: 'Bootstrap Nodes', count: '6/6', status: 'online', icon: 'fas fa-rocket' }
+            ];
+            
+            grid.innerHTML = statuses.map(item => `
+                <div class="status-item">
+                    <div class="status-info">
+                        <div class="status-icon ${item.status}">
+                            <i class="${item.icon}"></i>
+                        </div>
+                        <div class="status-details">
+                            <h4>${item.name}</h4>
+                            <p>${item.status === 'online' ? 'All operational' : 'Minor issues'}</p>
+                        </div>
+                    </div>
+                    <div class="status-value">${item.count}</div>
+                </div>
+            `).join('');
+        }
+
+        // Live feed simulation
+        function generateFeedItem() {
+            const feedTypes = ['block', 'tx', 'validator', 'error'];
+            const messages = {
+                block: ['New block mined by validator-007', 'Block #6006 added to chain', 'Consensus reached for block #6007'],
+                tx: ['Large transaction detected: 50,000 STR', 'Smart contract deployed', 'Cross-chain transfer completed'],
+                validator: ['Validator node-042 joined network', 'Validator rewards distributed', 'New validator registered'],
+                error: ['Temporary connection loss detected', 'Minor sync delay resolved', 'Network latency spike detected']
+            };
+            
+            const type = feedTypes[Math.floor(Math.random() * feedTypes.length)];
+            const message = messages[type][Math.floor(Math.random() * messages[type].length)];
+            const time = new Date().toLocaleTimeString();
+            
+            return { type, message, time };
+        }
+
+        function addFeedItem() {
+            if (feedPaused) return;
+            
+            const feed = document.getElementById('liveFeed');
+            const item = generateFeedItem();
+            
+            const feedElement = document.createElement('div');
+            feedElement.className = 'feed-item';
+            feedElement.innerHTML = `
+                <div class="feed-time">${item.time}</div>
+                <div class="feed-message">${item.message}</div>
+                <div class="feed-type ${item.type}">${item.type.toUpperCase()}</div>
+            `;
+            
+            feed.insertBefore(feedElement, feed.firstChild);
+            
+            // Keep only last 20 items
+            while (feed.children.length > 20) {
+                feed.removeChild(feed.lastChild);
+            }
+        }
+
+        // Control functions
+        function refreshMap() {
+            generateNetworkMap();
+        }
+
+        function pauseFeed() {
+            feedPaused = !feedPaused;
+            const btn = document.getElementById('pauseBtn');
+            btn.innerHTML = feedPaused ? '<i class="fas fa-play"></i>' : '<i class="fas fa-pause"></i>';
+        }
+
+        function clearFeed() {
+            document.getElementById('liveFeed').innerHTML = '';
+        }
+
+        // Real-time updates
+        function updateMetrics() {
+            const tps = document.getElementById('tps');
+            const metricTps = document.getElementById('metricTps');
+            const blockHeight = document.getElementById('blockHeight');
+            
+            // Simulate real-time changes
+            const currentTps = parseInt(tps.textContent.replace(',', ''));
+            const newTps = currentTps + Math.floor(Math.random() * 200) - 100;
+            
+            tps.textContent = newTps.toLocaleString();
+            metricTps.textContent = newTps.toLocaleString();
+            
+            const currentHeight = parseInt(blockHeight.textContent.replace(',', ''));
+            if (Math.random() > 0.7) {
+                const newHeight = currentHeight + 1;
+                blockHeight.textContent = newHeight.toLocaleString();
+            }
+        }
+
+        // Event listeners
+        document.querySelectorAll('.btn[data-view]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.btn[data-view]').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        document.querySelectorAll('.btn[data-period]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.btn[data-period]').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', function() {
+            generateNetworkBackground();
+            generateNetworkMap();
+            initPerformanceChart();
+            generateNodeStatus();
+            
+            // Start live updates
+            feedInterval = setInterval(addFeedItem, 3000);
+            setInterval(updateMetrics, 5000);
+            
+            // Add some initial feed items
+            for (let i = 0; i < 5; i++) {
+                setTimeout(addFeedItem, i * 500);
+            }
+        });
+    </script>
+</body>
+</html>

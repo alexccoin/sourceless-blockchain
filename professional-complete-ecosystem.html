@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SourceLess Professional Ecosystem Dashboard - Complete Interface</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #64748b;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --purple: #8b5cf6;
+            --dark: #0f172a;
+            --darker: #020617;
+            --card: #1e293b;
+            --border: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            
+            /* Ledger colors */
+            --main-ledger: #2563eb;
+            --asset-ledger: #06b6d4;
+            --contract-ledger: #10b981;
+            --governance-ledger: #f59e0b;
+            --ccoin-ledger: #8b5cf6;
+            --ccos-ledger: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--darker);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--dark), var(--darker));
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .logo i {
+            color: var(--primary);
+            font-size: 2rem;
+        }
+
+        .ecosystem-badge {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .network-status {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--card);
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Main container */
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Grid layouts */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .ledger-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .validator-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .token-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            border-color: var(--primary);
+        }
+
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--primary);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .stat-change {
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+
+        .positive { color: var(--success); }
+        .negative { color: var(--danger); }
+
+        /* Ledger-specific cards */
+        .ledger-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ledger-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+        }
+
+        .ledger-card.main::before { background: var(--main-ledger); }
+        .ledger-card.asset::before { background: var(--asset-ledger); }
+        .ledger-card.contract::before { background: var(--contract-ledger); }
+        .ledger-card.governance::before { background: var(--governance-ledger); }
+        .ledger-card.ccoin::before { background: var(--ccoin-ledger); }
+        .ledger-card.ccos::before { background: var(--ccos-ledger); }
+
+        .ledger-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .ledger-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .ledger-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .ledger-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .ledger-stat {
+            text-align: center;
+        }
+
+        .ledger-stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .ledger-stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* Validator type cards */
+        .validator-type-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .validator-type-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+        }
+
+        .validator-type-card.genesis::before { background: #dc2626; }
+        .validator-type-card.supernode::before { background: #7c3aed; }
+        .validator-type-card.mini::before { background: var(--primary); }
+        .validator-type-card.starw::before { background: var(--success); }
+
+        .validator-header {
+            display: flex;
+            align-items: center;
+            justify-content: between;
+            margin-bottom: 1rem;
+        }
+
+        .validator-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            flex: 1;
+        }
+
+        .validator-count {
+            background: var(--darker);
+            color: var(--text-primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .validator-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .validator-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .validator-metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+
+        .validator-metric-label {
+            color: var(--text-secondary);
+        }
+
+        .validator-metric-value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        /* Token cards */
+        .token-card {
+            position: relative;
+            text-align: center;
+        }
+
+        .token-symbol {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .token-name {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .token-price {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        /* Section headers */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: between;
+            margin: 3rem 0 1.5rem 0;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title i {
+            color: var(--primary);
+        }
+
+        .section-badge {
+            background: var(--primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th {
+            background: var(--darker);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 1rem 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        .table tr:hover {
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .hash {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .hash:hover {
+            text-decoration: underline;
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .badge-info {
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--accent);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        /* Chart containers */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 1rem;
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        /* STARW specific styling */
+        .starw-card {
+            background: linear-gradient(135deg, var(--success), #047857);
+            color: white;
+        }
+
+        .starw-card .card-title {
+            color: white;
+        }
+
+        .starw-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .starw-stat {
+            text-align: center;
+        }
+
+        .starw-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .starw-stat-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* DeFi styling */
+        .defi-card {
+            background: linear-gradient(135deg, var(--purple), #6d28d9);
+            color: white;
+        }
+
+        .defi-card .card-title {
+            color: white;
+        }
+
+        /* Loading states */
+        .loading {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 2rem;
+        }
+
+        .loading i {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .ledger-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .validator-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Special animations */
+        .fade-in {
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-up {
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Tooltips */
+        [data-tooltip] {
+            position: relative;
+            cursor: help;
+        }
+
+        [data-tooltip]:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--darker);
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+            font-size: 0.85rem;
+            white-space: nowrap;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-cube"></i>
+                <div>
+                    <div>SourceLess Professional</div>
+                    <div class="ecosystem-badge">Complete 6-Ledger Ecosystem</div>
+                </div>
+            </div>
+            <div class="network-status">
+                <div class="status-item">
+                    <div class="status-dot"></div>
+                    <span>Network Online</span>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-server"></i>
+                    <span id="activeValidators">1,287</span>
+                    <span>Validators</span>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span id="currentTPS">9,129</span>
+                    <span>TPS</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Network Overview Stats -->
+        <div class="stats-grid fade-in">
+            <div class="stat-card">
+                <div class="stat-value" id="totalBlocks">9.3M</div>
+                <div class="stat-label">Total Blocks</div>
+                <div class="stat-change positive">+0.5% (24h)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalTransactions">45.2M</div>
+                <div class="stat-label">Total Transactions</div>
+                <div class="stat-change positive">+2.1% (24h)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalStaked">42.3B</div>
+                <div class="stat-label">Total Staked (STR)</div>
+                <div class="stat-change positive">67.3% Staking Ratio</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="marketCap">$727.8B</div>
+                <div class="stat-label">Market Cap</div>
+                <div class="stat-change positive">+2.34% (24h)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="crossChainVolume">$1.2B</div>
+                <div class="stat-label">Cross-Chain Volume</div>
+                <div class="stat-change positive">12 Networks</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="starwNodes">1,313</div>
+                <div class="stat-label">STARW Nodes</div>
+                <div class="stat-change positive">98.2% Online</div>
+            </div>
+        </div>
+
+        <!-- Multi-Token Economy -->
+        <div class="section-header slide-up">
+            <h2 class="section-title">
+                <i class="fas fa-coins"></i>
+                Multi-Token Economy
+            </h2>
+            <div class="section-badge">5 Tokens</div>
+        </div>
+        
+        <div class="token-grid slide-up">
+            <div class="card token-card">
+                <div class="token-symbol">STR</div>
+                <div class="token-name">Sourceless Token</div>
+                <div class="token-price">$17.42</div>
+                <div class="stat-change positive">+2.34%</div>
+            </div>
+            <div class="card token-card">
+                <div class="token-symbol">CCOS</div>
+                <div class="token-name">CCOIN Network</div>
+                <div class="token-price">$8.76</div>
+                <div class="stat-change positive">+1.12%</div>
+            </div>
+            <div class="card token-card">
+                <div class="token-symbol">ARSS</div>
+                <div class="token-name">ARES Token</div>
+                <div class="token-price">$2.35</div>
+                <div class="stat-change negative">-0.87%</div>
+            </div>
+            <div class="card token-card">
+                <div class="token-symbol">WSTR</div>
+                <div class="token-name">Wrapped STR</div>
+                <div class="token-price">$17.39</div>
+                <div class="stat-change positive">+2.28%</div>
+            </div>
+            <div class="card token-card">
+                <div class="token-symbol">ESTR</div>
+                <div class="token-name">Ethereum STR</div>
+                <div class="token-price">$17.41</div>
+                <div class="stat-change positive">+2.33%</div>
+            </div>
+        </div>
+
+        <!-- 6-Ledger Architecture -->
+        <div class="section-header slide-up">
+            <h2 class="section-title">
+                <i class="fas fa-layer-group"></i>
+                6-Ledger Multi-Chain Architecture
+            </h2>
+            <div class="section-badge">Parallel Chains</div>
+        </div>
+
+        <div class="ledger-grid slide-up">
+            <!-- Main Ledger -->
+            <div class="card ledger-card main">
+                <div class="ledger-header">
+                    <div class="ledger-title">Main Ledger</div>
+                    <div class="ledger-icon" style="background: var(--main-ledger);">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                </div>
+                <div class="ledger-description">STR transfers & staking operations</div>
+                <div class="ledger-stats">
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value" id="mainBlocks">1.55M</div>
+                        <div class="ledger-stat-label">Blocks</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value" id="mainTPS">4,231</div>
+                        <div class="ledger-stat-label">TPS</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">23.5M</div>
+                        <div class="ledger-stat-label">Transactions</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">100 STR</div>
+                        <div class="ledger-stat-label">Block Reward</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Asset Ledger -->
+            <div class="card ledger-card asset">
+                <div class="ledger-header">
+                    <div class="ledger-title">Asset Ledger</div>
+                    <div class="ledger-icon" style="background: var(--asset-ledger);">
+                        <i class="fas fa-gem"></i>
+                    </div>
+                </div>
+                <div class="ledger-description">STR.Domains & NFTs</div>
+                <div class="ledger-stats">
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">1.55M</div>
+                        <div class="ledger-stat-label">Blocks</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">1,876</div>
+                        <div class="ledger-stat-label">TPS</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">125K</div>
+                        <div class="ledger-stat-label">Domains</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">457K</div>
+                        <div class="ledger-stat-label">NFTs</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contract Ledger -->
+            <div class="card ledger-card contract">
+                <div class="ledger-header">
+                    <div class="ledger-title">Contract Ledger</div>
+                    <div class="ledger-icon" style="background: var(--contract-ledger);">
+                        <i class="fas fa-code"></i>
+                    </div>
+                </div>
+                <div class="ledger-description">STARW smart contracts</div>
+                <div class="ledger-stats">
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">1.55M</div>
+                        <div class="ledger-stat-label">Blocks</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">987</div>
+                        <div class="ledger-stat-label">TPS</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">23.5K</div>
+                        <div class="ledger-stat-label">Contracts</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">789</div>
+                        <div class="ledger-stat-label">STARW VMs</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Governance Ledger -->
+            <div class="card ledger-card governance">
+                <div class="ledger-header">
+                    <div class="ledger-title">Governance Ledger</div>
+                    <div class="ledger-icon" style="background: var(--governance-ledger);">
+                        <i class="fas fa-vote-yea"></i>
+                    </div>
+                </div>
+                <div class="ledger-description">DAO & voting system</div>
+                <div class="ledger-stats">
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">1.55M</div>
+                        <div class="ledger-stat-label">Blocks</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">234</div>
+                        <div class="ledger-stat-label">TPS</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">456</div>
+                        <div class="ledger-stat-label">Proposals</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">67.8%</div>
+                        <div class="ledger-stat-label">Participation</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CCOIN Ledger -->
+            <div class="card ledger-card ccoin">
+                <div class="ledger-header">
+                    <div class="ledger-title">CCOIN Ledger</div>
+                    <div class="ledger-icon" style="background: var(--ccoin-ledger);">
+                        <i class="fas fa-bridge"></i>
+                    </div>
+                </div>
+                <div class="ledger-description">Cross-chain bridge</div>
+                <div class="ledger-stats">
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">1.55M</div>
+                        <div class="ledger-stat-label">Blocks</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">1,234</div>
+                        <div class="ledger-stat-label">TPS</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">12</div>
+                        <div class="ledger-stat-label">Networks</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">$1.2B</div>
+                        <div class="ledger-stat-label">Volume</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CCOS Ledger -->
+            <div class="card ledger-card ccos">
+                <div class="ledger-header">
+                    <div class="ledger-title">CCOS Ledger</div>
+                    <div class="ledger-icon" style="background: var(--ccos-ledger);">
+                        <i class="fas fa-gamepad"></i>
+                    </div>
+                </div>
+                <div class="ledger-description">IgniteHex platform</div>
+                <div class="ledger-stats">
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">1.55M</div>
+                        <div class="ledger-stat-label">Blocks</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">567</div>
+                        <div class="ledger-stat-label">TPS</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">123</div>
+                        <div class="ledger-stat-label">Platforms</div>
+                    </div>
+                    <div class="ledger-stat">
+                        <div class="ledger-stat-value">234K</div>
+                        <div class="ledger-stat-label">Users</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1313 Validator Network -->
+        <div class="section-header slide-up">
+            <h2 class="section-title">
+                <i class="fas fa-server"></i>
+                1313 STARW Validator Network
+            </h2>
+            <div class="section-badge">Genesis Network</div>
+        </div>
+
+        <div class="validator-grid slide-up">
+            <!-- Genesis Nodes -->
+            <div class="card validator-type-card genesis">
+                <div class="validator-header">
+                    <div class="validator-title">Genesis Nodes</div>
+                    <div class="validator-count">21</div>
+                </div>
+                <div class="validator-description">Genesis Authority Nodes with special privileges and maximum voting power</div>
+                <div class="validator-metrics">
+                    <div class="validator-metric">
+                        <span class="validator-metric-label">Power:</span>
+                        <span class="validator-metric-value">100</span>
+                    </div>
+                    <div class="validator-metric">
+                        <span class="validator-metric-label">Avg Stake:</span>
+                        <span class="validator-metric-value">2.86B STR</span>
+                    </div>
+                    <div class="validator-metric">
+                        <span class="validator-metric-label">Uptime:</span>
+                        <span class="validator-metric-value">99.98%</span>
+                    </div>
+                    <div class="validator-metric">
+                        <span class="validator-metric-label">Rewards:</span>
+                        <span class="validator-metric-value">125K STR</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Supernodes -->
+            <div class="card validator-type-card supernode">
+                <div class="validator-header">
+                    <div class="validator-title">Supernodes</div>
+                    <div class="validator-count">156</div>
+                </div>
+                <div class="validator-description">High-Performance Validators with enhanced capabilities and significant stake</div>
+                <div class="validator-metrics">
+                    <div class="validator-metric">
+                        <span class="validator-metric-label">Power:</span>
+                        <span class="validator-metric-value">50</span>
+                    </div>
+                    <div class="validator-metric">
+                        <span class="validator-metric-label">Avg Stake:</span>
+                        <span class="validator-metric-value">64.1M STR</span>
+                    </div>
+                    <div class="validator-metric">
+                        <span class="validator-metric-label">Uptime:</span>
+                        <span class="validator-metric-value">99.85%</span>
+                    </div>
+                    <div class="validator-metric">
+                        <span class="validator-metric-label">Rewards:</span>
+                        <span class="validator-metric-value">85K STR</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mini Validators -->
+            <div class="card validator-type-card mini">
+                <div class="validator-header">
+                    <div class="validator-title">Mini Validators</div>
+                    <div class="validator-count">847</div>
+                </div>
+                <div class="validator-description">Distributed Mini Validators ensuring network decentralization</div>
+                <div class="validator-metrics">
+                    <div class="validator-metric">
+                        <span class="validator-metric-label">Power:</span>
+                        <span class="validator-metric-value">10</span>
+                    </div>
+                    <div class="validator-metric">
+                        <span class="validator-metric-label">Avg Stake:</span>
+                        <span class="validator-metric-value">11.8M STR</span>
+                    </div>
+                    <div class="validator-metric">
+                        <span class="validator-metric-label">Uptime:</span>
+                        <span class="validator-metric-value">99.72%</span>
+                    </div>
+                    <div class="validator-metric">
+                        <span class="validator-metric-label">Rewards:</span>
+                        <span class="validator-metric-value">15K STR</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STARW Workers -->
+            <div class="card validator-type-card starw">
+                <div class="validator-header">
+                    <div class="validator-title">STARW Workers</div>
+                    <div class="validator-count">289</div>
+                </div>
+                <div class="validator-description">STARW Computation Workers providing VM hosting and contract execution</div>
+                <div class="validator-metrics">
+                    <div class="validator-metric">
+                        <span class="validator-metric-label">Power:</span>
+                        <span class="validator-metric-value">5</span>
+                    </div>
+                    <div class="validator-metric">
+                        <span class="validator-metric-label">Avg Stake:</span>
+                        <span class="validator-metric-value">3.5M STR</span>
+                    </div>
+                    <div class="validator-metric">
+                        <span class="validator-metric-label">Compute:</span>
+                        <span class="validator-metric-value">1.2 PFLOPS</span>
+                    </div>
+                    <div class="validator-metric">
+                        <span class="validator-metric-label">ARSS Earned:</span>
+                        <span class="validator-metric-value">432 ARSS</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STARW VM Ecosystem -->
+        <div class="section-header slide-up">
+            <h2 class="section-title">
+                <i class="fas fa-microchip"></i>
+                STARW Virtual Machine Ecosystem
+            </h2>
+            <div class="section-badge">AppLess Contracts</div>
+        </div>
+
+        <div class="chart-grid slide-up">
+            <div class="card starw-card">
+                <h3 class="card-title">
+                    <i class="fas fa-server"></i>
+                    STARW Network Stats
+                </h3>
+                <div class="starw-stats">
+                    <div class="starw-stat">
+                        <div class="starw-stat-value">289</div>
+                        <div class="starw-stat-label">Active Workers</div>
+                    </div>
+                    <div class="starw-stat">
+                        <div class="starw-stat-value">1.2 PF</div>
+                        <div class="starw-stat-label">Total Compute</div>
+                    </div>
+                    <div class="starw-stat">
+                        <div class="starw-stat-value">500 TB</div>
+                        <div class="starw-stat-label">Storage</div>
+                    </div>
+                    <div class="starw-stat">
+                        <div class="starw-stat-value">73%</div>
+                        <div class="starw-stat-label">Utilization</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">
+                    <i class="fas fa-code"></i>
+                    AppLess Contracts
+                </h3>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Contract</th>
+                                <th>Executions</th>
+                                <th>Gas Cost</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="applessContracts">
+                            <tr><td colspan="4" class="loading"><i class="fas fa-spinner"></i> Loading AppLess contracts...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- DeFi & Cross-Chain -->
+        <div class="section-header slide-up">
+            <h2 class="section-title">
+                <i class="fas fa-exchange-alt"></i>
+                DeFi & Cross-Chain Bridge
+            </h2>
+            <div class="section-badge">12 Networks</div>
+        </div>
+
+        <div class="chart-grid slide-up">
+            <div class="card defi-card">
+                <h3 class="card-title">
+                    <i class="fas fa-chart-line"></i>
+                    DeFi Liquidity Pools
+                </h3>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Pair</th>
+                                <th>Liquidity</th>
+                                <th>Volume 24h</th>
+                                <th>APR</th>
+                            </tr>
+                        </thead>
+                        <tbody id="defiPools">
+                            <tr><td colspan="4" class="loading"><i class="fas fa-spinner"></i> Loading DeFi pools...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">
+                    <i class="fas fa-bridge"></i>
+                    Cross-Chain Bridges
+                </h3>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Network</th>
+                                <th>Volume</th>
+                                <th>Avg Time</th>
+                                <th>Fee</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bridgeStats">
+                            <tr><td colspan="4" class="loading"><i class="fas fa-spinner"></i> Loading bridge stats...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="section-header slide-up">
+            <h2 class="section-title">
+                <i class="fas fa-clock"></i>
+                Real-Time Network Activity
+            </h2>
+            <div class="section-badge">Live</div>
+        </div>
+
+        <div class="chart-grid slide-up">
+            <div class="card">
+                <h3 class="card-title">
+                    <i class="fas fa-cubes"></i>
+                    Recent Blocks
+                </h3>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Block</th>
+                                <th>Ledger</th>
+                                <th>Validator</th>
+                                <th>Txns</th>
+                                <th>Age</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentBlocks">
+                            <tr><td colspan="5" class="loading"><i class="fas fa-spinner"></i> Loading recent blocks...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">
+                    <i class="fas fa-chart-area"></i>
+                    Network Performance
+                </h3>
+                <div class="chart-container">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load the complete ecosystem library -->
+    <script src="js/sourceless-ecosystem-core.js"></script>
+    <script>
+        let performanceChart;
+
+        // Initialize performance chart
+        function initializePerformanceChart() {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            
+            performanceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Total TPS',
+                            data: [],
+                            borderColor: '#2563eb',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Main Ledger',
+                            data: [],
+                            borderColor: '#06b6d4',
+                            backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Asset Ledger',
+                            data: [],
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: '#cbd5e1'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: '#334155'
+                            },
+                            ticks: {
+                                color: '#cbd5e1'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: '#334155'
+                            },
+                            ticks: {
+                                color: '#cbd5e1'
+                            }
+                        }
+                    }
+                }
+            });
+
+            updatePerformanceChart();
+        }
+
+        // Update performance chart
+        function updatePerformanceChart() {
+            if (!performanceChart) return;
+
+            const now = new Date();
+            const timeLabel = now.toLocaleTimeString();
+            const totalTPS = Math.floor(Math.random() * 3000) + 6000;
+            const mainTPS = Math.floor(Math.random() * 1500) + 3500;
+            const assetTPS = Math.floor(Math.random() * 800) + 1200;
+
+            performanceChart.data.labels.push(timeLabel);
+            performanceChart.data.datasets[0].data.push(totalTPS);
+            performanceChart.data.datasets[1].data.push(mainTPS);
+            performanceChart.data.datasets[2].data.push(assetTPS);
+
+            // Keep only last 20 points
+            if (performanceChart.data.labels.length > 20) {
+                performanceChart.data.labels.shift();
+                performanceChart.data.datasets.forEach(dataset => dataset.data.shift());
+            }
+
+            performanceChart.update('none');
+        }
+
+        // Load recent blocks
+        async function loadRecentBlocks() {
+            try {
+                const blocks = await SourceLess.blockchain.getBlocks(8);
+                const tbody = document.getElementById('recentBlocks');
+                
+                tbody.innerHTML = blocks.map(block => {
+                    const ledgerColor = Utils.getLedgerColor(block.ledger);
+                    return `
+                        <tr>
+                            <td><span class="hash">${block.number.toLocaleString()}</span></td>
+                            <td><span class="badge" style="background: ${ledgerColor}20; color: ${ledgerColor}; border: 1px solid ${ledgerColor}40;">${block.ledgerName}</span></td>
+                            <td><span class="hash">${Utils.formatAddress(block.validator)}</span></td>
+                            <td><span class="badge badge-info">${block.transactions}</span></td>
+                            <td>${Utils.formatTime(block.timestamp)}</td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (error) {
+                document.getElementById('recentBlocks').innerHTML = '<tr><td colspan="5" class="loading">Error loading blocks</td></tr>';
+            }
+        }
+
+        // Load AppLess contracts
+        async function loadAppLessContracts() {
+            try {
+                const contracts = await SourceLess.starw.getAppLessContracts();
+                const tbody = document.getElementById('applessContracts');
+                
+                tbody.innerHTML = contracts.map(contract => `
+                    <tr>
+                        <td>
+                            <div style="font-weight: 600;">${contract.name}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">${contract.category}</div>
+                        </td>
+                        <td>${contract.executions.toLocaleString()}</td>
+                        <td>${contract.gas}</td>
+                        <td>${contract.verified ? '<span class="badge badge-success">Verified</span>' : '<span class="badge badge-warning">Unverified</span>'}</td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                document.getElementById('applessContracts').innerHTML = '<tr><td colspan="4" class="loading">Error loading contracts</td></tr>';
+            }
+        }
+
+        // Load DeFi pools
+        async function loadDeFiPools() {
+            try {
+                const pools = await SourceLess.defi.getPools();
+                const tbody = document.getElementById('defiPools');
+                
+                tbody.innerHTML = pools.map(pool => `
+                    <tr>
+                        <td style="font-weight: 600;">${pool.pair}</td>
+                        <td>${pool.liquidity}</td>
+                        <td>${pool.volume24h}</td>
+                        <td style="color: var(--success); font-weight: 600;">${pool.apr}</td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                document.getElementById('defiPools').innerHTML = '<tr><td colspan="4" class="loading">Error loading pools</td></tr>';
+            }
+        }
+
+        // Load bridge stats
+        async function loadBridgeStats() {
+            try {
+                const bridgeData = await SourceLess.defi.getBridgeStats();
+                const tbody = document.getElementById('bridgeStats');
+                
+                tbody.innerHTML = bridgeData.bridges.map(bridge => `
+                    <tr>
+                        <td>
+                            <div style="font-weight: 600;">${bridge.from} → SourceLess</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Tokens: ${bridge.tokens.join(', ')}</div>
+                        </td>
+                        <td>${bridge.volume}</td>
+                        <td>${bridge.avgTime}</td>
+                        <td>${bridge.fee}</td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                document.getElementById('bridgeStats').innerHTML = '<tr><td colspan="4" class="loading">Error loading bridges</td></tr>';
+            }
+        }
+
+        // Update network stats in header
+        async function updateHeaderStats() {
+            try {
+                const stats = await SourceLess.network.getEcosystemOverview();
+                
+                document.getElementById('activeValidators').textContent = stats.network.onlineNodes.toLocaleString();
+                document.getElementById('currentTPS').textContent = stats.performance.totalTPS.toLocaleString();
+            } catch (error) {
+                console.error('Failed to update header stats:', error);
+            }
+        }
+
+        // Real-time updates
+        function setupRealTimeUpdates() {
+            // Subscribe to real-time events
+            SourceLess.realtime.subscribe('networkStats', (data) => {
+                document.getElementById('currentTPS').textContent = data.tps.toLocaleString();
+            });
+
+            SourceLess.realtime.subscribe('newBlock', (data) => {
+                // Refresh recent blocks when new block arrives
+                loadRecentBlocks();
+            });
+        }
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Wait for SourceLess ecosystem to be ready
+            while (!window.SourceLess) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            
+            console.log('Initializing SourceLess Professional Ecosystem Dashboard...');
+            
+            // Initialize all components
+            initializePerformanceChart();
+            await updateHeaderStats();
+            await loadRecentBlocks();
+            await loadAppLessContracts();
+            await loadDeFiPools();
+            await loadBridgeStats();
+            
+            // Setup real-time updates
+            setupRealTimeUpdates();
+            
+            // Set up refresh intervals
+            setInterval(updatePerformanceChart, 3000);
+            setInterval(loadRecentBlocks, 15000);
+            setInterval(updateHeaderStats, 10000);
+            
+            console.log('✅ SourceLess Professional Ecosystem Dashboard initialized successfully!');
+            console.log('🌟 Monitoring 6 ledgers, 1313 validators, and complete ecosystem');
+        });
+
+        // Add some interactive features
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('hash')) {
+                e.target.style.color = 'var(--accent)';
+                setTimeout(() => {
+                    e.target.style.color = 'var(--primary)';
+                }, 200);
+            }
+        });
+
+        // Add animation classes as elements come into view
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all cards for animation
+        document.querySelectorAll('.card').forEach(card => {
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>

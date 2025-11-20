@@ -434,30 +434,44 @@ export class AresForgeEngine {
      * Load pre-built contract templates
      */
     private loadContractTemplates(): void {
-        // ERC20 Token Template
-        this.templates.set('ERC20', {
-            name: 'ERC20Token',
+        // Native AresLang STR Token Template
+        this.templates.set('STR_TOKEN', {
+            name: 'NativeSTRToken',
             version: '1.0.0',
             language: 'ares',
             code: `
-contract ERC20Token {
-    string public name;
-    string public symbol;
-    uint256 public totalSupply;
-    mapping(address => uint256) public balances;
-    mapping(address => mapping(address => uint256)) public allowances;
+// Native SourceLess™ STR Token Contract
+token_contract NativeSTRToken {
+    # Token metadata
+    name: string = "{{tokenName}}";
+    symbol: string = "{{tokenSymbol}}";
+    decimals: uint8 = 13;  // All SourceLess tokens use 13 decimals
+    total_supply: uint256 = {{totalSupply}};
     
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    event Approval(address indexed owner, address indexed spender, uint256 value);
+    # Native SourceLess balances use ZK13STR addresses
+    balances: mapping<zk13str_address, uint256>;
+    allowances: mapping<zk13str_address, mapping<zk13str_address, uint256>>;
     
-    constructor(string _name, string _symbol, uint256 _initialSupply) {
+    # SourceLess native events
+    event STRTransfer(zk13str_address indexed from, zk13str_address indexed to, uint256 value);
+    event STRApproval(zk13str_address indexed owner, zk13str_address indexed spender, uint256 value);
+    
+    # Constructor with CCOIN integration
+    constructor(string _name, string _symbol, uint256 _initial_supply) {
         name = _name;
         symbol = _symbol;
-        totalSupply = _initialSupply;
-        balances[msg.sender] = _initialSupply;
+        total_supply = _initial_supply;
+        balances[msg.sender] = _initial_supply;
+        
+        # Auto-enable HOSTLESS feeless transactions
+        enable_hostless_mode();
+        
+        # Setup CCOIN reward integration (2.5-10% dynamic)
+        setup_ccoin_integration(2.5, 10.0);
     }
     
-    function transfer(address to, uint256 amount) public returns (bool) {
+    # Native STR transfer with gas-free support
+    function transfer(zk13str_address to, uint256 amount) public returns (bool) {
         require(balances[msg.sender] >= amount, "Insufficient balance");
         balances[msg.sender] -= amount;
         balances[to] += amount;

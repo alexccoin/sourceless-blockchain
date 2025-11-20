@@ -167,13 +167,45 @@ const WalletAPI = {
             // Owner has access to treasury (67% of total supply)
             return { 
                 STR: 42210000000,      // 67% of 63B STR (treasury)
+                CCOIN: 15750000,       // PoE Post Mining Financial Core (growing supply)
                 CCOS: 42210000,        // 67% of 63M CCOS (treasury)
-                CCOIN: 5000000,        // 5M CCOIN
                 ARSS: 10000000,        // 10M ARSS
                 wSTR: 1000000,         // 1M wSTR
                 eSTR: 500000,          // 500K eSTR
                 $TR: 2500000           // 2.5M $TR (USD-pegged)
             };
+        }
+    },
+
+    // Get CCOIN Financial Core statistics
+    async getCCOINStats(address) {
+        try {
+            const data = await apiRequest(`ccoin/stats/${address}`);
+            return {
+                balance: data.balance || 0,
+                totalPostMined: data.totalPostMined || 0,
+                lastMiningTimestamp: data.lastMiningTimestamp || 0,
+                averagePoEScore: data.averagePoEScore || 0
+            };
+        } catch (error) {
+            console.warn('Using mock CCOIN stats');
+            return {
+                balance: 15750000,      // Mock treasury balance
+                totalPostMined: 2480000, // Mock post mined amount
+                lastMiningTimestamp: Date.now() - 300000, // 5 minutes ago
+                averagePoEScore: 87.5    // Mock PoE score
+            };
+        }
+    },
+
+    // Get CCOIN total supply (Financial Core)
+    async getCCOINTotalSupply() {
+        try {
+            const data = await apiRequest('ccoin/totalSupply');
+            return data.totalSupply || 0;
+        } catch (error) {
+            console.warn('Using mock CCOIN total supply');
+            return 23500000; // Mock growing supply from post mining
         }
     }
 };

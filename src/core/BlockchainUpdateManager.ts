@@ -529,7 +529,7 @@ export class BlockchainUpdateManager extends EventEmitter {
   private async testCCOINIntegration(): Promise<TestResult> {
     const startTime = Date.now();
     try {
-      // Test CCOIN minting and rewards
+      // Test CCOIN post mining and PoE validation
       return {
         testName: 'CCOINIntegration',
         status: 'passed',

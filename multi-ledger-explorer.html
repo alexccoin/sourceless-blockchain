@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>6-Ledger Multi-Chain Explorer - SourceLess Professional</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #64748b;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --purple: #8b5cf6;
+            --dark: #0f172a;
+            --darker: #020617;
+            --card: #1e293b;
+            --border: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            
+            /* Ledger-specific colors */
+            --main-ledger: #2563eb;
+            --asset-ledger: #06b6d4;
+            --contract-ledger: #10b981;
+            --governance-ledger: #f59e0b;
+            --ccoin-ledger: #8b5cf6;
+            --ccos-ledger: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--darker);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--dark), var(--darker));
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .logo i {
+            color: var(--primary);
+            font-size: 2rem;
+        }
+
+        .multi-chain-badge {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .ledger-tabs {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .ledger-tab {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .ledger-tab:hover {
+            border-color: var(--primary);
+            color: var(--text-primary);
+        }
+
+        .ledger-tab.active {
+            color: white;
+            border-color: transparent;
+        }
+
+        .ledger-tab.main.active { background: var(--main-ledger); }
+        .ledger-tab.asset.active { background: var(--asset-ledger); }
+        .ledger-tab.contract.active { background: var(--contract-ledger); }
+        .ledger-tab.governance.active { background: var(--governance-ledger); }
+        .ledger-tab.ccoin.active { background: var(--ccoin-ledger); }
+        .ledger-tab.ccos.active { background: var(--ccos-ledger); }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .grid {
+            display: grid;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .grid-1 { grid-template-columns: 1fr; }
+        .grid-2 { grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); }
+        .grid-3 { grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); }
+        .grid-4 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            border-color: var(--primary);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card-title i {
+            color: var(--primary);
+        }
+
+        .card-badge {
+            background: var(--primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Ledger-specific content */
+        .ledger-content {
+            display: none;
+        }
+
+        .ledger-content.active {
+            display: block;
+        }
+
+        .ledger-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .overview-card {
+            text-align: center;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .overview-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+        }
+
+        .overview-card.main::before { background: var(--main-ledger); }
+        .overview-card.asset::before { background: var(--asset-ledger); }
+        .overview-card.contract::before { background: var(--contract-ledger); }
+        .overview-card.governance::before { background: var(--governance-ledger); }
+        .overview-card.ccoin::before { background: var(--ccoin-ledger); }
+        .overview-card.ccos::before { background: var(--ccos-ledger); }
+
+        .overview-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .overview-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .overview-change {
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+
+        .positive { color: var(--success); }
+        .negative { color: var(--danger); }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th {
+            background: var(--darker);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 1rem 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        .table tr:hover {
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .hash {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .hash:hover {
+            text-decoration: underline;
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .badge-info {
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--accent);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .ledger-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: white;
+        }
+
+        .ledger-badge.main { background: var(--main-ledger); }
+        .ledger-badge.asset { background: var(--asset-ledger); }
+        .ledger-badge.contract { background: var(--contract-ledger); }
+        .ledger-badge.governance { background: var(--governance-ledger); }
+        .ledger-badge.ccoin { background: var(--ccoin-ledger); }
+        .ledger-badge.ccos { background: var(--ccos-ledger); }
+
+        /* Chart containers */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 1rem;
+        }
+
+        /* Section headers */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 3rem 0 1.5rem 0;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title i {
+            color: var(--primary);
+        }
+
+        .section-badge {
+            background: var(--primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Loading states */
+        .loading {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 2rem;
+        }
+
+        .loading i {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Cross-chain specific styling */
+        .cross-chain-flow {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .chain-node {
+            background: var(--darker);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .chain-node::after {
+            content: '→';
+            position: absolute;
+            right: -1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .chain-node:last-child::after {
+            display: none;
+        }
+
+        .chain-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .chain-volume {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .ledger-tabs {
+                flex-wrap: wrap;
+            }
+            
+            .grid-2, .grid-3, .grid-4 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animation classes */
+        .fade-in {
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-up {
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-layer-group"></i>
+                <div>
+                    <div>6-Ledger Multi-Chain</div>
+                    <div class="multi-chain-badge">Parallel Blockchain Architecture</div>
+                </div>
+            </div>
+            <div class="ledger-tabs">
+                <button class="ledger-tab main active" onclick="switchLedger('main')">Main</button>
+                <button class="ledger-tab asset" onclick="switchLedger('asset')">Asset</button>
+                <button class="ledger-tab contract" onclick="switchLedger('contract')">Contract</button>
+                <button class="ledger-tab governance" onclick="switchLedger('governance')">Governance</button>
+                <button class="ledger-tab ccoin" onclick="switchLedger('ccoin')">CCOIN</button>
+                <button class="ledger-tab ccos" onclick="switchLedger('ccos')">CCOS</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Main Ledger Content -->
+        <div id="main-content" class="ledger-content active">
+            <div class="section-header fade-in">
+                <h2 class="section-title">
+                    <i class="fas fa-coins"></i>
+                    Main Ledger - STR Transfers & Staking
+                </h2>
+                <div class="section-badge" style="background: var(--main-ledger);">Primary Chain</div>
+            </div>
+
+            <div class="ledger-overview slide-up">
+                <div class="overview-card main">
+                    <div class="overview-value" id="mainBlocks">1.55M</div>
+                    <div class="overview-label">Total Blocks</div>
+                    <div class="overview-change positive">+127 (1h)</div>
+                </div>
+                <div class="overview-card main">
+                    <div class="overview-value" id="mainTransactions">23.5M</div>
+                    <div class="overview-label">Transactions</div>
+                    <div class="overview-change positive">+4,231 (1h)</div>
+                </div>
+                <div class="overview-card main">
+                    <div class="overview-value" id="mainTPS">4,231</div>
+                    <div class="overview-label">Current TPS</div>
+                    <div class="overview-change positive">Live</div>
+                </div>
+                <div class="overview-card main">
+                    <div class="overview-value" id="mainStaked">42.3B</div>
+                    <div class="overview-label">STR Staked</div>
+                    <div class="overview-change positive">67.3%</div>
+                </div>
+            </div>
+
+            <div class="grid grid-2 slide-up">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-cubes"></i>
+                            Recent Blocks
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Block</th>
+                                    <th>Validator</th>
+                                    <th>Txns</th>
+                                    <th>Reward</th>
+                                    <th>Age</th>
+                                </tr>
+                            </thead>
+                            <tbody id="mainBlocks">
+                                <tr><td colspan="5" class="loading"><i class="fas fa-spinner"></i> Loading blocks...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-exchange-alt"></i>
+                            Recent Transactions
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Hash</th>
+                                    <th>From</th>
+                                    <th>To</th>
+                                    <th>Value</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="mainTransactions">
+                                <tr><td colspan="5" class="loading"><i class="fas fa-spinner"></i> Loading transactions...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Asset Ledger Content -->
+        <div id="asset-content" class="ledger-content">
+            <div class="section-header fade-in">
+                <h2 class="section-title">
+                    <i class="fas fa-gem"></i>
+                    Asset Ledger - STR.Domains & NFTs
+                </h2>
+                <div class="section-badge" style="background: var(--asset-ledger);">Digital Assets</div>
+            </div>
+
+            <div class="ledger-overview slide-up">
+                <div class="overview-card asset">
+                    <div class="overview-value" id="assetBlocks">1.55M</div>
+                    <div class="overview-label">Asset Blocks</div>
+                    <div class="overview-change positive">+98 (1h)</div>
+                </div>
+                <div class="overview-card asset">
+                    <div class="overview-value" id="totalDomains">125K</div>
+                    <div class="overview-label">STR.Domains</div>
+                    <div class="overview-change positive">+234 (24h)</div>
+                </div>
+                <div class="overview-card asset">
+                    <div class="overview-value" id="totalNFTs">457K</div>
+                    <div class="overview-label">Total NFTs</div>
+                    <div class="overview-change positive">+1,234 (24h)</div>
+                </div>
+                <div class="overview-card asset">
+                    <div class="overview-value" id="assetTPS">1,876</div>
+                    <div class="overview-label">Asset TPS</div>
+                    <div class="overview-change positive">Live</div>
+                </div>
+            </div>
+
+            <div class="grid grid-2 slide-up">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-globe"></i>
+                            Recent Domain Registrations
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Domain</th>
+                                    <th>Owner</th>
+                                    <th>Price</th>
+                                    <th>Expiry</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentDomains">
+                                <tr><td colspan="5" class="loading"><i class="fas fa-spinner"></i> Loading domains...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-images"></i>
+                            NFT Collections
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Collection</th>
+                                    <th>Items</th>
+                                    <th>Volume</th>
+                                    <th>Floor</th>
+                                    <th>Change</th>
+                                </tr>
+                            </thead>
+                            <tbody id="nftCollections">
+                                <tr><td colspan="5" class="loading"><i class="fas fa-spinner"></i> Loading NFT collections...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contract Ledger Content -->
+        <div id="contract-content" class="ledger-content">
+            <div class="section-header fade-in">
+                <h2 class="section-title">
+                    <i class="fas fa-code"></i>
+                    Contract Ledger - STARW Smart Contracts
+                </h2>
+                <div class="section-badge" style="background: var(--contract-ledger);">Zero-Knowledge</div>
+            </div>
+
+            <div class="ledger-overview slide-up">
+                <div class="overview-card contract">
+                    <div class="overview-value" id="contractBlocks">1.55M</div>
+                    <div class="overview-label">Contract Blocks</div>
+                    <div class="overview-change positive">+67 (1h)</div>
+                </div>
+                <div class="overview-card contract">
+                    <div class="overview-value" id="totalContracts">23.5K</div>
+                    <div class="overview-label">STARW Contracts</div>
+                    <div class="overview-change positive">+145 (24h)</div>
+                </div>
+                <div class="overview-card contract">
+                    <div class="overview-value" id="activeVMs">789</div>
+                    <div class="overview-label">Active VMs</div>
+                    <div class="overview-change positive">98.2%</div>
+                </div>
+                <div class="overview-card contract">
+                    <div class="overview-value" id="contractTPS">987</div>
+                    <div class="overview-label">Contract TPS</div>
+                    <div class="overview-change positive">Live</div>
+                </div>
+            </div>
+
+            <div class="grid grid-2 slide-up">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-file-code"></i>
+                            AppLess Contracts
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Contract</th>
+                                    <th>STARW VM</th>
+                                    <th>Executions</th>
+                                    <th>Gas Used</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="applessContracts">
+                                <tr><td colspan="5" class="loading"><i class="fas fa-spinner"></i> Loading contracts...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-server"></i>
+                            STARW VM Performance
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="contractPerformanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Governance Ledger Content -->
+        <div id="governance-content" class="ledger-content">
+            <div class="section-header fade-in">
+                <h2 class="section-title">
+                    <i class="fas fa-vote-yea"></i>
+                    Governance Ledger - DAO & Proposals
+                </h2>
+                <div class="section-badge" style="background: var(--governance-ledger);">Democracy</div>
+            </div>
+
+            <div class="ledger-overview slide-up">
+                <div class="overview-card governance">
+                    <div class="overview-value" id="governanceBlocks">1.55M</div>
+                    <div class="overview-label">Gov Blocks</div>
+                    <div class="overview-change positive">+23 (1h)</div>
+                </div>
+                <div class="overview-card governance">
+                    <div class="overview-value" id="totalProposals">456</div>
+                    <div class="overview-label">Total Proposals</div>
+                    <div class="overview-change positive">+12 (7d)</div>
+                </div>
+                <div class="overview-card governance">
+                    <div class="overview-value" id="voterTurnout">67.8%</div>
+                    <div class="overview-label">Voter Turnout</div>
+                    <div class="overview-change positive">Active</div>
+                </div>
+                <div class="overview-card governance">
+                    <div class="overview-value" id="governanceTPS">234</div>
+                    <div class="overview-label">Gov TPS</div>
+                    <div class="overview-change positive">Live</div>
+                </div>
+            </div>
+
+            <div class="grid grid-2 slide-up">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-clipboard-list"></i>
+                            Active Proposals
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Proposal</th>
+                                    <th>Type</th>
+                                    <th>Votes</th>
+                                    <th>Status</th>
+                                    <th>Deadline</th>
+                                </tr>
+                            </thead>
+                            <tbody id="activeProposals">
+                                <tr><td colspan="5" class="loading"><i class="fas fa-spinner"></i> Loading proposals...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-chart-pie"></i>
+                            Voting Distribution
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="votingChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CCOIN Ledger Content -->
+        <div id="ccoin-content" class="ledger-content">
+            <div class="section-header fade-in">
+                <h2 class="section-title">
+                    <i class="fas fa-bridge"></i>
+                    CCOIN Ledger - Cross-Chain Bridge
+                </h2>
+                <div class="section-badge" style="background: var(--ccoin-ledger);">12 Networks</div>
+            </div>
+
+            <div class="ledger-overview slide-up">
+                <div class="overview-card ccoin">
+                    <div class="overview-value" id="ccoinBlocks">1.55M</div>
+                    <div class="overview-label">CCOIN Blocks</div>
+                    <div class="overview-change positive">+145 (1h)</div>
+                </div>
+                <div class="overview-card ccoin">
+                    <div class="overview-value" id="bridgeVolume">$1.2B</div>
+                    <div class="overview-label">Bridge Volume</div>
+                    <div class="overview-change positive">+5.2% (24h)</div>
+                </div>
+                <div class="overview-card ccoin">
+                    <div class="overview-value" id="connectedNetworks">12</div>
+                    <div class="overview-label">Networks</div>
+                    <div class="overview-change positive">All Online</div>
+                </div>
+                <div class="overview-card ccoin">
+                    <div class="overview-value" id="ccoinTPS">1,234</div>
+                    <div class="overview-label">Bridge TPS</div>
+                    <div class="overview-change positive">Live</div>
+                </div>
+            </div>
+
+            <div class="grid grid-1 slide-up">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-network-wired"></i>
+                            Cross-Chain Network Flow
+                        </div>
+                    </div>
+                    <div class="cross-chain-flow" id="crossChainFlow">
+                        <div class="loading"><i class="fas fa-spinner"></i> Loading cross-chain data...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-2 slide-up">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-exchange-alt"></i>
+                            Recent Bridge Transactions
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Hash</th>
+                                    <th>From → To</th>
+                                    <th>Amount</th>
+                                    <th>Fee</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bridgeTransactions">
+                                <tr><td colspan="5" class="loading"><i class="fas fa-spinner"></i> Loading bridge transactions...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-chart-area"></i>
+                            Bridge Volume Analytics
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="bridgeVolumeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CCOS Ledger Content -->
+        <div id="ccos-content" class="ledger-content">
+            <div class="section-header fade-in">
+                <h2 class="section-title">
+                    <i class="fas fa-gamepad"></i>
+                    CCOS Ledger - IgniteHex Platform
+                </h2>
+                <div class="section-badge" style="background: var(--ccos-ledger);">Gaming</div>
+            </div>
+
+            <div class="ledger-overview slide-up">
+                <div class="overview-card ccos">
+                    <div class="overview-value" id="ccosBlocks">1.55M</div>
+                    <div class="overview-label">CCOS Blocks</div>
+                    <div class="overview-change positive">+89 (1h)</div>
+                </div>
+                <div class="overview-card ccos">
+                    <div class="overview-value" id="activePlatforms">123</div>
+                    <div class="overview-label">Active Platforms</div>
+                    <div class="overview-change positive">+15 (30d)</div>
+                </div>
+                <div class="overview-card ccos">
+                    <div class="overview-value" id="totalUsers">234K</div>
+                    <div class="overview-label">Total Users</div>
+                    <div class="overview-change positive">+2,341 (24h)</div>
+                </div>
+                <div class="overview-card ccos">
+                    <div class="overview-value" id="ccosTPS">567</div>
+                    <div class="overview-label">Platform TPS</div>
+                    <div class="overview-change positive">Live</div>
+                </div>
+            </div>
+
+            <div class="grid grid-2 slide-up">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-trophy"></i>
+                            Top IgniteHex Platforms
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Platform</th>
+                                    <th>Users</th>
+                                    <th>Volume</th>
+                                    <th>Rewards</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topPlatforms">
+                                <tr><td colspan="5" class="loading"><i class="fas fa-spinner"></i> Loading platforms...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-chart-line"></i>
+                            Platform Activity
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="platformActivityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load the complete ecosystem library -->
+    <script src="js/sourceless-ecosystem-core.js"></script>
+    <script>
+        let contractPerformanceChart, votingChart, bridgeVolumeChart, platformActivityChart;
+        let currentLedger = 'main';
+
+        // Switch between ledgers
+        function switchLedger(ledger) {
+            // Hide all content
+            document.querySelectorAll('.ledger-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active from all tabs
+            document.querySelectorAll('.ledger-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected content and activate tab
+            document.getElementById(`${ledger}-content`).classList.add('active');
+            document.querySelector(`.ledger-tab.${ledger}`).classList.add('active');
+            
+            currentLedger = ledger;
+            
+            // Load data for selected ledger
+            loadLedgerData(ledger);
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            // Contract Performance Chart
+            const contractCtx = document.getElementById('contractPerformanceChart')?.getContext('2d');
+            if (contractCtx) {
+                contractPerformanceChart = new Chart(contractCtx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [
+                            {
+                                label: 'VM CPU %',
+                                data: [],
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                tension: 0.4,
+                                fill: true
+                            },
+                            {
+                                label: 'Gas Usage',
+                                data: [],
+                                borderColor: '#f59e0b',
+                                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                                tension: 0.4
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true, labels: { color: '#cbd5e1' }}
+                        },
+                        scales: {
+                            x: { grid: { color: '#334155' }, ticks: { color: '#cbd5e1' }},
+                            y: { grid: { color: '#334155' }, ticks: { color: '#cbd5e1' }}
+                        }
+                    }
+                });
+            }
+
+            // Voting Distribution Chart
+            const votingCtx = document.getElementById('votingChart')?.getContext('2d');
+            if (votingCtx) {
+                votingChart = new Chart(votingCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Genesis (21)', 'Supernodes (156)', 'Mini (847)', 'STARW (289)'],
+                        datasets: [{
+                            data: [45, 30, 20, 5],
+                            backgroundColor: ['#dc2626', '#7c3aed', '#2563eb', '#10b981'],
+                            borderWidth: 2,
+                            borderColor: '#334155'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: '#cbd5e1' }}
+                        }
+                    }
+                });
+            }
+
+            // Bridge Volume Chart
+            const bridgeCtx = document.getElementById('bridgeVolumeChart')?.getContext('2d');
+            if (bridgeCtx) {
+                bridgeVolumeChart = new Chart(bridgeCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Ethereum', 'BSC', 'Polygon', 'Avalanche', 'Fantom', 'Arbitrum'],
+                        datasets: [{
+                            label: 'Volume (24h)',
+                            data: [250, 180, 120, 95, 75, 60],
+                            backgroundColor: 'rgba(139, 92, 246, 0.8)',
+                            borderColor: '#8b5cf6',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: { grid: { color: '#334155' }, ticks: { color: '#cbd5e1' }},
+                            y: { grid: { color: '#334155' }, ticks: { color: '#cbd5e1' }}
+                        }
+                    }
+                });
+            }
+
+            // Platform Activity Chart
+            const platformCtx = document.getElementById('platformActivityChart')?.getContext('2d');
+            if (platformCtx) {
+                platformActivityChart = new Chart(platformCtx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [
+                            {
+                                label: 'Active Users',
+                                data: [],
+                                borderColor: '#ef4444',
+                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                tension: 0.4,
+                                fill: true
+                            },
+                            {
+                                label: 'Transactions',
+                                data: [],
+                                borderColor: '#f59e0b',
+                                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                                tension: 0.4
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true, labels: { color: '#cbd5e1' }}
+                        },
+                        scales: {
+                            x: { grid: { color: '#334155' }, ticks: { color: '#cbd5e1' }},
+                            y: { grid: { color: '#334155' }, ticks: { color: '#cbd5e1' }}
+                        }
+                    }
+                });
+            }
+        }
+
+        // Load data for specific ledger
+        async function loadLedgerData(ledger) {
+            switch (ledger) {
+                case 'main':
+                    await loadMainLedgerData();
+                    break;
+                case 'asset':
+                    await loadAssetLedgerData();
+                    break;
+                case 'contract':
+                    await loadContractLedgerData();
+                    break;
+                case 'governance':
+                    await loadGovernanceLedgerData();
+                    break;
+                case 'ccoin':
+                    await loadCCOINLedgerData();
+                    break;
+                case 'ccos':
+                    await loadCCOSLedgerData();
+                    break;
+            }
+        }
+
+        // Load Main Ledger data
+        async function loadMainLedgerData() {
+            try {
+                const blocks = await SourceLess.blockchain.getBlocksByLedger('main', 5);
+                const transactions = await SourceLess.blockchain.getTransactionsByLedger('main', 5);
+                
+                // Update blocks table
+                const blocksTable = document.querySelector('#main-content #mainBlocks');
+                if (blocksTable) {
+                    blocksTable.innerHTML = blocks.map(block => `
+                        <tr>
+                            <td><span class="hash">${block.number.toLocaleString()}</span></td>
+                            <td><span class="hash">${Utils.formatAddress(block.validator)}</span></td>
+                            <td><span class="badge badge-info">${block.transactions}</span></td>
+                            <td>100 STR</td>
+                            <td>${Utils.formatTime(block.timestamp)}</td>
+                        </tr>
+                    `).join('');
+                }
+                
+                // Update transactions table
+                const txTable = document.querySelector('#main-content #mainTransactions');
+                if (txTable) {
+                    txTable.innerHTML = transactions.map(tx => `
+                        <tr>
+                            <td><span class="hash">${Utils.formatAddress(tx.hash)}</span></td>
+                            <td><span class="hash">${Utils.formatAddress(tx.from)}</span></td>
+                            <td><span class="hash">${Utils.formatAddress(tx.to)}</span></td>
+                            <td>${tx.value} STR</td>
+                            <td><span class="badge badge-success">Success</span></td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading main ledger data:', error);
+            }
+        }
+
+        // Load Asset Ledger data
+        async function loadAssetLedgerData() {
+            try {
+                const domains = await SourceLess.assets.getRecentDomains();
+                const collections = await SourceLess.assets.getNFTCollections();
+                
+                // Update domains table
+                const domainsTable = document.querySelector('#asset-content #recentDomains');
+                if (domainsTable) {
+                    domainsTable.innerHTML = domains.map(domain => `
+                        <tr>
+                            <td><strong>${domain.name}.str</strong></td>
+                            <td><span class="hash">${Utils.formatAddress(domain.owner)}</span></td>
+                            <td>${domain.price} STR</td>
+                            <td>${domain.expiry}</td>
+                            <td><span class="badge badge-success">Active</span></td>
+                        </tr>
+                    `).join('');
+                }
+                
+                // Update NFT collections table
+                const collectionsTable = document.querySelector('#asset-content #nftCollections');
+                if (collectionsTable) {
+                    collectionsTable.innerHTML = collections.map(collection => `
+                        <tr>
+                            <td><strong>${collection.name}</strong></td>
+                            <td>${collection.items.toLocaleString()}</td>
+                            <td>${collection.volume}</td>
+                            <td>${collection.floor}</td>
+                            <td class="${collection.change > 0 ? 'positive' : 'negative'}">${collection.change > 0 ? '+' : ''}${collection.change}%</td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading asset ledger data:', error);
+            }
+        }
+
+        // Load Contract Ledger data
+        async function loadContractLedgerData() {
+            try {
+                const contracts = await SourceLess.starw.getAppLessContracts();
+                
+                // Update contracts table
+                const contractsTable = document.querySelector('#contract-content #applessContracts');
+                if (contractsTable) {
+                    contractsTable.innerHTML = contracts.map(contract => `
+                        <tr>
+                            <td>
+                                <div style="font-weight: 600;">${contract.name}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary);">${contract.category}</div>
+                            </td>
+                            <td><span class="hash">VM-${contract.vmId}</span></td>
+                            <td>${contract.executions.toLocaleString()}</td>
+                            <td>${contract.gas}</td>
+                            <td>${contract.verified ? '<span class="badge badge-success">Verified</span>' : '<span class="badge badge-warning">Unverified</span>'}</td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading contract ledger data:', error);
+            }
+        }
+
+        // Load Governance Ledger data
+        async function loadGovernanceLedgerData() {
+            try {
+                const proposals = await SourceLess.dao.getActiveProposals();
+                
+                // Update proposals table
+                const proposalsTable = document.querySelector('#governance-content #activeProposals');
+                if (proposalsTable) {
+                    proposalsTable.innerHTML = proposals.map(proposal => `
+                        <tr>
+                            <td>
+                                <div style="font-weight: 600;">${proposal.title}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary);">#{proposal.id}</div>
+                            </td>
+                            <td><span class="ledger-badge governance">${proposal.type}</span></td>
+                            <td>
+                                <div>Yes: ${proposal.votesFor}</div>
+                                <div>No: ${proposal.votesAgainst}</div>
+                            </td>
+                            <td><span class="badge badge-info">${proposal.status}</span></td>
+                            <td>${proposal.deadline}</td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading governance ledger data:', error);
+            }
+        }
+
+        // Load CCOIN Ledger data
+        async function loadCCOINLedgerData() {
+            try {
+                const bridgeData = await SourceLess.defi.getBridgeStats();
+                const transactions = await SourceLess.defi.getCrossChainTransactions();
+                
+                // Update cross-chain flow
+                const flowContainer = document.querySelector('#ccoin-content #crossChainFlow');
+                if (flowContainer && bridgeData) {
+                    flowContainer.innerHTML = bridgeData.bridges.slice(0, 6).map(bridge => `
+                        <div class="chain-node">
+                            <div class="chain-name">${bridge.from}</div>
+                            <div class="chain-volume">${bridge.volume}</div>
+                        </div>
+                    `).join('');
+                }
+                
+                // Update bridge transactions table
+                const txTable = document.querySelector('#ccoin-content #bridgeTransactions');
+                if (txTable) {
+                    txTable.innerHTML = transactions.map(tx => `
+                        <tr>
+                            <td><span class="hash">${Utils.formatAddress(tx.hash)}</span></td>
+                            <td>${tx.fromChain} → SourceLess</td>
+                            <td>${tx.amount}</td>
+                            <td>${tx.fee}</td>
+                            <td><span class="badge badge-success">Confirmed</span></td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading CCOIN ledger data:', error);
+            }
+        }
+
+        // Load CCOS Ledger data
+        async function loadCCOSLedgerData() {
+            try {
+                const platforms = await SourceLess.defi.getIgniteHexPlatforms();
+                
+                // Update platforms table
+                const platformsTable = document.querySelector('#ccos-content #topPlatforms');
+                if (platformsTable) {
+                    platformsTable.innerHTML = platforms.map(platform => `
+                        <tr>
+                            <td><strong>${platform.name}</strong></td>
+                            <td>${platform.users.toLocaleString()}</td>
+                            <td>${platform.volume}</td>
+                            <td>${platform.rewards}</td>
+                            <td><span class="badge badge-success">Active</span></td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading CCOS ledger data:', error);
+            }
+        }
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Wait for SourceLess ecosystem to be ready
+            while (!window.SourceLess) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            
+            console.log('Initializing 6-Ledger Multi-Chain Explorer...');
+            
+            // Initialize charts
+            initializeCharts();
+            
+            // Load initial data for main ledger
+            await loadLedgerData('main');
+            
+            // Set up refresh intervals
+            setInterval(() => {
+                if (currentLedger) {
+                    loadLedgerData(currentLedger);
+                }
+            }, 15000);
+            
+            console.log('✅ 6-Ledger Multi-Chain Explorer initialized successfully!');
+            console.log('🌟 Monitoring all 6 parallel blockchain ledgers');
+        });
+
+        // Add animation classes as elements come into view
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all cards for animation
+        document.querySelectorAll('.card').forEach(card => {
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>

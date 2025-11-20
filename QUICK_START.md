@@ -80,17 +80,28 @@ POST /api/transactions/create  - Create new transaction
 
 ## Development
 
-### AresLang Contract Development
+### Native SourceLess AresLang Contract Development
 ```areslang
-contract ZKT13PrivacyToken {
-    privacy_level: u8 = 7;
-    quantum_signature: bool = true;
-    ccoin_reward_rate: f64 = 3.5;
+// Native SourceLess ZKT13 Privacy Token
+zkt13_token_contract ZKT13PrivacyToken {
+    privacy_level: uint8 = 7;
+    quantum_signatures: bool = true;
+    ccoin_reward_rate: float64 = 3.5;
     
-    function mint_private(amount: u64, privacy: u8) -> Result<()> {
-        quantum::generate_proof(amount, privacy);
-        ccoin::distribute_reward(amount * 0.035);
-        emit PrivateTokenMinted { amount, privacy };
+    # Native ZK13STR address support
+    zk_balances: zk_mapping<zk13str_address, zk_uint256>;
+    
+    function mint_private(amount: uint64, privacy: uint8) -> Result<bool> hostless {
+        require(validate_zk13str(msg.sender), "Invalid ZK13STR address");
+        
+        # Generate quantum-safe zero-knowledge proof
+        zk_proof proof = quantum.generate_zk_proof(amount, privacy, msg.sender);
+        
+        # Auto-distribute CCOIN rewards (3.5% base + privacy bonus)
+        ccoin.distribute_reward(msg.sender, calculate_privacy_reward(amount, privacy));
+        
+        emit ZKT13PrivateTokenMinted(msg.sender, amount, privacy);
+        return true;
     }
 }
 ```

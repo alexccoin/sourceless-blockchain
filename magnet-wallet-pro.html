@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MagnetWallet Pro - Professional SourceLess Wallet</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --darker: #020617;
+            --card: #1e293b;
+            --border: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--darker);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 25% 25%, rgba(37, 99, 235, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 75% 75%, rgba(6, 182, 212, 0.1) 0%, transparent 50%);
+            animation: pulse 15s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.3; }
+            100% { opacity: 0.6; }
+        }
+
+        /* Header */
+        .header {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .logo i {
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .network-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .network-selector:hover {
+            border-color: var(--primary);
+        }
+
+        .network-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse-dot 2s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.2); }
+        }
+
+        .wallet-address {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--card);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            border: 1px solid var(--border);
+            color: var(--accent);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .wallet-address:hover {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            margin-top: 100px;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Balance Card */
+        .balance-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .balance-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-1);
+            opacity: 0.05;
+            z-index: 0;
+        }
+
+        .balance-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .balance-header {
+            display: flex;
+            align-items: center;
+            justify-content: between;
+            margin-bottom: 2rem;
+        }
+
+        .balance-title {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .balance-amount {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .balance-usd {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+        }
+
+        .balance-change {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 0.5rem;
+            color: var(--success);
+            font-weight: 600;
+            width: fit-content;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1.5rem;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            border-color: var(--primary);
+        }
+
+        .action-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .action-icon.send { background: var(--gradient-1); }
+        .action-icon.receive { background: var(--gradient-2); }
+        .action-icon.swap { background: var(--gradient-3); }
+        .action-icon.stake { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); }
+
+        /* Portfolio Section */
+        .portfolio-section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1.5rem;
+            padding: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .portfolio-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .token-item {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 0.75rem;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .token-item:hover {
+            border-color: var(--border);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .token-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .token-info h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .token-info p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .token-balance {
+            text-align: right;
+        }
+
+        .token-balance .amount {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .token-balance .usd {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Recent Activity */
+        .activity-section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 0.75rem;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .activity-item:hover {
+            border-color: var(--border);
+        }
+
+        .activity-icon {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            color: white;
+        }
+
+        .activity-icon.send { background: var(--danger); }
+        .activity-icon.receive { background: var(--success); }
+        .activity-icon.swap { background: var(--accent); }
+
+        .activity-details h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-details p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .activity-amount {
+            margin-left: auto;
+            text-align: right;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Security Features */
+        .security-section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .security-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .security-item:last-child {
+            border-bottom: none;
+        }
+
+        .security-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .security-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--success);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+        }
+
+        .toggle-switch {
+            width: 40px;
+            height: 20px;
+            background: var(--success);
+            border-radius: 10px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .toggle-switch::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .sidebar {
+                order: -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 1rem;
+                margin-top: 140px;
+            }
+
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .balance-amount {
+                font-size: 2rem;
+            }
+
+            .wallet-address {
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: var(--border);
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem;
+            background: var(--darker);
+            border: 2px solid var(--border);
+            border-radius: 0.75rem;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 1rem;
+            background: var(--gradient-1);
+            border: none;
+            border-radius: 0.75rem;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+
+    <!-- Navigation Component -->
+    <div id="navigationComponent"></div>
+
+    <!-- Main Container -->
+    <main class="container">
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Balance Card -->
+            <section class="balance-card" data-aos="fade-up">
+                <div class="balance-content">
+                    <div class="balance-title">Total Portfolio Value</div>
+                    <div class="balance-amount">245,678.92 STR</div>
+                    <div class="balance-usd">$4,278,542.10 USD</div>
+                    <div class="balance-change">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>+12.5% ($532.45) Today</span>
+                    </div>
+                </div>
+                
+                <div class="quick-actions">
+                    <a href="#" class="action-btn" onclick="openModal('sendModal')">
+                        <div class="action-icon send">
+                            <i class="fas fa-paper-plane"></i>
+                        </div>
+                        <span>Send</span>
+                    </a>
+                    <a href="#" class="action-btn" onclick="openModal('receiveModal')">
+                        <div class="action-icon receive">
+                            <i class="fas fa-download"></i>
+                        </div>
+                        <span>Receive</span>
+                    </a>
+                    <a href="#" class="action-btn" onclick="openModal('swapModal')">
+                        <div class="action-icon swap">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                        <span>Swap</span>
+                    </a>
+                    <a href="#" class="action-btn">
+                        <div class="action-icon stake">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <span>Stake</span>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Portfolio -->
+            <section class="portfolio-section" data-aos="fade-up" data-aos-delay="100">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>Portfolio Assets</span>
+                    </div>
+                    <button class="btn" onclick="refreshPortfolio()">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>Refresh</span>
+                    </button>
+                </div>
+                
+                <div class="portfolio-grid" id="portfolioGrid">
+                    <!-- Dynamic content -->
+                </div>
+            </section>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <!-- Recent Activity -->
+            <section class="activity-section" data-aos="fade-left">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class="fas fa-history"></i>
+                        <span>Recent Activity</span>
+                    </div>
+                </div>
+                
+                <div class="activity-list" id="activityList">
+                    <!-- Dynamic content -->
+                </div>
+            </section>
+
+            <!-- Stats -->
+            <section class="stats-grid" data-aos="fade-left" data-aos-delay="100">
+                <div class="stat-card">
+                    <div class="stat-value">$2,845.67</div>
+                    <div class="stat-label">24h P&L</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">156</div>
+                    <div class="stat-label">Transactions</div>
+                </div>
+            </section>
+
+            <!-- Security -->
+            <section class="security-section" data-aos="fade-left" data-aos-delay="200">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Security</span>
+                    </div>
+                </div>
+                
+                <div class="security-item">
+                    <div class="security-info">
+                        <div class="security-icon">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <div>
+                            <div>2FA Enabled</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">Two-factor authentication</div>
+                        </div>
+                    </div>
+                    <div class="toggle-switch"></div>
+                </div>
+                
+                <div class="security-item">
+                    <div class="security-info">
+                        <div class="security-icon">
+                            <i class="fas fa-key"></i>
+                        </div>
+                        <div>
+                            <div>Hardware Wallet</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">Ledger connected</div>
+                        </div>
+                    </div>
+                    <div class="toggle-switch"></div>
+                </div>
+                
+                <div class="security-item">
+                    <div class="security-info">
+                        <div class="security-icon">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <div>
+                            <div>Push Notifications</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">Transaction alerts</div>
+                        </div>
+                    </div>
+                    <div class="toggle-switch"></div>
+                </div>
+            </section>
+        </aside>
+    </main>
+
+    <!-- Modals -->
+    <div id="sendModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-paper-plane"></i> Send STR</h2>
+                <button class="close-btn" onclick="closeModal('sendModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form>
+                <div class="form-group">
+                    <label class="form-label">Recipient Address</label>
+                    <input type="text" class="form-input" placeholder="zk13str_...">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Amount (STR)</label>
+                    <input type="number" class="form-input" placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Gas Fee</label>
+                    <input type="text" class="form-input" value="0.001 STR" readonly>
+                </div>
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-paper-plane"></i>
+                    Send Transaction
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="receiveModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-download"></i> Receive STR</h2>
+                <button class="close-btn" onclick="closeModal('receiveModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div style="text-align: center;">
+                <div style="background: white; padding: 2rem; border-radius: 1rem; margin-bottom: 2rem; display: inline-block;">
+                    <div style="width: 200px; height: 200px; background: #333; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; color: white;">
+                        QR Code
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Your Wallet Address</label>
+                    <input type="text" class="form-input" value="zk13str_a1b2c3d4e5f6g7h8" readonly>
+                </div>
+                <button type="button" class="btn-primary" onclick="copyAddress()">
+                    <i class="fas fa-copy"></i>
+                    Copy Address
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="swapModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-exchange-alt"></i> Swap Tokens</h2>
+                <button class="close-btn" onclick="closeModal('swapModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form>
+                <div class="form-group">
+                    <label class="form-label">From</label>
+                    <input type="text" class="form-input" placeholder="0.00">
+                </div>
+                <div style="text-align: center; margin: 1rem 0;">
+                    <i class="fas fa-arrow-down" style="font-size: 1.5rem; color: var(--primary);"></i>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">To</label>
+                    <input type="text" class="form-input" placeholder="0.00" readonly>
+                </div>
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-exchange-alt"></i>
+                    Swap Tokens
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="js/sourceless-core.js"></script>
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+
+        // Mock data
+        const portfolioAssets = [
+            { name: 'STR', fullName: 'SourceLess Token', balance: '245,678.92', usd: '$4,278,542.10', color: '#2563eb' },
+            { name: 'CCOIN', fullName: 'Community Coin', balance: '15,432.10', usd: '$89,254.30', color: '#10b981' },
+            { name: 'CCOS', fullName: 'Community Coin OS', balance: '8,765.44', usd: '$45,123.67', color: '#f59e0b' },
+            { name: 'USTR', fullName: 'USD SourceLess', balance: '12,500.00', usd: '$12,500.00', color: '#06b6d4' }
+        ];
+
+        const recentActivity = [
+            { type: 'send', title: 'Sent STR', subtitle: 'To zk13str_xyz...', amount: '-1,250.00 STR', time: '2m ago' },
+            { type: 'receive', title: 'Received CCOIN', subtitle: 'From zk13str_abc...', amount: '+500.00 CCOIN', time: '15m ago' },
+            { type: 'swap', title: 'Swapped Tokens', subtitle: 'STR → USTR', amount: '2,000.00 USTR', time: '1h ago' },
+            { type: 'receive', title: 'Received STR', subtitle: 'Staking Rewards', amount: '+125.50 STR', time: '3h ago' },
+            { type: 'send', title: 'Sent CCOS', subtitle: 'To zk13str_def...', amount: '-75.00 CCOS', time: '6h ago' }
+        ];
+
+        // Populate portfolio
+        function populatePortfolio() {
+            const grid = document.getElementById('portfolioGrid');
+            grid.innerHTML = portfolioAssets.map(asset => `
+                <div class="token-item">
+                    <div class="token-icon" style="background: ${asset.color};">
+                        ${asset.name[0]}
+                    </div>
+                    <div class="token-info">
+                        <h4>${asset.name}</h4>
+                        <p>${asset.fullName}</p>
+                    </div>
+                    <div class="token-balance">
+                        <div class="amount">${asset.balance}</div>
+                        <div class="usd">${asset.usd}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Populate activity
+        function populateActivity() {
+            const list = document.getElementById('activityList');
+            list.innerHTML = recentActivity.map(activity => `
+                <div class="activity-item">
+                    <div class="activity-icon ${activity.type}">
+                        <i class="fas fa-${activity.type === 'send' ? 'arrow-up' : activity.type === 'receive' ? 'arrow-down' : 'exchange-alt'}"></i>
+                    </div>
+                    <div class="activity-details">
+                        <h4>${activity.title}</h4>
+                        <p>${activity.subtitle} • ${activity.time}</p>
+                    </div>
+                    <div class="activity-amount" style="color: ${activity.amount.startsWith('+') ? 'var(--success)' : activity.amount.startsWith('-') ? 'var(--danger)' : 'var(--text-primary)'};">
+                        ${activity.amount}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Modal functions
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Utility functions
+        function copyAddress() {
+            const address = 'zk13str_a1b2c3d4e5f6g7h8';
+            navigator.clipboard.writeText(address).then(() => {
+                alert('Wallet address copied to clipboard!');
+            });
+        }
+
+        function refreshPortfolio() {
+            const grid = document.getElementById('portfolioGrid');
+            grid.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-muted);">Refreshing portfolio...</div>';
+            setTimeout(() => {
+                populatePortfolio();
+            }, 1500);
+        }
+
+        // Close modals when clicking outside
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal(this.id);
+                }
+            });
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            populatePortfolio();
+            populateActivity();
+        });
+
+        // Real-time updates simulation
+        function updateBalances() {
+            // Simulate small balance changes
+            const balanceElement = document.querySelector('.balance-amount');
+            const currentBalance = parseFloat(balanceElement.textContent.replace(/[^\d.]/g, ''));
+            const change = (Math.random() - 0.5) * 100; // Random change ±50
+            const newBalance = (currentBalance + change).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            balanceElement.textContent = `${newBalance} STR`;
+            
+            // Update USD value
+            const usdElement = document.querySelector('.balance-usd');
+            const usdValue = (parseFloat(newBalance.replace(',', '')) * 17.42).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            usdElement.textContent = `$${usdValue} USD`;
+        }
+
+        // Update balances every 30 seconds
+        setInterval(updateBalances, 30000);
+    </script>
+</body>
+</html>

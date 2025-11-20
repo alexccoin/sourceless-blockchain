@@ -6,6 +6,7 @@ import * as crypto from 'crypto';
 import { ec as EC } from 'elliptic';
 import { v4 as uuidv4 } from 'uuid';
 import { Wallet, TokenBalance } from '../../../shared/types';
+import { CCOINPostMiningService } from '../../../services/CCOINPostMiningService';
 
 const ec = new EC('secp256k1'); // Same curve as Bitcoin/Ethereum
 
@@ -19,6 +20,11 @@ export interface WalletKeyPair {
 export class WalletManager {
   private wallets: Map<string, Wallet> = new Map();
   private keyPairs: Map<string, WalletKeyPair> = new Map();
+  private ccoinPostMiningService: CCOINPostMiningService;
+
+  constructor() {
+    this.ccoinPostMiningService = new CCOINPostMiningService();
+  }
 
   /**
    * Generate a new wallet with ZK13STR address format
@@ -52,7 +58,12 @@ export class WalletManager {
       nonce: 0,
       domains: [strDomain],
       strDomain,
-      kycVerified
+      kycVerified,
+      ccoinPostMiningStats: {
+        totalPostMined: 0,
+        lastMiningTimestamp: 0,
+        averagePoEScore: 0
+      }
     };
 
     // Store wallet and keypair
@@ -117,7 +128,12 @@ export class WalletManager {
         nonce: 0,
         domains: [strDomain],
         strDomain,
-        kycVerified
+        kycVerified,
+        ccoinPostMiningStats: {
+          totalPostMined: 0,
+          lastMiningTimestamp: 0,
+          averagePoEScore: 0
+        }
       };
 
       this.wallets.set(address, wallet);
@@ -293,6 +309,42 @@ export class WalletManager {
     } catch (e) {
       return false;
     }
+  }
+
+  /**
+   * Update CCOIN balance after post mining (Financial Core)
+   */
+  updateCCOINBalance(address: string, ccoinAmount: number, poeScore: number): void {
+    const wallet = this.wallets.get(address);
+    if (!wallet) return;
+
+    wallet.balances.CCOIN += ccoinAmount;
+    
+    if (wallet.ccoinPostMiningStats) {
+      wallet.ccoinPostMiningStats.totalPostMined += ccoinAmount;
+      wallet.ccoinPostMiningStats.lastMiningTimestamp = Date.now();
+      // Update rolling average PoE score
+      const currentAvg = wallet.ccoinPostMiningStats.averagePoEScore;
+      wallet.ccoinPostMiningStats.averagePoEScore = (currentAvg + poeScore) / 2;
+    }
+    
+    console.log(`💰 CCOIN Balance Updated: ${address} (+${ccoinAmount.toFixed(6)} CCOIN)`);
+  }
+
+  /**
+   * Get CCOIN balance for address
+   */
+  getCCOINBalance(address: string): number {
+    const wallet = this.wallets.get(address);
+    return wallet?.balances.CCOIN || 0;
+  }
+
+  /**
+   * Get CCOIN post mining statistics
+   */
+  getCCOINStats(address: string) {
+    const wallet = this.wallets.get(address);
+    return wallet?.ccoinPostMiningStats || null;
   }
 
   /**

@@ -172,11 +172,13 @@ npm run dev
 Sourceless implements **four independent blockchains** that operate simultaneously:
 
 #### 1️⃣ Main Ledger
-**Purpose**: Primary STR token economy
+**Purpose**: Primary STR token economy with CCOIN financial core
 
-- STR token transfers
-- Stake/unstake operations
+- STR token transfers with PoE post mining
+- CCOIN financial engine integration
+- Stake/unstake operations with CCOIN benefits
 - Mining rewards: **100 STR** per block
+- CCOIN post mining: Variable based on PoE validation
 - Difficulty: 4 (adjusts dynamically)
 
 ```typescript

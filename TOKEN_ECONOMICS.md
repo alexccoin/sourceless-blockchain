@@ -263,6 +263,7 @@ const genesisConfig: GenesisConfig = {
 |--------|--------|----------------|-------------------|-------------------|-----------------|-----------------------------------|
 | STR    | STR    | 63,000,000,000 | 20,790,000,000    | 42,210,000,000    | No              | Main network fuel                 |
 | CCOS   | CCOS   | 63,000,000     | 20,790,000        | 42,210,000        | Yes (2.5-10%)   | Financial network token           |
+| CCOIN  | CCOIN  | 0              | PoE-based         | PoE-based         | Yes (PoE post mining) | Financial core engine       |
 | ARSS   | ARSS   | 0              | TBD               | TBD               | TBD             | Asset shares                      |
 | wSTR   | wSTR   | 0              | TBD               | TBD               | Formula-based   | Wrapped STR + domain value        |
 | eSTR   | eSTR   | 0              | TBD               | TBD               | TBD             | Energy token                      |

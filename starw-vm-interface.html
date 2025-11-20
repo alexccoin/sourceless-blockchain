@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STARW Virtual Machine | High-Performance Smart Contract Execution</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: linear-gradient(310deg, #7928CA 0%, #FF0080 100%);
+            --secondary: linear-gradient(310deg, #2152FF 0%, #21D4FD 100%);
+            --success: linear-gradient(310deg, #17AD37 0%, #98EC2D 100%);
+            --warning: linear-gradient(310deg, #F53939 0%, #FBCF33 100%);
+            --dark: linear-gradient(310deg, #141727 0%, #3A416F 100%);
+            --background: linear-gradient(310deg, #0a0e27 0%, #1a1f3a 100%);
+            --surface: rgba(255, 255, 255, 0.1);
+            --border: rgba(255, 255, 255, 0.2);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.8);
+            --starw-glow: #00d4ff;
+            --execution-bg: #0d1421;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-top: 2rem;
+        }
+
+        .logo-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .header-logo {
+            height: 24px;
+            width: auto;
+            margin-right: 8px;
+            filter: brightness(1.1) drop-shadow(0 6px 12px rgba(0, 212, 255, 0.4));
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--starw-glow), #7928CA, #FF0080);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .header .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+        }
+
+        .vm-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.1), transparent);
+            transition: left 0.8s;
+        }
+
+        .stat-card:hover::before {
+            left: 100%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 212, 255, 0.2);
+            border-color: var(--starw-glow);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, var(--starw-glow), #51cf66);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .execution-panel {
+            background: var(--execution-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            min-height: 600px;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .panel-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .panel-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .control-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .control-btn.primary {
+            background: var(--primary);
+        }
+
+        .control-btn.success {
+            background: var(--success);
+        }
+
+        .control-btn.warning {
+            background: var(--warning);
+        }
+
+        .code-editor {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text-primary);
+            resize: none;
+            width: 100%;
+            height: 300px;
+            outline: none;
+        }
+
+        .execution-output {
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .output-line {
+            margin-bottom: 0.5rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .output-line.success {
+            color: #51cf66;
+            background: rgba(81, 207, 102, 0.1);
+        }
+
+        .output-line.error {
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+        .output-line.info {
+            color: var(--starw-glow);
+        }
+
+        .workers-panel {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .worker-item {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .worker-item:hover {
+            transform: translateX(5px);
+            border-color: var(--starw-glow);
+        }
+
+        .worker-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .worker-id {
+            font-weight: 600;
+            color: var(--starw-glow);
+        }
+
+        .worker-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: var(--success);
+            color: white;
+        }
+
+        .status-idle {
+            background: #6c757d;
+            color: white;
+        }
+
+        .status-busy {
+            background: var(--warning);
+            color: white;
+        }
+
+        .worker-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .metric {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .metric-value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .wasm-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .wasm-card {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .wasm-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .wasm-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin: 1rem 0;
+        }
+
+        .feature-list li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .feature-list i {
+            color: var(--starw-glow);
+            margin-right: 0.5rem;
+            width: 16px;
+        }
+
+        .performance-chart {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 1rem 0;
+            height: 150px;
+            display: flex;
+            align-items: end;
+            gap: 4px;
+        }
+
+        .chart-bar {
+            background: linear-gradient(to top, var(--starw-glow), #7928CA);
+            border-radius: 2px 2px 0 0;
+            flex: 1;
+            transition: height 0.5s ease;
+            opacity: 0.8;
+        }
+
+        .chart-bar:hover {
+            opacity: 1;
+        }
+
+        .vm-console {
+            background: var(--execution-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .console-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .console-output {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            height: 300px;
+            overflow-y: auto;
+            line-height: 1.4;
+        }
+
+        .console-line {
+            margin-bottom: 0.25rem;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .console-prompt {
+            color: var(--starw-glow);
+        }
+
+        .console-success {
+            color: #51cf66;
+        }
+
+        .console-error {
+            color: #ff6b6b;
+        }
+
+        .console-info {
+            color: var(--text-secondary);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            border-top-color: var(--starw-glow);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .glow-effect {
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(0, 212, 255, 0.5); }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-btn">
+        <i class="fas fa-arrow-left"></i>
+        Back to Dashboard
+    </a>
+
+    <div class="container">
+        <header class="header">
+            <div class="logo-container">
+                <img src="https://cdn.prod.website-files.com/6761a2c6913e66c7e863de66/67739a0ea120050e95603449_PrimarywhiteLogo1-ezgif.com-png-to-webp-converter.avif" alt="SourceLess Logo" class="header-logo">
+            </div>
+            <h1>⚡ STARW Virtual Machine</h1>
+            <p class="subtitle">SourceLess™ High-Performance Smart Contract Execution Engine with WebAssembly Support</p>
+            
+            <div class="vm-stats">
+                <div class="stat-card glow-effect">
+                    <div class="stat-value" id="active-workers">289</div>
+                    <div class="stat-label">Active Workers</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="contracts-executed">12,847</div>
+                    <div class="stat-label">Contracts Executed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="gas-consumed">4.7M</div>
+                    <div class="stat-label">Gas Consumed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="execution-time">127ms</div>
+                    <div class="stat-label">Avg Execution Time</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="wasm-modules">1,234</div>
+                    <div class="stat-label">WASM Modules</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="throughput">8,450</div>
+                    <div class="stat-label">TPS Throughput</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Execution Interface -->
+        <div class="main-grid">
+            <div class="execution-panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="fas fa-code"></i>
+                        Smart Contract Execution Environment
+                    </h2>
+                    <div class="panel-controls">
+                        <button class="control-btn primary" onclick="compileContract()">
+                            <i class="fas fa-hammer"></i>
+                            Compile
+                        </button>
+                        <button class="control-btn success" onclick="executeContract()">
+                            <i class="fas fa-play"></i>
+                            Execute
+                        </button>
+                        <button class="control-btn warning" onclick="deployContract()">
+                            <i class="fas fa-rocket"></i>
+                            Deploy
+                        </button>
+                    </div>
+                </div>
+                
+                <textarea class="code-editor" id="contract-code" placeholder="// Enter your smart contract code or WebAssembly text format
+// STARW VM supports AresLang, Solidity, and WASM
+
+contract StarwExample {
+    mapping(address => uint256) balances;
+    uint256 totalSupply;
+    
+    constructor(uint256 _totalSupply) {
+        totalSupply = _totalSupply;
+        balances[msg.sender] = _totalSupply;
+    }
+    
+    function transfer(address to, uint256 amount) external returns (bool) {
+        require(balances[msg.sender] >= amount, \"Insufficient balance\");
+        
+        balances[msg.sender] -= amount;
+        balances[to] += amount;
+        
+        emit Transfer(msg.sender, to, amount);
+        return true;
+    }
+    
+    function balanceOf(address account) external view returns (uint256) {
+        return balances[account];
+    }
+    
+    event Transfer(address indexed from, address indexed to, uint256 value);
+}">// STARW Virtual Machine - Smart Contract Example
+// High-performance execution with WebAssembly compilation
+
+contract StarwAdvancedExample {
+    mapping(address => uint256) private balances;
+    mapping(address => bool) private authorized;
+    uint256 public totalSupply;
+    address public owner;
+    
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event AuthorizedUser(address indexed user);
+    
+    constructor(uint256 _totalSupply) {
+        totalSupply = _totalSupply;
+        owner = msg.sender;
+        balances[owner] = _totalSupply;
+        authorized[owner] = true;
+    }
+    
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Not authorized: owner only");
+        _;
+    }
+    
+    modifier onlyAuthorized() {
+        require(authorized[msg.sender], "Not authorized");
+        _;
+    }
+    
+    function transfer(address to, uint256 amount) external onlyAuthorized returns (bool) {
+        require(to != address(0), "Invalid recipient");
+        require(balances[msg.sender] >= amount, "Insufficient balance");
+        
+        balances[msg.sender] -= amount;
+        balances[to] += amount;
+        
+        emit Transfer(msg.sender, to, amount);
+        return true;
+    }
+    
+    function authorize(address user) external onlyOwner {
+        authorized[user] = true;
+        emit AuthorizedUser(user);
+    }
+    
+    function balanceOf(address account) external view returns (uint256) {
+        return balances[account];
+    }
+    
+    function isAuthorized(address user) external view returns (bool) {
+        return authorized[user];
+    }
+    
+    // WebAssembly optimized function for batch processing
+    function batchTransfer(address[] calldata recipients, uint256[] calldata amounts) 
+        external onlyAuthorized returns (bool) {
+        require(recipients.length == amounts.length, "Arrays length mismatch");
+        
+        uint256 totalAmount = 0;
+        for (uint256 i = 0; i < amounts.length; i++) {
+            totalAmount += amounts[i];
+        }
+        
+        require(balances[msg.sender] >= totalAmount, "Insufficient balance for batch");
+        
+        balances[msg.sender] -= totalAmount;
+        
+        for (uint256 i = 0; i < recipients.length; i++) {
+            balances[recipients[i]] += amounts[i];
+            emit Transfer(msg.sender, recipients[i], amounts[i]);
+        }
+        
+        return true;
+    }
+}</textarea>
+                
+                <div class="execution-output" id="execution-output">
+                    <div class="output-line info">[STARW-VM] Virtual Machine initialized successfully</div>
+                    <div class="output-line info">[STARW-VM] WebAssembly runtime loaded</div>
+                    <div class="output-line info">[STARW-VM] 289 worker nodes connected</div>
+                    <div class="output-line success">[STARW-VM] Ready for smart contract execution</div>
+                </div>
+            </div>
+
+            <!-- Worker Nodes Panel -->
+            <div class="workers-panel">
+                <div class="panel-header">
+                    <h3 class="panel-title">
+                        <i class="fas fa-microchip"></i>
+                        STARW Worker Nodes
+                    </h3>
+                </div>
+                
+                <div id="workers-list">
+                    <!-- Workers will be dynamically loaded -->
+                </div>
+                
+                <div style="text-align: center; margin-top: 1rem;">
+                    <button class="control-btn primary" onclick="refreshWorkers()">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh Workers
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- WebAssembly Features -->
+        <div class="wasm-section">
+            <div class="wasm-card">
+                <h3 class="wasm-title">
+                    <i class="fab fa-rust"></i>
+                    WebAssembly Runtime
+                </h3>
+                <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                    High-performance WebAssembly execution environment with native-speed smart contract processing.
+                </p>
+                <ul class="feature-list">
+                    <li><i class="fas fa-check"></i> Near-native execution speed</li>
+                    <li><i class="fas fa-check"></i> Memory-safe execution</li>
+                    <li><i class="fas fa-check"></i> Cross-platform compatibility</li>
+                    <li><i class="fas fa-check"></i> Sandboxed environment</li>
+                    <li><i class="fas fa-check"></i> JIT compilation support</li>
+                </ul>
+                
+                <div class="performance-chart" id="wasm-performance">
+                    <!-- Performance bars will be generated -->
+                </div>
+            </div>
+
+            <div class="wasm-card">
+                <h3 class="wasm-title">
+                    <i class="fas fa-cogs"></i>
+                    Execution Statistics
+                </h3>
+                <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                    Real-time performance metrics and execution analytics for the STARW VM network.
+                </p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0;">
+                    <div style="text-align: center; padding: 1rem; background: rgba(0,0,0,0.3); border-radius: 8px;">
+                        <div style="font-size: 1.5rem; font-weight: 600; color: var(--starw-glow);" id="contracts-per-second">847</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">Contracts/sec</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: rgba(0,0,0,0.3); border-radius: 8px;">
+                        <div style="font-size: 1.5rem; font-weight: 600; color: #51cf66;" id="success-rate">99.7%</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">Success Rate</div>
+                    </div>
+                </div>
+                <ul class="feature-list">
+                    <li><i class="fas fa-chart-line"></i> Real-time monitoring</li>
+                    <li><i class="fas fa-shield-alt"></i> Error detection & recovery</li>
+                    <li><i class="fas fa-tachometer-alt"></i> Performance optimization</li>
+                    <li><i class="fas fa-database"></i> State management</li>
+                </ul>
+            </div>
+
+            <div class="wasm-card">
+                <h3 class="wasm-title">
+                    <i class="fas fa-network-wired"></i>
+                    Distributed Computing
+                </h3>
+                <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                    289 STARW worker nodes provide distributed smart contract execution across the global network.
+                </p>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin: 1rem 0;">
+                    <div style="text-align: center; padding: 0.5rem;">
+                        <div style="font-size: 1.2rem; font-weight: 600; color: #51cf66;">72</div>
+                        <div style="font-size: 0.7rem; color: var(--text-secondary);">US East</div>
+                    </div>
+                    <div style="text-align: center; padding: 0.5rem;">
+                        <div style="font-size: 1.2rem; font-weight: 600; color: #51cf66;">68</div>
+                        <div style="font-size: 0.7rem; color: var(--text-secondary);">US West</div>
+                    </div>
+                    <div style="text-align: center; padding: 0.5rem;">
+                        <div style="font-size: 1.2rem; font-weight: 600; color: #51cf66;">81</div>
+                        <div style="font-size: 0.7rem; color: var(--text-secondary);">EU West</div>
+                    </div>
+                    <div style="text-align: center; padding: 0.5rem;">
+                        <div style="font-size: 1.2rem; font-weight: 600; color: #51cf66;">68</div>
+                        <div style="font-size: 0.7rem; color: var(--text-secondary);">Asia Pac</div>
+                    </div>
+                </div>
+                <ul class="feature-list">
+                    <li><i class="fas fa-globe"></i> Global distribution</li>
+                    <li><i class="fas fa-balance-scale"></i> Load balancing</li>
+                    <li><i class="fas fa-sync-alt"></i> Automatic failover</li>
+                    <li><i class="fas fa-lock"></i> Secure execution</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- VM Console -->
+        <div class="vm-console">
+            <div class="console-header">
+                <h3 class="panel-title">
+                    <i class="fas fa-terminal"></i>
+                    STARW VM Console
+                </h3>
+                <div class="panel-controls">
+                    <button class="control-btn" onclick="clearConsole()">
+                        <i class="fas fa-trash"></i>
+                        Clear
+                    </button>
+                    <button class="control-btn primary" onclick="runDiagnostics()">
+                        <i class="fas fa-stethoscope"></i>
+                        Diagnostics
+                    </button>
+                </div>
+            </div>
+            
+            <div class="console-output" id="vm-console-output">
+                <div class="console-line"><span class="console-prompt">starw-vm$</span> <span class="console-info">STARW Virtual Machine v2.1.0 initialized</span></div>
+                <div class="console-line"><span class="console-success">✓</span> <span class="console-info">WebAssembly runtime loaded successfully</span></div>
+                <div class="console-line"><span class="console-success">✓</span> <span class="console-info">289 worker nodes connected and ready</span></div>
+                <div class="console-line"><span class="console-success">✓</span> <span class="console-info">Memory pool initialized: 2.4 GB available</span></div>
+                <div class="console-line"><span class="console-success">✓</span> <span class="console-info">Execution engine status: OPTIMAL</span></div>
+                <div class="console-line"><span class="console-prompt">starw-vm$</span> <span class="console-info">Ready for smart contract execution...</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include SourceLess Core -->
+    <script src="js/production-classes.js"></script>
+    <script src="js/sourceless-ecosystem-core.js"></script>
+
+    <script>
+        // STARW VM Controller
+        let sourcelessCore = null;
+        let workers = [];
+        let executionCount = 0;
+        let vmStats = {
+            activeWorkers: 289,
+            contractsExecuted: 12847,
+            gasConsumed: 4700000,
+            executionTime: 127,
+            wasmModules: 1234,
+            throughput: 8450
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('⚡ Initializing STARW Virtual Machine...');
+            
+            // Initialize SourceLess Core
+            if (typeof SourceLessCore !== 'undefined') {
+                sourcelessCore = new SourceLessCore();
+                console.log('✅ STARW VM Core loaded');
+            }
+            
+            // Generate worker nodes
+            generateWorkers();
+            
+            // Create performance chart
+            createPerformanceChart();
+            
+            // Start real-time updates
+            setInterval(updateVMStats, 3000);
+            setInterval(updateWorkers, 5000);
+            setInterval(simulateExecution, 2000);
+            
+            console.log('🎉 STARW Virtual Machine ready');
+        });
+
+        // Generate worker nodes
+        function generateWorkers() {
+            workers = [];
+            const regions = ['US-East', 'US-West', 'EU-West', 'Asia-Pac'];
+            const statuses = ['active', 'idle', 'busy'];
+            
+            for (let i = 1; i <= 20; i++) { // Show first 20 workers in panel
+                const worker = {
+                    id: `STARW-${String(i).padStart(3, '0')}`,
+                    region: regions[Math.floor(Math.random() * regions.length)],
+                    status: statuses[Math.floor(Math.random() * statuses.length)],
+                    cpu: Math.floor(Math.random() * 80 + 20),
+                    memory: Math.floor(Math.random() * 70 + 30),
+                    contracts: Math.floor(Math.random() * 100 + 50),
+                    uptime: (95 + Math.random() * 5).toFixed(1)
+                };
+                workers.push(worker);
+            }
+            
+            renderWorkers();
+        }
+
+        // Render worker nodes
+        function renderWorkers() {
+            const workersList = document.getElementById('workers-list');
+            workersList.innerHTML = '';
+            
+            workers.slice(0, 8).forEach(worker => { // Show first 8 workers
+                const statusClass = `status-${worker.status}`;
+                const statusIcon = worker.status === 'active' ? 'fas fa-circle' : 
+                                 worker.status === 'busy' ? 'fas fa-cog fa-spin' : 'fas fa-pause-circle';
+                
+                const workerDiv = document.createElement('div');
+                workerDiv.className = 'worker-item';
+                workerDiv.innerHTML = `
+                    <div class="worker-header">
+                        <div class="worker-id">${worker.id}</div>
+                        <div class="worker-status ${statusClass}">
+                            <i class="${statusIcon}"></i>
+                            ${worker.status.toUpperCase()}
+                        </div>
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
+                        Region: ${worker.region} | Uptime: ${worker.uptime}%
+                    </div>
+                    <div class="worker-metrics">
+                        <div class="metric">CPU: <span class="metric-value">${worker.cpu}%</span></div>
+                        <div class="metric">Memory: <span class="metric-value">${worker.memory}%</span></div>
+                        <div class="metric">Contracts: <span class="metric-value">${worker.contracts}</span></div>
+                        <div class="metric">Status: <span class="metric-value">${worker.status}</span></div>
+                    </div>
+                `;
+                
+                workersList.appendChild(workerDiv);
+            });
+        }
+
+        // Update VM statistics
+        function updateVMStats() {
+            // Update statistics with small variations
+            vmStats.contractsExecuted += Math.floor(Math.random() * 50 + 10);
+            vmStats.gasConsumed += Math.floor(Math.random() * 100000 + 50000);
+            vmStats.executionTime = Math.floor(120 + Math.random() * 20);
+            vmStats.throughput = Math.floor(8400 + Math.random() * 100);
+            
+            // Update display
+            document.getElementById('active-workers').textContent = vmStats.activeWorkers;
+            document.getElementById('contracts-executed').textContent = vmStats.contractsExecuted.toLocaleString();
+            document.getElementById('gas-consumed').textContent = (vmStats.gasConsumed / 1000000).toFixed(1) + 'M';
+            document.getElementById('execution-time').textContent = vmStats.executionTime + 'ms';
+            document.getElementById('wasm-modules').textContent = vmStats.wasmModules.toLocaleString();
+            document.getElementById('throughput').textContent = vmStats.throughput.toLocaleString();
+            
+            // Update other metrics
+            document.getElementById('contracts-per-second').textContent = Math.floor(800 + Math.random() * 100);
+            document.getElementById('success-rate').textContent = (99.5 + Math.random() * 0.4).toFixed(1) + '%';
+        }
+
+        // Update worker status
+        function updateWorkers() {
+            workers.forEach(worker => {
+                if (Math.random() > 0.8) { // 20% chance to update status
+                    const statuses = ['active', 'idle', 'busy'];
+                    worker.status = statuses[Math.floor(Math.random() * statuses.length)];
+                    worker.cpu = Math.floor(Math.random() * 80 + 20);
+                    worker.memory = Math.floor(Math.random() * 70 + 30);
+                }
+            });
+            
+            renderWorkers();
+        }
+
+        // Simulate contract execution
+        function simulateExecution() {
+            const messages = [
+                'Contract compilation completed successfully',
+                'WebAssembly module loaded and validated',
+                'Execution environment initialized',
+                'Gas estimation: 147,892 units',
+                'Contract deployed to STARW network',
+                'Transaction hash: 0x' + Math.random().toString(16).substr(2, 8),
+                'Execution completed in 89ms',
+                'State changes committed to blockchain'
+            ];
+            
+            if (Math.random() > 0.7) { // 30% chance to show execution
+                const message = messages[Math.floor(Math.random() * messages.length)];
+                logToConsole(message, 'info');
+            }
+        }
+
+        // Create performance chart
+        function createPerformanceChart() {
+            const chart = document.getElementById('wasm-performance');
+            chart.innerHTML = '';
+            
+            for (let i = 0; i < 20; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'chart-bar';
+                bar.style.height = Math.floor(Math.random() * 80 + 20) + '%';
+                chart.appendChild(bar);
+            }
+            
+            // Animate bars periodically
+            setInterval(() => {
+                const bars = chart.querySelectorAll('.chart-bar');
+                bars.forEach(bar => {
+                    bar.style.height = Math.floor(Math.random() * 80 + 20) + '%';
+                });
+            }, 4000);
+        }
+
+        // VM Functions
+        function compileContract() {
+            logToOutput('🔨 Compiling smart contract...', 'info');
+            logToConsole('starw-vm$ compile contract.ares', 'prompt');
+            
+            setTimeout(() => {
+                logToOutput('✅ Compilation successful!', 'success');
+                logToOutput('📦 WebAssembly bytecode generated', 'info');
+                logToOutput('⛽ Estimated gas: 247,892 units', 'info');
+                logToConsole('✓ Contract compiled to WebAssembly', 'success');
+                logToConsole('✓ Gas optimization applied', 'success');
+            }, 2000);
+        }
+
+        function executeContract() {
+            if (Math.random() > 0.1) { // 90% success rate
+                logToOutput('🚀 Executing contract on STARW network...', 'info');
+                logToConsole('starw-vm$ execute --contract=latest', 'prompt');
+                
+                setTimeout(() => {
+                    executionCount++;
+                    const executionTime = Math.floor(Math.random() * 200 + 50);
+                    const gasUsed = Math.floor(Math.random() * 100000 + 150000);
+                    
+                    logToOutput(`✅ Execution completed in ${executionTime}ms`, 'success');
+                    logToOutput(`⛽ Gas used: ${gasUsed.toLocaleString()} units`, 'info');
+                    logToOutput(`🔗 Transaction hash: 0x${Math.random().toString(16).substr(2, 16)}`, 'info');
+                    logToConsole('✓ Contract execution successful', 'success');
+                    logToConsole(`✓ Worker node STARW-${String(Math.floor(Math.random() * 289) + 1).padStart(3, '0')} processed request`, 'info');
+                }, 1500);
+            } else {
+                logToOutput('❌ Execution failed: Gas limit exceeded', 'error');
+                logToConsole('✗ Execution reverted', 'error');
+            }
+        }
+
+        function deployContract() {
+            logToOutput('🚀 Deploying contract to SourceLess mainnet...', 'info');
+            logToConsole('starw-vm$ deploy --network=mainnet', 'prompt');
+            
+            setTimeout(() => {
+                const contractAddress = '0x' + Math.random().toString(16).substr(2, 40);
+                const txHash = '0x' + Math.random().toString(16).substr(2, 64);
+                
+                logToOutput(`✅ Contract deployed successfully!`, 'success');
+                logToOutput(`📄 Contract Address: ${contractAddress}`, 'success');
+                logToOutput(`🔗 Transaction Hash: ${txHash}`, 'info');
+                logToOutput(`⛽ Deployment Cost: ${(Math.random() * 0.1 + 0.05).toFixed(4)} STR`, 'info');
+                logToConsole('✓ Contract deployment completed', 'success');
+                logToConsole('✓ Contract verified and indexed', 'success');
+            }, 3000);
+        }
+
+        function refreshWorkers() {
+            logToConsole('starw-vm$ refresh workers', 'prompt');
+            logToConsole('Refreshing worker node status...', 'info');
+            
+            setTimeout(() => {
+                updateWorkers();
+                logToConsole(`✓ ${vmStats.activeWorkers} workers refreshed`, 'success');
+            }, 1000);
+        }
+
+        function clearConsole() {
+            document.getElementById('vm-console-output').innerHTML = '';
+            logToConsole('starw-vm$ clear', 'prompt');
+            logToConsole('Console cleared', 'info');
+        }
+
+        function runDiagnostics() {
+            logToConsole('starw-vm$ run diagnostics', 'prompt');
+            logToConsole('Running system diagnostics...', 'info');
+            
+            setTimeout(() => {
+                const diagnostics = [
+                    'Memory usage: 67% (1.6GB / 2.4GB)',
+                    'CPU utilization: 34% average across workers',
+                    'Network latency: 12ms average',
+                    'WebAssembly modules: 1,234 loaded',
+                    'Active connections: 289 workers',
+                    'Execution queue: 7 pending contracts',
+                    'Success rate: 99.7% (last 1000 executions)',
+                    'System status: OPTIMAL'
+                ];
+                
+                diagnostics.forEach((diagnostic, index) => {
+                    setTimeout(() => {
+                        logToConsole(`✓ ${diagnostic}`, 'success');
+                    }, index * 200);
+                });
+            }, 1000);
+        }
+
+        // Console logging
+        function logToOutput(message, type) {
+            const output = document.getElementById('execution-output');
+            const line = document.createElement('div');
+            line.className = `output-line ${type}`;
+            line.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            output.appendChild(line);
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function logToConsole(message, type) {
+            const console = document.getElementById('vm-console-output');
+            const line = document.createElement('div');
+            line.className = 'console-line';
+            
+            if (type === 'prompt') {
+                line.innerHTML = `<span class="console-prompt">starw-vm$</span> <span class="console-info">${message.replace('starw-vm$ ', '')}</span>`;
+            } else {
+                const icon = type === 'success' ? '✓' : type === 'error' ? '✗' : 'ℹ';
+                line.innerHTML = `<span class="console-${type}">${icon}</span> <span class="console-info">${message}</span>`;
+            }
+            
+            console.appendChild(line);
+            console.scrollTop = console.scrollHeight;
+        }
+    </script>
+</body>
+</html>

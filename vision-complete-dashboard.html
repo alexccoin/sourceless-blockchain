@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SourceLess Vision Dashboard PRO - Complete Ecosystem</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Vision UI Dashboard PRO Complete Styles */
+        :root {
+            --primary: linear-gradient(310deg, #7928CA 0%, #FF0080 100%);
+            --secondary: linear-gradient(310deg, #2152FF 0%, #21D4FD 100%);
+            --success: linear-gradient(310deg, #17AD37 0%, #98EC2D 100%);
+            --info: linear-gradient(310deg, #2152FF 0%, #21D4FD 100%);
+            --warning: linear-gradient(310deg, #F53939 0%, #FBCF33 100%);
+            --dark: linear-gradient(310deg, #141727 0%, #3A416F 100%);
+            --background: linear-gradient(310deg, #141727 0%, #3A416F 100%);
+            --surface: rgba(255, 255, 255, 0.1);
+            --border: rgba(255, 255, 255, 0.2);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.8);
+            --blur: blur(20px);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .glass {
+            background: var(--surface);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+        }
+
+        /* Layout */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--surface);
+            backdrop-filter: var(--blur);
+            border-right: 1px solid var(--border);
+            padding: 2rem 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .logo {
+            text-align: center;
+            padding: 0 2rem 2rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .search-container {
+            position: relative;
+            margin: 1rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1001;
+            margin-top: 0.5rem;
+        }
+
+        .search-result-item {
+            padding: 0.75rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .search-result-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 0 1rem;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.875rem 1.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            background: var(--surface);
+            color: var(--text-primary);
+            transform: translateX(5px);
+        }
+
+        .nav-link.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .nav-link i {
+            margin-right: 1rem;
+            font-size: 1.1rem;
+            width: 20px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: var(--primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Grid System */
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .grid-4 {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            backdrop-filter: var(--blur);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: var(--primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 300px;
+            position: relative;
+        }
+
+        .chart-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Tables */
+        .table-container {
+            background: var(--surface);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .table th {
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .table td {
+            color: var(--text-primary);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            backdrop-filter: var(--blur);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: rgba(121, 40, 202, 0.5);
+            box-shadow: 0 0 0 3px rgba(121, 40, 202, 0.1);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: relative;
+                height: auto;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+            
+            .grid-4,
+            .grid-3,
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h1><i class="fas fa-cube"></i> SourceLess</h1>
+                <p style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.5rem;">Vision UI Dashboard PRO</p>
+            </div>
+            
+            <!-- Search -->
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="Search ecosystem..." onkeyup="performSearch(this.value)">
+                <div id="searchResults" class="search-results" style="display: none;"></div>
+            </div>
+            
+            <!-- Navigation -->
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="#dashboard" class="nav-link active">
+                            <i class="fas fa-tachometer-alt"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#ledgers" class="nav-link">
+                            <i class="fas fa-layer-group"></i>
+                            Multi-Ledger
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#validators" class="nav-link">
+                            <i class="fas fa-server"></i>
+                            Validators (1,313)
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#transactions" class="nav-link">
+                            <i class="fas fa-exchange-alt"></i>
+                            Transactions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#staking" class="nav-link">
+                            <i class="fas fa-coins"></i>
+                            Staking & Rewards
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#governance" class="nav-link">
+                            <i class="fas fa-vote-yea"></i>
+                            DAO Governance
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#defi" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            DeFi Protocols
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#bridge" class="nav-link">
+                            <i class="fas fa-bridge"></i>
+                            Cross-Chain Bridge
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#starw" class="nav-link">
+                            <i class="fas fa-microchip"></i>
+                            STARW VM
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#analytics" class="nav-link">
+                            <i class="fas fa-chart-bar"></i>
+                            Analytics
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <div>
+                    <h1><i class="fas fa-rocket"></i> Complete Ecosystem Dashboard</h1>
+                    <p style="color: var(--text-secondary);">Professional Vision UI Dashboard PRO - All SourceLess Features</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="openTransactionForm()">
+                        <i class="fas fa-paper-plane"></i>
+                        Send Transaction
+                    </button>
+                    <button class="btn btn-primary" onclick="openStakingForm()">
+                        <i class="fas fa-coins"></i>
+                        Stake Now
+                    </button>
+                </div>
+            </header>
+
+            <!-- Network Stats -->
+            <div class="grid grid-4 fade-in">
+                <div class="card stat-card">
+                    <div class="stat-value" id="networkTPS">47,234</div>
+                    <div class="stat-label">Network TPS</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-value" id="activeValidators">1,313</div>
+                    <div class="stat-label">Active Validators</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-value" id="totalStaked">15.2M</div>
+                    <div class="stat-label">Total Staked STR</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-value" id="networkHealth">99.9%</div>
+                    <div class="stat-label">Network Health</div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="grid grid-2 fade-in">
+                <div class="card">
+                    <h3 style="margin-bottom: 1rem;">Network Performance</h3>
+                    <div class="chart-container">
+                        <canvas id="networkChart" class="chart-canvas"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 style="margin-bottom: 1rem;">Validator Distribution</h3>
+                    <div class="chart-container">
+                        <canvas id="validatorChart" class="chart-canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ledger Overview -->
+            <div class="grid grid-3 fade-in">
+                <div class="card">
+                    <h3 style="margin-bottom: 1rem; color: #2563eb;">
+                        <i class="fas fa-database"></i>
+                        Main Ledger
+                    </h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">Primary blockchain for STR transactions</p>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>Block Height:</span>
+                        <span id="mainBlockHeight">2,847,293</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>Transactions:</span>
+                        <span id="mainTransactions">8,392,847</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Active Accounts:</span>
+                        <span id="mainAccounts">592,384</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom: 1rem; color: #06b6d4;">
+                        <i class="fas fa-coins"></i>
+                        Asset Ledger
+                    </h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">Multi-asset token management</p>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>Active Tokens:</span>
+                        <span id="assetTokens">2,847</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>Total Value:</span>
+                        <span id="assetValue">$847M</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Transfers (24h):</span>
+                        <span id="assetTransfers">94,273</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom: 1rem; color: #10b981;">
+                        <i class="fas fa-file-contract"></i>
+                        Contract Ledger
+                    </h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">AppLess smart contracts</p>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>Active Contracts:</span>
+                        <span id="contractCount">28,473</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>Executions (24h):</span>
+                        <span id="contractExecutions">847,293</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Gas Consumed:</span>
+                        <span id="contractGas">2.8M ARSS</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Transactions Table -->
+            <div class="table-container fade-in">
+                <h3 style="padding: 1.5rem; margin: 0; border-bottom: 1px solid var(--border);">Recent Transactions</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Hash</th>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Amount</th>
+                            <th>Ledger</th>
+                            <th>Status</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionTable">
+                        <!-- Transactions will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for Forms -->
+    <div id="formModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Form</h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Form content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Library -->
+    <script src="js/sourceless-ecosystem-core.js"></script>
+    
+    <!-- Dashboard Implementation -->
+    <script>
+        let sourcelessCore;
+        let updateInterval;
+        let searchTimeout;
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🎨 Vision UI Dashboard PRO Loading...');
+            
+            // Initialize SourceLess Core
+            if (typeof SourceLessCore !== 'undefined') {
+                sourcelessCore = new SourceLessCore();
+                console.log('✅ SourceLess Core Connected with Full Functionality');
+                
+                // Wait for core initialization
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+
+            // Initialize dashboard
+            await initializeDashboard();
+            
+            console.log('🚀 Vision UI Dashboard PRO Ready with All Features!');
+        });
+
+        async function initializeDashboard() {
+            // Start real-time updates
+            updateStats();
+            updateTransactionTable();
+            updateInterval = setInterval(() => {
+                updateStats();
+                updateTransactionTable();
+            }, 5000);
+
+            // Initialize charts
+            initializeCharts();
+            
+            // Setup navigation
+            setupNavigation();
+            
+            // Listen for real-time updates
+            window.addEventListener('sourcelessUpdate', handleRealTimeUpdate);
+        }
+
+        // Enhanced search functionality
+        function performSearch(query) {
+            if (searchTimeout) clearTimeout(searchTimeout);
+            
+            const resultsContainer = document.getElementById('searchResults');
+            
+            if (!query || query.length < 2) {
+                resultsContainer.style.display = 'none';
+                return;
+            }
+            
+            searchTimeout = setTimeout(() => {
+                if (sourcelessCore) {
+                    const results = sourcelessCore.search(query, { limit: 10 });
+                    displaySearchResults(results);
+                }
+            }, 300);
+        }
+
+        function displaySearchResults(results) {
+            const container = document.getElementById('searchResults');
+            if (!container) return;
+            
+            if (results.total === 0) {
+                container.innerHTML = '<div class=\"search-result-item\">No results found</div>';
+                container.style.display = 'block';
+                return;
+            }
+            
+            let html = '';
+            
+            // Transactions
+            if (results.transactions && results.transactions.length > 0) {
+                html += '<div style=\"padding: 0.5rem; font-weight: 600; color: var(--text-primary); border-bottom: 1px solid var(--border);\">Transactions</div>';
+                results.transactions.forEach(tx => {
+                    html += `
+                        <div class=\"search-result-item\" onclick=\"viewTransaction('${tx.hash}')\">
+                            <div style=\"font-weight: 500;\">${tx.hash.substring(0, 20)}...</div>
+                            <div style=\"color: var(--text-secondary); font-size: 12px;\">${tx.ledger} • ${tx.type}</div>
+                        </div>
+                    `;
+                });
+            }
+            
+            // Validators
+            if (results.validators && results.validators.length > 0) {
+                html += '<div style=\"padding: 0.5rem; font-weight: 600; color: var(--text-primary); border-bottom: 1px solid var(--border);\">Validators</div>';
+                results.validators.forEach(validator => {
+                    html += `
+                        <div class=\"search-result-item\" onclick=\"viewValidator('${validator.id}')\">
+                            <div style=\"font-weight: 500;\">${validator.id}</div>
+                            <div style=\"color: var(--text-secondary); font-size: 12px;\">${validator.type} • ${validator.status}</div>
+                        </div>
+                    `;
+                });
+            }
+            
+            container.innerHTML = html;
+            container.style.display = 'block';
+        }
+
+        // Form functionality
+        function openTransactionForm() {
+            const formHtml = `
+                <form onsubmit=\"submitTransactionForm(event)\">
+                    <div class=\"form-group\">
+                        <label class=\"form-label\">From Address</label>
+                        <input type=\"text\" name=\"from\" class=\"form-input\" placeholder=\"zk13str_...\" required>
+                    </div>
+                    <div class=\"form-group\">
+                        <label class=\"form-label\">To Address</label>
+                        <input type=\"text\" name=\"to\" class=\"form-input\" placeholder=\"zk13str_...\" required>
+                    </div>
+                    <div class=\"form-group\">
+                        <label class=\"form-label\">Amount</label>
+                        <input type=\"number\" name=\"amount\" class=\"form-input\" placeholder=\"0.00\" step=\"0.000001\" required>
+                    </div>
+                    <div class=\"form-group\">
+                        <label class=\"form-label\">Ledger</label>
+                        <select name=\"ledger\" class=\"form-input\" required>
+                            <option value=\"main\">Main Ledger</option>
+                            <option value=\"asset\">Asset Ledger</option>
+                            <option value=\"contract\">Contract Ledger</option>
+                            <option value=\"governance\">Governance Ledger</option>
+                            <option value=\"ccoin\">CCOIN Ledger</option>
+                            <option value=\"ccos\">CCOS Ledger</option>
+                        </select>
+                    </div>
+                    <button type=\"submit\" class=\"btn btn-primary\" style=\"width: 100%; margin-top: 1rem;\">
+                        <i class=\"fas fa-paper-plane\"></i>
+                        Send Transaction
+                    </button>
+                </form>
+            `;
+            
+            document.getElementById('modalTitle').textContent = 'Send Transaction';
+            document.getElementById('modalBody').innerHTML = formHtml;
+            document.getElementById('formModal').style.display = 'flex';
+        }
+
+        function openStakingForm() {
+            const formHtml = `
+                <form onsubmit=\"submitStakingForm(event)\">
+                    <div class=\"form-group\">
+                        <label class=\"form-label\">Validator</label>
+                        <select name=\"validator\" class=\"form-input\" required>
+                            <option value=\"\">Select Validator...</option>
+                            <option value=\"genesis_0001\">Genesis Node #1</option>
+                            <option value=\"super_0042\">Supernode #42</option>
+                            <option value=\"mini_0123\">Mini Validator #123</option>
+                            <option value=\"starw_0089\">STARW Worker #89</option>
+                        </select>
+                    </div>
+                    <div class=\"form-group\">
+                        <label class=\"form-label\">Amount (STR)</label>
+                        <input type=\"number\" name=\"amount\" class=\"form-input\" placeholder=\"1000.00\" min=\"100\" required>
+                    </div>
+                    <div class=\"form-group\">
+                        <label class=\"form-label\">Staking Duration (days)</label>
+                        <select name=\"duration\" class=\"form-input\" required>
+                            <option value=\"30\">30 days (5% APY)</option>
+                            <option value=\"90\">90 days (8% APY)</option>
+                            <option value=\"180\">180 days (12% APY)</option>
+                            <option value=\"365\">365 days (18% APY)</option>
+                        </select>
+                    </div>
+                    <button type=\"submit\" class=\"btn btn-primary\" style=\"width: 100%; margin-top: 1rem;\">
+                        <i class=\"fas fa-coins\"></i>
+                        Stake STR Tokens
+                    </button>
+                </form>
+            `;
+            
+            document.getElementById('modalTitle').textContent = 'Stake STR Tokens';
+            document.getElementById('modalBody').innerHTML = formHtml;
+            document.getElementById('formModal').style.display = 'flex';
+        }
+
+        function submitTransactionForm(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            if (sourcelessCore) {
+                const result = sourcelessCore.submitForm('transaction', data);
+                if (result.success) {
+                    alert(`✅ Transaction submitted successfully!\\n\\nHash: ${result.result.hash}\\nStatus: ${result.result.status}\\n\\nYour transaction is being processed by the network.`);
+                    closeModal();
+                    // Update transaction table
+                    setTimeout(() => updateTransactionTable(), 1000);
+                } else {
+                    alert('❌ Transaction failed: ' + (result.error || 'Unknown error'));
+                }
+            }
+        }
+
+        function submitStakingForm(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            if (sourcelessCore) {
+                const result = sourcelessCore.submitForm('staking', data);
+                if (result.success) {
+                    alert(`✅ Staking request submitted!\\n\\nValidator: ${data.validator}\\nAmount: ${data.amount} STR\\nDuration: ${data.duration} days\\n\\nYour tokens will be staked shortly.`);
+                    closeModal();
+                } else {
+                    alert('❌ Staking failed: ' + (result.error || 'Unknown error'));
+                }
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('formModal').style.display = 'none';
+        }
+
+        // Chart initialization
+        function initializeCharts() {
+            if (!sourcelessCore) return;
+
+            // Network Performance Chart
+            const performanceData = sourcelessCore.getPerformanceData(30);
+            sourcelessCore.createChart('networkChart', {
+                type: 'line',
+                data: performanceData
+            });
+            
+            // Validator Distribution Chart
+            const validatorData = sourcelessCore.getValidatorDistribution();
+            sourcelessCore.createChart('validatorChart', {
+                type: 'pie',
+                data: validatorData
+            });
+        }
+
+        // Stats updates
+        function updateStats() {
+            if (sourcelessCore) {
+                const stats = sourcelessCore.getNetworkStats();
+                document.getElementById('networkTPS').textContent = stats.averageTPS.toLocaleString();
+                document.getElementById('activeValidators').textContent = stats.totalValidators.toLocaleString();
+                document.getElementById('totalStaked').textContent = (stats.totalStaked / 1000000).toFixed(1) + 'M';
+                document.getElementById('networkHealth').textContent = stats.networkUptime + '%';
+                
+                // Update ledger stats
+                document.getElementById('mainBlockHeight').textContent = stats.blockHeight.toLocaleString();
+                document.getElementById('mainTransactions').textContent = stats.totalTransactions.toLocaleString();
+                document.getElementById('mainAccounts').textContent = (stats.totalTransactions / 14).toFixed(0).replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');
+            }
+        }
+
+        function updateTransactionTable() {
+            if (!sourcelessCore) return;
+            
+            // Get recent transactions
+            sourcelessCore.getAllEcosystemData().then(data => {
+                const tbody = document.getElementById('transactionTable');
+                if (tbody && data.transactions) {
+                    tbody.innerHTML = data.transactions.slice(0, 10).map(tx => `
+                        <tr style=\"cursor: pointer;\" onclick=\"viewTransaction('${tx.hash}')\">
+                            <td><code>${tx.hash.substring(0, 12)}...</code></td>
+                            <td><code>${tx.from.substring(0, 8)}...${tx.from.slice(-4)}</code></td>
+                            <td><code>${tx.to.substring(0, 8)}...${tx.to.slice(-4)}</code></td>
+                            <td>${tx.amount} ${tx.token || 'STR'}</td>
+                            <td><span style=\"color: ${getStatusColor(tx.ledger)}; font-weight: 500;\">${tx.ledger.toUpperCase()}</span></td>
+                            <td><span style=\"color: ${getStatusColor(tx.status)}; font-weight: 500;\">${tx.status}</span></td>
+                            <td>${new Date(tx.timestamp).toLocaleTimeString()}</td>
+                        </tr>
+                    `).join('');
+                }
+            });
+        }
+
+        function getStatusColor(status) {
+            const colors = {
+                confirmed: '#10b981',
+                pending: '#f59e0b',
+                failed: '#ef4444',
+                main: '#2563eb',
+                asset: '#06b6d4',
+                contract: '#10b981',
+                governance: '#f59e0b',
+                ccoin: '#8b5cf6',
+                ccos: '#ef4444'
+            };
+            return colors[status.toLowerCase()] || '#6b7280';
+        }
+
+        // Navigation
+        function setupNavigation() {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelectorAll('.nav-link').forEach(nav => nav.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const section = this.getAttribute('href').substring(1);
+                    console.log(`Navigating to: ${section}`);
+                });
+            });
+        }
+
+        // Real-time update handler
+        function handleRealTimeUpdate(event) {
+            const { type, data } = event.detail;
+            
+            switch (type) {
+                case 'networkStats':
+                    updateStats();
+                    break;
+                case 'newTransaction':
+                    updateTransactionTable();
+                    break;
+                case 'validatorUpdate':
+                    // Update validator displays
+                    break;
+            }
+        }
+
+        // View functions
+        function viewTransaction(hash) {
+            alert(`🔍 Transaction Details\\n\\nHash: ${hash}\\n\\nFull transaction viewer with complete details, inputs, outputs, and blockchain verification coming soon!\\n\\nThis will include:\\n• Complete transaction data\\n• Block confirmation details\\n• Gas fees and execution traces\\n• Related contract interactions`);
+            document.getElementById('searchResults').style.display = 'none';
+        }
+
+        function viewValidator(id) {
+            alert(`🏗️ Validator Details\\n\\nValidator ID: ${id}\\n\\nComprehensive validator dashboard coming soon!\\n\\nThis will include:\\n• Staking information and rewards\\n• Performance metrics and uptime\\n• Delegation management\\n• Validator node statistics\\n• Historical performance data`);
+            document.getElementById('searchResults').style.display = 'none';
+        }
+
+        // Click outside to close search results
+        document.addEventListener('click', function(e) {
+            const searchContainer = document.querySelector('.search-container');
+            if (!searchContainer.contains(e.target)) {
+                document.getElementById('searchResults').style.display = 'none';
+            }
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (updateInterval) clearInterval(updateInterval);
+            if (sourcelessCore) sourcelessCore.destroy();
+        });
+    </script>
+</body>
+</html>

@@ -28,6 +28,8 @@ export interface Transaction {
   signature: string;
   type: 'transfer' | 'stake' | 'unstake' | 'mint' | 'contract' | 'governance' | 'cross-chain' | 'appless';
   data?: any; // Additional data for specific transaction types
+  ccoinPostMined?: number;  // CCOIN generated via PoE post mining
+  poeValidation?: boolean;  // Proof of Existence validation status
   zkProof?: string; // zk-SNARK proof for privacy
 	crossChainData?: {
 		sourceChain: string; // Bitcoin, Ethereum, Cardano, etc.
@@ -45,7 +47,7 @@ export type TokenSymbol = 'STR' | 'CCOIN' | 'ARSS' | 'CCOS' | 'ESTR' | 'wSTR' | 
 
 export interface TokenBalance {
   STR: number;      // Main fuel token
-  CCOIN: number;    // Cross-chain bridge token
+  CCOIN: number;    // PoE Post Mining Financial Core Token
   ARSS: number;     // VM computation & storage rewards
   CCOS: number;     // IgniteHex platform token
   ESTR: number;     // Energy token for network operations
@@ -181,12 +183,17 @@ export interface StarwWorkerNodeConfig {
 export interface Wallet {
   address: string; // STR.domain format (STR.{username}, max 128 chars after STR.)
   publicKey: string;
-  balances: TokenBalance; // All token balances
+  balances: TokenBalance; // All token balances including CCOIN
   stakedAmount: number;
   nonce: number;
   domains: string[]; // List of owned STR.domains
   strDomain: string; // Primary STR.domain identifier (e.g., STR.alexccoin)
   kycVerified: boolean; // KYC & AML verification status
+  ccoinPostMiningStats?: { // CCOIN Financial Core stats
+    totalPostMined: number;
+    lastMiningTimestamp: number;
+    averagePoEScore: number;
+  };
   crossChainAssets?: { // Cross-chain asset tracking
     [blockchain: string]: number; // e.g., { "Bitcoin": 0.5, "Ethereum": 2.3 }
   };

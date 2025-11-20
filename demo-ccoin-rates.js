@@ -33,10 +33,10 @@ function demonstrateCCOINRates() {
     console.log('   ✅ Dynamic rates based on pool utilization\n');
     
     // DAO Participation
-    console.log('🏛️ DAO PARTICIPATION REWARDS (1% Fixed):');
-    console.log('   • Proposal Creation: 1% CCOIN rewards');
-    console.log('   • Voting Activity:   1% CCOIN rewards');
-    console.log('   • Proposal Execution: 1% CCOIN rewards');
+    console.log('🏛️ DAO PARTICIPATION POST MINING (PoE-Based):');
+    console.log('   • Proposal Creation: PoE validation → CCOIN post mining');
+    console.log('   • Voting Activity:   Consensus proof → CCOIN post mining');
+    console.log('   • Proposal Execution: Governance proof → CCOIN post mining');
     console.log('   ✅ Fixed 1% rate for all governance activities\n');
     
     // Sample calculations

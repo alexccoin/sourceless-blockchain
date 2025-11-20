@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SourceLess Blockchain Professional Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --accent-color: #3b82f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --dark-bg: #0f172a;
+            --darker-bg: #020617;
+            --card-bg: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --border-color: #334155;
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--darker-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(-45deg, #0f172a, #1e293b, #0f172a, #334155);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Navigation */
+        .navbar {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .logo i {
+            color: var(--primary-color);
+            font-size: 2rem;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-item {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+        }
+
+        .nav-item:hover {
+            color: var(--text-primary);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        /* Main Container */
+        .container {
+            margin-top: 80px;
+            padding: 2rem;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+            margin-bottom: 3rem;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--gradient-success);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--gradient-primary);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+            box-shadow: 0 20px 40px rgba(37, 99, 235, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Stat Cards */
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--gradient-success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Progress Bars */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+
+        /* Network Visualization */
+        .network-viz {
+            background: var(--darker-bg);
+            border-radius: 1rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            min-height: 300px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .node {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            animation: nodeFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes nodeFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .dashboard-grid,
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+        }
+
+        /* Animation Classes */
+        .fade-in {
+            animation: fadeIn 1s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Loading Animation */
+        .loading-spinner {
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Table Styles */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table th {
+            background: var(--darker-bg);
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .data-table td {
+            color: var(--text-secondary);
+        }
+
+        .data-table tr:hover {
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        /* Charts Container */
+        .chart-container {
+            background: var(--darker-bg);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            min-height: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-bg"></div>
+    
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-cube"></i>
+                <span>SourceLess</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#dashboard" class="nav-item"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="#blockchain" class="nav-item"><i class="fas fa-link"></i> Blockchain</a></li>
+                <li><a href="#wallet" class="nav-item"><i class="fas fa-wallet"></i> Wallet</a></li>
+                <li><a href="#analytics" class="nav-item"><i class="fas fa-chart-line"></i> Analytics</a></li>
+                <li><a href="#settings" class="nav-item"><i class="fas fa-cog"></i> Settings</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Hero Section -->
+        <section class="hero" data-aos="fade-up">
+            <h1>SourceLess Blockchain</h1>
+            <p>Next-generation multi-ledger blockchain platform with quantum-safe cryptography and ARES Lang integration</p>
+            <div class="status-badge">
+                <i class="fas fa-check-circle"></i>
+                <span>System Operational - 99.9% Uptime</span>
+            </div>
+        </section>
+
+        <!-- Stats Grid -->
+        <section class="stats-grid" data-aos="fade-up" data-aos-delay="100">
+            <div class="stat-card">
+                <div class="stat-value" id="blockCount">6,006</div>
+                <div class="stat-label">Total Blocks</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 85%; background: var(--gradient-success);"></div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="tpsCount">131,300</div>
+                <div class="stat-label">TPS Capacity</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 95%; background: var(--gradient-primary);"></div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="nodeCount">1,313</div>
+                <div class="stat-label">Active Nodes</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 100%; background: var(--gradient-secondary);"></div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="walletCount">89,432</div>
+                <div class="stat-label">Active Wallets</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 78%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Grid -->
+        <section class="dashboard-grid">
+            <!-- Blockchain Status -->
+            <div class="card" data-aos="fade-up" data-aos-delay="200">
+                <div class="card-header">
+                    <div class="card-icon" style="background: var(--gradient-primary);">
+                        <i class="fas fa-cubes"></i>
+                    </div>
+                    <div class="card-title">Blockchain Status</div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="blockchainChart" width="400" height="200"></canvas>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button class="btn btn-primary" onclick="openBlockExplorer()">
+                        <i class="fas fa-search"></i> Explore Blocks
+                    </button>
+                    <button class="btn btn-secondary" onclick="viewTransactions()">
+                        <i class="fas fa-exchange-alt"></i> Transactions
+                    </button>
+                </div>
+            </div>
+
+            <!-- Network Overview -->
+            <div class="card" data-aos="fade-up" data-aos-delay="300">
+                <div class="card-header">
+                    <div class="card-icon" style="background: var(--gradient-success);">
+                        <i class="fas fa-network-wired"></i>
+                    </div>
+                    <div class="card-title">Network Overview</div>
+                </div>
+                <div class="network-viz" id="networkViz">
+                    <!-- Nodes will be dynamically generated -->
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button class="btn btn-success" onclick="openNetworkMap()">
+                        <i class="fas fa-globe"></i> Network Map
+                    </button>
+                    <button class="btn btn-secondary" onclick="viewNodeStats()">
+                        <i class="fas fa-server"></i> Node Stats
+                    </button>
+                </div>
+            </div>
+
+            <!-- Wallet Management -->
+            <div class="card" data-aos="fade-up" data-aos-delay="400">
+                <div class="card-header">
+                    <div class="card-icon" style="background: var(--gradient-secondary);">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <div class="card-title">Wallet Management</div>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>STR Balance</span>
+                        <span style="font-weight: 600;">15,234.56 STR</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>CCOS Balance</span>
+                        <span style="font-weight: 600;">89.12 CCOS</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>WSTR Balance</span>
+                        <span style="font-weight: 600;">2,456.78 WSTR</span>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button class="btn btn-primary" onclick="openWallet()">
+                        <i class="fas fa-eye"></i> View Wallet
+                    </button>
+                    <button class="btn btn-secondary" onclick="sendTransaction()">
+                        <i class="fas fa-paper-plane"></i> Send
+                    </button>
+                </div>
+            </div>
+
+            <!-- ARES Lang Console -->
+            <div class="card" data-aos="fade-up" data-aos-delay="500">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <div class="card-title">ARES Lang Console</div>
+                </div>
+                <div style="background: var(--darker-bg); border-radius: 0.5rem; padding: 1rem; margin: 1rem 0; font-family: 'Courier New', monospace; min-height: 150px;">
+                    <div style="color: var(--success-color);">$ ares-lang --version</div>
+                    <div style="color: var(--text-secondary); margin: 0.5rem 0;">ARES Lang v2.1.0 - Quantum Ready</div>
+                    <div style="color: var(--success-color);">$ compile contract.ares</div>
+                    <div style="color: var(--text-secondary);">✅ Contract compiled successfully</div>
+                    <div style="color: var(--text-secondary);">🔒 Post-quantum signatures enabled</div>
+                    <div style="color: var(--success-color);">$ _</div>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button class="btn btn-primary" onclick="openAresConsole()">
+                        <i class="fas fa-terminal"></i> Open Console
+                    </button>
+                    <button class="btn btn-secondary" onclick="viewContracts()">
+                        <i class="fas fa-file-code"></i> Contracts
+                    </button>
+                </div>
+            </div>
+
+            <!-- System Metrics -->
+            <div class="card" data-aos="fade-up" data-aos-delay="600">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        <i class="fas fa-chart-area"></i>
+                    </div>
+                    <div class="card-title">System Metrics</div>
+                </div>
+                <table class="data-table">
+                    <tbody>
+                        <tr>
+                            <td><i class="fas fa-microchip" style="color: var(--primary-color);"></i> CPU Usage</td>
+                            <td>23%</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-memory" style="color: var(--success-color);"></i> Memory</td>
+                            <td>4.2GB / 16GB</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-hdd" style="color: var(--warning-color);"></i> Storage</td>
+                            <td>156GB / 1TB</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-wifi" style="color: var(--primary-color);"></i> Network</td>
+                            <td>1.2GB ↓ / 856MB ↑</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button class="btn btn-secondary" onclick="openSystemMonitor()">
+                    <i class="fas fa-tachometer-alt"></i> Full Monitor
+                </button>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card" data-aos="fade-up" data-aos-delay="700">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div class="card-title">Quick Actions</div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <button class="btn btn-primary" onclick="createWallet()">
+                        <i class="fas fa-plus"></i> Create Wallet
+                    </button>
+                    <button class="btn btn-secondary" onclick="registerDomain()">
+                        <i class="fas fa-globe"></i> Register Domain
+                    </button>
+                    <button class="btn btn-success" onclick="deployContract()">
+                        <i class="fas fa-rocket"></i> Deploy Contract
+                    </button>
+                    <button class="btn btn-secondary" onclick="bridgeTokens()">
+                        <i class="fas fa-exchange-alt"></i> Bridge Tokens
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recent Activity -->
+        <section class="card" style="margin-top: 2rem;" data-aos="fade-up" data-aos-delay="800">
+            <div class="card-header">
+                <div class="card-icon" style="background: var(--gradient-primary);">
+                    <i class="fas fa-history"></i>
+                </div>
+                <div class="card-title">Recent Activity</div>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Transaction ID</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody id="activityTable">
+                    <tr>
+                        <td><i class="fas fa-paper-plane" style="color: var(--primary-color);"></i> Transfer</td>
+                        <td>0x7a2f...8b9c</td>
+                        <td>250.00 STR</td>
+                        <td><span style="color: var(--success-color);">✅ Confirmed</span></td>
+                        <td>2 minutes ago</td>
+                    </tr>
+                    <tr>
+                        <td><i class="fas fa-globe" style="color: var(--warning-color);"></i> Domain Reg</td>
+                        <td>0x4d1e...3f2a</td>
+                        <td>50.00 STR</td>
+                        <td><span style="color: var(--success-color);">✅ Confirmed</span></td>
+                        <td>15 minutes ago</td>
+                    </tr>
+                    <tr>
+                        <td><i class="fas fa-code" style="color: var(--accent-color);"></i> Contract</td>
+                        <td>0x9c8b...1e7d</td>
+                        <td>100.00 STR</td>
+                        <td><span style="color: var(--warning-color);">⏳ Pending</span></td>
+                        <td>32 minutes ago</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 1000,
+            easing: 'ease-in-out-quart',
+            once: true
+        });
+
+        // Real-time data updates
+        function updateStats() {
+            // Simulate real-time data
+            const stats = {
+                blocks: Math.floor(6006 + Math.random() * 10),
+                tps: Math.floor(131300 + Math.random() * 1000),
+                nodes: 1313,
+                wallets: Math.floor(89432 + Math.random() * 100)
+            };
+
+            document.getElementById('blockCount').textContent = stats.blocks.toLocaleString();
+            document.getElementById('tpsCount').textContent = stats.tps.toLocaleString();
+            document.getElementById('nodeCount').textContent = stats.nodes.toLocaleString();
+            document.getElementById('walletCount').textContent = stats.wallets.toLocaleString();
+        }
+
+        // Network visualization
+        function initNetworkViz() {
+            const container = document.getElementById('networkViz');
+            const nodeCount = 15;
+
+            for (let i = 0; i < nodeCount; i++) {
+                const node = document.createElement('div');
+                node.className = 'node';
+                node.style.left = Math.random() * (container.offsetWidth - 20) + 'px';
+                node.style.top = Math.random() * (container.offsetHeight - 20) + 'px';
+                node.style.animationDelay = Math.random() * 3 + 's';
+                container.appendChild(node);
+            }
+        }
+
+        // Blockchain chart
+        function initBlockchainChart() {
+            const ctx = document.getElementById('blockchainChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+                    datasets: [{
+                        label: 'Blocks/Hour',
+                        data: [1250, 1180, 1320, 1280, 1450, 1380],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { 
+                            grid: { color: '#334155' },
+                            ticks: { color: '#cbd5e1' }
+                        },
+                        y: { 
+                            grid: { color: '#334155' },
+                            ticks: { color: '#cbd5e1' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Action functions
+        function openBlockExplorer() {
+            window.open('public/strxplorer-fixed.html', '_blank');
+        }
+
+        function viewTransactions() {
+            alert('Opening transaction viewer...');
+        }
+
+        function openNetworkMap() {
+            window.open('public/network-map.html', '_blank');
+        }
+
+        function viewNodeStats() {
+            alert('Opening node statistics...');
+        }
+
+        function openWallet() {
+            window.open('client-mini-node/magnet-wallet.html', '_blank');
+        }
+
+        function sendTransaction() {
+            alert('Opening send transaction dialog...');
+        }
+
+        function openAresConsole() {
+            alert('Opening ARES Lang console...');
+        }
+
+        function viewContracts() {
+            alert('Opening smart contracts viewer...');
+        }
+
+        function openSystemMonitor() {
+            window.open('system-monitor.html', '_blank');
+        }
+
+        function createWallet() {
+            alert('Creating new wallet...');
+        }
+
+        function registerDomain() {
+            alert('Opening domain registration...');
+        }
+
+        function deployContract() {
+            alert('Opening contract deployment wizard...');
+        }
+
+        function bridgeTokens() {
+            alert('Opening cross-chain bridge...');
+        }
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStats();
+            initNetworkViz();
+            initBlockchainChart();
+            
+            // Update stats every 10 seconds
+            setInterval(updateStats, 10000);
+        });
+
+        // Add some interactive effects
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-8px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>

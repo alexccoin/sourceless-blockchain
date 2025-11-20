@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SourceLess Explorer - Professional Blockchain Explorer</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --darker: #020617;
+            --card: #1e293b;
+            --border: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--darker);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 20% 80%, rgba(37, 99, 235, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 40%, rgba(168, 85, 247, 0.1) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(120deg); }
+            66% { transform: translate(-20px, 20px) rotate(240deg); }
+        }
+
+        /* Header */
+        .header {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .logo i {
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 600px;
+            margin: 0 2rem;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 3rem;
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: 50px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1.2rem;
+        }
+
+        .network-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            border-radius: 50px;
+            color: var(--success);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            margin-top: 100px;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-item {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Tabs */
+        .tab-container {
+            margin-bottom: 2rem;
+        }
+
+        .tab-nav {
+            display: flex;
+            gap: 0.5rem;
+            background: var(--card);
+            border-radius: 1rem;
+            padding: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-weight: 600;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .tab-button.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .tab-button:hover:not(.active) {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--text-primary);
+        }
+
+        /* Table */
+        .data-table {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .table-header {
+            background: var(--darker);
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .table-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            background: var(--card);
+            color: var(--text-secondary);
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .table th {
+            background: var(--darker);
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .table td {
+            color: var(--text-secondary);
+        }
+
+        .table tr:hover {
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        /* Hash styling */
+        .hash {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--accent);
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .hash:hover {
+            color: var(--primary);
+        }
+
+        /* Status badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge.success {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+        }
+
+        .badge.pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+        }
+
+        .badge.failed {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+        }
+
+        /* Loading animation */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .search-container {
+                margin: 0;
+                max-width: none;
+            }
+
+            .stats-bar {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .tab-nav {
+                flex-wrap: wrap;
+            }
+
+            .container {
+                padding: 1rem;
+                margin-top: 140px;
+            }
+
+            .table-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-search"></i>
+                <span>SourceLess Explorer</span>
+            </div>
+            
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="Search blocks, transactions, addresses, or domains..." id="searchInput">
+            </div>
+            
+            <div class="network-status">
+                <div class="status-dot"></div>
+                <span>Mainnet</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container">
+        <!-- Stats Bar -->
+        <section class="stats-bar" data-aos="fade-up">
+            <div class="stat-item">
+                <div class="stat-value" id="latestBlock">6,006</div>
+                <div class="stat-label">Latest Block</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="totalTxs">2,156,789</div>
+                <div class="stat-label">Total Transactions</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="avgBlockTime">2.1s</div>
+                <div class="stat-label">Avg Block Time</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="networkTps">131.3K</div>
+                <div class="stat-label">Network TPS</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="activeDomains">45,231</div>
+                <div class="stat-label">STR.Domains</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="totalSupply">63B</div>
+                <div class="stat-label">STR Supply</div>
+            </div>
+        </section>
+
+        <!-- Tabs -->
+        <section class="tab-container" data-aos="fade-up" data-aos-delay="100">
+            <nav class="tab-nav">
+                <button class="tab-button active" data-tab="blocks">
+                    <i class="fas fa-cubes"></i>
+                    <span>Latest Blocks</span>
+                </button>
+                <button class="tab-button" data-tab="transactions">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Transactions</span>
+                </button>
+                <button class="tab-button" data-tab="domains">
+                    <i class="fas fa-globe"></i>
+                    <span>STR.Domains</span>
+                </button>
+                <button class="tab-button" data-tab="contracts">
+                    <i class="fas fa-file-code"></i>
+                    <span>Smart Contracts</span>
+                </button>
+            </nav>
+
+            <!-- Blocks Tab -->
+            <div class="tab-content active" id="blocks">
+                <div class="data-table">
+                    <div class="table-header">
+                        <div class="table-title">
+                            <i class="fas fa-cubes"></i>
+                            <span>Latest Blocks</span>
+                        </div>
+                        <div class="table-actions">
+                            <button class="btn" onclick="refreshBlocks()">
+                                <i class="fas fa-sync-alt"></i>
+                                <span>Refresh</span>
+                            </button>
+                            <a href="#" class="btn">
+                                <i class="fas fa-download"></i>
+                                <span>Export</span>
+                            </a>
+                        </div>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Block Height</th>
+                                <th>Hash</th>
+                                <th>Ledger</th>
+                                <th>Transactions</th>
+                                <th>Size</th>
+                                <th>Timestamp</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="blocksTable">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Transactions Tab -->
+            <div class="tab-content" id="transactions">
+                <div class="data-table">
+                    <div class="table-header">
+                        <div class="table-title">
+                            <i class="fas fa-exchange-alt"></i>
+                            <span>Recent Transactions</span>
+                        </div>
+                        <div class="table-actions">
+                            <button class="btn" onclick="refreshTransactions()">
+                                <i class="fas fa-sync-alt"></i>
+                                <span>Refresh</span>
+                            </button>
+                            <a href="#" class="btn">
+                                <i class="fas fa-filter"></i>
+                                <span>Filter</span>
+                            </a>
+                        </div>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Transaction Hash</th>
+                                <th>From</th>
+                                <th>To</th>
+                                <th>Amount</th>
+                                <th>Gas Used</th>
+                                <th>Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionsTable">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Domains Tab -->
+            <div class="tab-content" id="domains">
+                <div class="data-table">
+                    <div class="table-header">
+                        <div class="table-title">
+                            <i class="fas fa-globe"></i>
+                            <span>STR.Domains Registry</span>
+                        </div>
+                        <div class="table-actions">
+                            <button class="btn" onclick="refreshDomains()">
+                                <i class="fas fa-sync-alt"></i>
+                                <span>Refresh</span>
+                            </button>
+                            <a href="#" class="btn">
+                                <i class="fas fa-plus"></i>
+                                <span>Register</span>
+                            </a>
+                        </div>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Domain Name</th>
+                                <th>Owner</th>
+                                <th>Registration Date</th>
+                                <th>Expiry</th>
+                                <th>Value</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="domainsTable">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Smart Contracts Tab -->
+            <div class="tab-content" id="contracts">
+                <div class="data-table">
+                    <div class="table-header">
+                        <div class="table-title">
+                            <i class="fas fa-file-code"></i>
+                            <span>Smart Contracts</span>
+                        </div>
+                        <div class="table-actions">
+                            <button class="btn" onclick="refreshContracts()">
+                                <i class="fas fa-sync-alt"></i>
+                                <span>Refresh</span>
+                            </button>
+                            <a href="#" class="btn">
+                                <i class="fas fa-code"></i>
+                                <span>Deploy</span>
+                            </a>
+                        </div>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Contract Address</th>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Transactions</th>
+                                <th>Balance</th>
+                                <th>Created</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="contractsTable">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+
+        // Sample data generators
+        function generateHash() {
+            const chars = '0123456789abcdef';
+            let result = '0x';
+            for (let i = 0; i < 8; i++) {
+                result += chars[Math.floor(Math.random() * chars.length)];
+            }
+            return result;
+        }
+
+        function generateAddress() {
+            const chars = '0123456789abcdef';
+            let result = 'zk13str_';
+            for (let i = 0; i < 8; i++) {
+                result += chars[Math.floor(Math.random() * chars.length)];
+            }
+            return result;
+        }
+
+        function formatTime(minutes) {
+            if (minutes < 60) return `${minutes}m ago`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `${hours}h ago`;
+            const days = Math.floor(hours / 24);
+            return `${days}d ago`;
+        }
+
+        // Mock data
+        const mockBlocks = Array.from({ length: 15 }, (_, i) => ({
+            height: 6006 - i,
+            hash: generateHash() + '...' + generateHash().slice(-4),
+            ledger: ['Main', 'Asset', 'Contract', 'Governance', 'CCOIN', 'CCOS'][Math.floor(Math.random() * 6)],
+            transactions: Math.floor(Math.random() * 50) + 10,
+            size: (Math.random() * 500 + 100).toFixed(1) + ' KB',
+            timestamp: formatTime(i * 2 + Math.floor(Math.random() * 10)),
+            status: 'Confirmed'
+        }));
+
+        const mockTransactions = Array.from({ length: 15 }, (_, i) => ({
+            hash: generateHash() + '...' + generateHash().slice(-4),
+            from: generateAddress(),
+            to: generateAddress(),
+            amount: (Math.random() * 1000 + 10).toFixed(2) + ' STR',
+            gasUsed: (Math.random() * 100000 + 21000).toLocaleString(),
+            time: formatTime(Math.floor(Math.random() * 60)),
+            status: ['success', 'pending', 'failed'][Math.floor(Math.random() * 3)]
+        }));
+
+        const mockDomains = Array.from({ length: 15 }, (_, i) => ({
+            name: `STR.${['company', 'project', 'defi', 'nft', 'game', 'dao', 'bridge', 'oracle', 'wallet', 'explorer'][Math.floor(Math.random() * 10)]}${i}`,
+            owner: generateAddress(),
+            registered: formatTime(Math.floor(Math.random() * 1000) + 100),
+            expiry: 'Lifetime',
+            value: (Math.random() * 10000 + 100).toFixed(0) + ' STR',
+            status: 'Active'
+        }));
+
+        const mockContracts = Array.from({ length: 15 }, (_, i) => ({
+            address: generateAddress(),
+            name: ['TokenSwap', 'NFTMarket', 'LendingPool', 'DEXRouter', 'StakingPool', 'Bridge', 'Oracle', 'Vault'][Math.floor(Math.random() * 8)],
+            type: ['DeFi', 'NFT', 'Gaming', 'Bridge', 'Oracle'][Math.floor(Math.random() * 5)],
+            transactions: Math.floor(Math.random() * 10000) + 100,
+            balance: (Math.random() * 50000 + 1000).toFixed(0) + ' STR',
+            created: formatTime(Math.floor(Math.random() * 200) + 50),
+            status: 'Active'
+        }));
+
+        // Populate tables
+        function populateBlocks() {
+            const tbody = document.getElementById('blocksTable');
+            tbody.innerHTML = mockBlocks.map(block => `
+                <tr>
+                    <td><strong>${block.height}</strong></td>
+                    <td><span class="hash">${block.hash}</span></td>
+                    <td><span class="badge success">${block.ledger}</span></td>
+                    <td>${block.transactions}</td>
+                    <td>${block.size}</td>
+                    <td>${block.timestamp}</td>
+                    <td><span class="badge success"><i class="fas fa-check"></i> ${block.status}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function populateTransactions() {
+            const tbody = document.getElementById('transactionsTable');
+            tbody.innerHTML = mockTransactions.map(tx => `
+                <tr>
+                    <td><span class="hash">${tx.hash}</span></td>
+                    <td><span class="hash">${tx.from}</span></td>
+                    <td><span class="hash">${tx.to}</span></td>
+                    <td><strong>${tx.amount}</strong></td>
+                    <td>${tx.gasUsed}</td>
+                    <td>${tx.time}</td>
+                    <td><span class="badge ${tx.status}">
+                        ${tx.status === 'success' ? '<i class="fas fa-check"></i> Confirmed' : 
+                          tx.status === 'pending' ? '<i class="fas fa-clock"></i> Pending' : 
+                          '<i class="fas fa-times"></i> Failed'}
+                    </span></td>
+                </tr>
+            `).join('');
+        }
+
+        function populateDomains() {
+            const tbody = document.getElementById('domainsTable');
+            tbody.innerHTML = mockDomains.map(domain => `
+                <tr>
+                    <td><strong style="color: var(--accent);">${domain.name}</strong></td>
+                    <td><span class="hash">${domain.owner}</span></td>
+                    <td>${domain.registered}</td>
+                    <td>${domain.expiry}</td>
+                    <td><strong>${domain.value}</strong></td>
+                    <td><span class="badge success"><i class="fas fa-check"></i> ${domain.status}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function populateContracts() {
+            const tbody = document.getElementById('contractsTable');
+            tbody.innerHTML = mockContracts.map(contract => `
+                <tr>
+                    <td><span class="hash">${contract.address}</span></td>
+                    <td><strong>${contract.name}</strong></td>
+                    <td><span class="badge success">${contract.type}</span></td>
+                    <td>${contract.transactions.toLocaleString()}</td>
+                    <td><strong>${contract.balance}</strong></td>
+                    <td>${contract.created}</td>
+                    <td><span class="badge success"><i class="fas fa-play"></i> ${contract.status}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        // Tab functionality
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const tabId = this.dataset.tab;
+                
+                // Update active button
+                document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Update active content
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const query = this.value.trim();
+                if (query) {
+                    alert(`Searching for: ${query}\n\nSearch functionality would be implemented to find:\n- Blocks by height or hash\n- Transactions by hash\n- Addresses by value\n- STR.Domains by name`);
+                }
+            }
+        });
+
+        // Refresh functions
+        function refreshBlocks() {
+            const tbody = document.getElementById('blocksTable');
+            tbody.innerHTML = '<tr><td colspan="7" class="loading"><div class="spinner"></div></td></tr>';
+            setTimeout(() => {
+                // Update latest block number
+                document.getElementById('latestBlock').textContent = (6006 + Math.floor(Math.random() * 10)).toLocaleString();
+                populateBlocks();
+            }, 1000);
+        }
+
+        function refreshTransactions() {
+            const tbody = document.getElementById('transactionsTable');
+            tbody.innerHTML = '<tr><td colspan="7" class="loading"><div class="spinner"></div></td></tr>';
+            setTimeout(populateTransactions, 1000);
+        }
+
+        function refreshDomains() {
+            const tbody = document.getElementById('domainsTable');
+            tbody.innerHTML = '<tr><td colspan="6" class="loading"><div class="spinner"></div></td></tr>';
+            setTimeout(populateDomains, 1000);
+        }
+
+        function refreshContracts() {
+            const tbody = document.getElementById('contractsTable');
+            tbody.innerHTML = '<tr><td colspan="7" class="loading"><div class="spinner"></div></td></tr>';
+            setTimeout(populateContracts, 1000);
+        }
+
+        // Real-time updates
+        function updateStats() {
+            const stats = {
+                blocks: parseInt(document.getElementById('latestBlock').textContent.replace(',', '')) + Math.floor(Math.random() * 3),
+                txs: parseInt(document.getElementById('totalTxs').textContent.replace(/,/g, '')) + Math.floor(Math.random() * 100),
+                domains: parseInt(document.getElementById('activeDomains').textContent.replace(/,/g, '')) + Math.floor(Math.random() * 10)
+            };
+
+            document.getElementById('latestBlock').textContent = stats.blocks.toLocaleString();
+            document.getElementById('totalTxs').textContent = stats.txs.toLocaleString();
+            document.getElementById('activeDomains').textContent = stats.domains.toLocaleString();
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            populateBlocks();
+            populateTransactions();
+            populateDomains();
+            populateContracts();
+
+            // Update stats every 15 seconds
+            setInterval(updateStats, 15000);
+        });
+
+        // Hash click handlers
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('hash')) {
+                const hash = e.target.textContent;
+                alert(`Viewing details for: ${hash}\n\nThis would open a detailed view showing:\n- Full hash value\n- Block/transaction details\n- Related information\n- Interactive hex viewer`);
+            }
+        });
+    </script>
+</body>
+</html>

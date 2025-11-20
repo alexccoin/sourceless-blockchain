@@ -307,6 +307,25 @@ function setupIPCHandlers(systems: Systems, window: BrowserWindow) {
         }
     });
     
+    // CCOIN (Financial Core) operations
+    ipcMain.handle('ccoin:balance', async (event, { address }) => {
+        const balance = systems.ledgerManager.mainLedger.getCCOINBalance(address);
+        const stats = systems.walletManager.getCCOINStats(address);
+        return {
+            balance,
+            totalPostMined: stats?.totalPostMined || 0,
+            lastMiningTimestamp: stats?.lastMiningTimestamp || 0,
+            averagePoEScore: stats?.averagePoEScore || 0
+        };
+    });
+
+    ipcMain.handle('ccoin:totalSupply', async () => {
+        return {
+            totalSupply: systems.ledgerManager.mainLedger.getCCOINTotalSupply(),
+            timestamp: Date.now()
+        };
+    });
+
     // $TR (Dollar Sourceless) operations
     ipcMain.handle('tr:balance', async () => {
         // TODO: Get actual $TR balance from ledger
@@ -399,14 +418,24 @@ function setupIPCHandlers(systems: Systems, window: BrowserWindow) {
         };
     });
     
-    // CCOIN balance
-    ipcMain.handle('ccoin:balance', async () => {
+    // CCOIN balance (Financial Core)
+    ipcMain.handle('ccoin:balance', async (event, data) => {
         const wallets = systems.walletManager.getAllWallets();
         const defaultWallet = wallets.length > 0 ? wallets[0] : null;
-        const balance = defaultWallet ? systems.ledgerManager.ccoinLedger.getBalance(defaultWallet.address) : 0;
+        const address = data?.address || defaultWallet?.address;
+        
+        if (!address) {
+            return { balance: 0, totalPostMined: 0, lastMiningTimestamp: 0, averagePoEScore: 0 };
+        }
+
+        const balance = systems.ledgerManager.mainLedger.getCCOINBalance(address);
+        const stats = systems.walletManager.getCCOINStats(address);
+        
         return {
             balance,
-            pending: 0,
+            totalPostMined: stats?.totalPostMined || 0,
+            lastMiningTimestamp: stats?.lastMiningTimestamp || 0,
+            averagePoEScore: stats?.averagePoEScore || 0,
             networks: systems.ledgerManager.ccoinLedger.getSupportedChains().length
         };
     });

@@ -534,30 +534,35 @@ const DeploymentSuccess: React.FC<{ result: DeploymentResult }> = ({ result }) =
 
 ### ERC-20 Token Template
 ```areslang
-// AresLang ERC-20 Token Template
-contract {{tokenName}} {
-    string public name = "{{tokenName}}";
-    string public symbol = "{{tokenSymbol}}";
-    uint8 public decimals = {{decimals}};
-    uint256 public totalSupply = {{totalSupply}};
+// Native SourceLess AresLang Token Template
+token_contract {{tokenName}} {
+    name: string = "{{tokenName}}";
+    symbol: string = "{{tokenSymbol}}";
+    decimals: uint8 = 13;  # All SourceLess tokens use 13 decimals
+    total_supply: uint256 = {{totalSupply}};
     
-    mapping(address => uint256) public balanceOf;
-    mapping(address => mapping(address => uint256)) public allowance;
+    # Native ZK13STR address mappings
+    balances: mapping<zk13str_address, uint256>;
+    allowances: mapping<zk13str_address, mapping<zk13str_address, uint256>>;
     
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    event Approval(address indexed owner, address indexed spender, uint256 value);
+    # Native SourceLess events
+    event STRTransfer(zk13str_address indexed from, zk13str_address indexed to, uint256 value);
+    event STRApproval(zk13str_address indexed owner, zk13str_address indexed spender, uint256 value);
     
     constructor() {
-        balanceOf[msg.sender] = totalSupply;
+        balances[msg.sender] = total_supply;
         
-        // Auto-setup CCOIN integration
-        setupCCOINIntegration();
+        # Auto-setup native CCOIN integration
+        setup_ccoin_integration();
         
-        // Auto-setup STR.domains revenue sharing
-        setupSTRDomainsSharing(15); // 15% revenue share
+        # Auto-setup STR.domains revenue sharing (15%)
+        setup_str_domains_sharing(15);
+        
+        # Enable HOSTLESS gas-free transactions
+        enable_hostless_mode();
     }
     
-    function transfer(address to, uint256 value) public returns (bool) {
+    function transfer(zk13str_address to, uint256 value) public hostless returns (bool) {
         require(balanceOf[msg.sender] >= value, "Insufficient balance");
         
         balanceOf[msg.sender] -= value;

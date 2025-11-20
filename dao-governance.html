@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SourceLess DAO - Governance Portal | Production Ready</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: linear-gradient(310deg, #7928CA 0%, #FF0080 100%);
+            --secondary: linear-gradient(310deg, #2152FF 0%, #21D4FD 100%);
+            --success: linear-gradient(310deg, #17AD37 0%, #98EC2D 100%);
+            --danger: linear-gradient(310deg, #F53939 0%, #FBCF33 100%);
+            --dark: linear-gradient(310deg, #141727 0%, #3A416F 100%);
+            --background: linear-gradient(310deg, #141727 0%, #3A416F 100%);
+            --surface: rgba(255, 255, 255, 0.1);
+            --border: rgba(255, 255, 255, 0.2);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: var(--primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: var(--primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .proposals-section {
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .proposal-card {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .proposal-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .proposal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .proposal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .proposal-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-active {
+            background: rgba(23, 173, 55, 0.2);
+            color: #17AD37;
+        }
+
+        .status-passed {
+            background: rgba(33, 82, 255, 0.2);
+            color: #2152FF;
+        }
+
+        .status-rejected {
+            background: rgba(245, 57, 57, 0.2);
+            color: #F53939;
+        }
+
+        .proposal-meta {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .voting-section {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+
+        .voting-bars {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .vote-bar {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .vote-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .vote-for .vote-fill {
+            background: var(--success);
+        }
+
+        .vote-against .vote-fill {
+            background: var(--danger);
+        }
+
+        .vote-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .vote-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .vote-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            color: var(--text-primary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .vote-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .vote-btn.for {
+            background: var(--success);
+        }
+
+        .vote-btn.against {
+            background: var(--danger);
+        }
+
+        .create-proposal-btn {
+            background: var(--primary);
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .create-proposal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(121, 40, 202, 0.3);
+        }
+
+        .treasury-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .treasury-card {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+        }
+
+        .treasury-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .treasury-amount {
+            font-size: 2rem;
+            font-weight: 700;
+            background: var(--success);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .live-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #17AD37;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #2d3748;
+            z-index: 10000;
+            transform: translateX(100%);
+            animation: slideIn 0.3s ease-out forwards;
+        }
+
+        @keyframes slideIn {
+            to { transform: translateX(0); }
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-btn">
+        <i class="fas fa-arrow-left"></i>
+        Back to Dashboard
+    </a>
+
+    <div class="container">
+        <header class="header">
+            <h1><span class="live-indicator"></span>SourceLess DAO</h1>
+            <p>Decentralized Autonomous Organization - Community Governance</p>
+        </header>
+
+        <!-- Governance Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalProposals">127</div>
+                <div class="stat-label">Total Proposals</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="activeProposals">3</div>
+                <div class="stat-label">Active Proposals</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalVoters">8,947</div>
+                <div class="stat-label">Total Voters</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="participationRate">78.4%</div>
+                <div class="stat-label">Participation Rate</div>
+            </div>
+        </div>
+
+        <!-- Create Proposal Button -->
+        <button class="create-proposal-btn" onclick="createProposal()">
+            <i class="fas fa-plus"></i>
+            Create New Proposal
+        </button>
+
+        <!-- Active Proposals -->
+        <section class="proposals-section">
+            <h2 class="section-title">
+                <i class="fas fa-vote-yea"></i>
+                Active Proposals
+            </h2>
+
+            <!-- Proposal 1: Network Upgrade -->
+            <div class="proposal-card">
+                <div class="proposal-header">
+                    <div>
+                        <h3 class="proposal-title">Network Upgrade v2.1 - Enhanced Cross-Chain Functionality</h3>
+                        <div class="proposal-meta">
+                            <span><i class="fas fa-user"></i> Proposed by: STR.GENESIS001</span>
+                            <span><i class="fas fa-clock"></i> 5 days remaining</span>
+                            <span><i class="fas fa-coins"></i> Requested: 2,500,000 STR</span>
+                        </div>
+                    </div>
+                    <span class="proposal-status status-active">Active</span>
+                </div>
+                
+                <p>Proposal to implement enhanced cross-chain bridge functionality, improved validator rewards mechanism, and upgraded consensus algorithm to increase network throughput by 40%.</p>
+                
+                <div class="voting-section">
+                    <div class="voting-bars">
+                        <div class="vote-bar vote-for">
+                            <div class="vote-fill" style="width: 73%"></div>
+                        </div>
+                        <div class="vote-bar vote-against">
+                            <div class="vote-fill" style="width: 27%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="vote-stats">
+                        <span><strong>For:</strong> 6,527,340 STR (73.2%)</span>
+                        <span><strong>Against:</strong> 2,394,187 STR (26.8%)</span>
+                        <span><strong>Quorum:</strong> 89.2% / 67% required</span>
+                    </div>
+                    
+                    <div class="vote-buttons">
+                        <button class="vote-btn for" onclick="vote('proposal-1', 'for')">
+                            <i class="fas fa-thumbs-up"></i>
+                            Vote For
+                        </button>
+                        <button class="vote-btn against" onclick="vote('proposal-1', 'against')">
+                            <i class="fas fa-thumbs-down"></i>
+                            Vote Against
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Proposal 2: Validator Rewards -->
+            <div class="proposal-card">
+                <div class="proposal-header">
+                    <div>
+                        <h3 class="proposal-title">Validator Rewards Optimization Program</h3>
+                        <div class="proposal-meta">
+                            <span><i class="fas fa-user"></i> Proposed by: STR.SUPER047</span>
+                            <span><i class="fas fa-clock"></i> 12 days remaining</span>
+                            <span><i class="fas fa-coins"></i> Requested: 1,200,000 STR</span>
+                        </div>
+                    </div>
+                    <span class="proposal-status status-active">Active</span>
+                </div>
+                
+                <p>Adjust validator reward distribution to incentivize long-term staking and improve network security. Includes bonus rewards for validators with 99%+ uptime.</p>
+                
+                <div class="voting-section">
+                    <div class="voting-bars">
+                        <div class="vote-bar vote-for">
+                            <div class="vote-fill" style="width: 67%"></div>
+                        </div>
+                        <div class="vote-bar vote-against">
+                            <div class="vote-fill" style="width: 33%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="vote-stats">
+                        <span><strong>For:</strong> 4,234,892 STR (67.4%)</span>
+                        <span><strong>Against:</strong> 2,047,319 STR (32.6%)</span>
+                        <span><strong>Quorum:</strong> 62.8% / 67% required</span>
+                    </div>
+                    
+                    <div class="vote-buttons">
+                        <button class="vote-btn for" onclick="vote('proposal-2', 'for')">
+                            <i class="fas fa-thumbs-up"></i>
+                            Vote For
+                        </button>
+                        <button class="vote-btn against" onclick="vote('proposal-2', 'against')">
+                            <i class="fas fa-thumbs-down"></i>
+                            Vote Against
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Proposal 3: Cross-Chain Integration -->
+            <div class="proposal-card">
+                <div class="proposal-header">
+                    <div>
+                        <h3 class="proposal-title">Multi-Chain DeFi Integration Initiative</h3>
+                        <div class="proposal-meta">
+                            <span><i class="fas fa-user"></i> Proposed by: Community Pool</span>
+                            <span><i class="fas fa-clock"></i> 18 days remaining</span>
+                            <span><i class="fas fa-coins"></i> Requested: 850,000 STR</span>
+                        </div>
+                    </div>
+                    <span class="proposal-status status-active">Active</span>
+                </div>
+                
+                <p>Establish partnerships with major DeFi protocols and implement native support for cross-chain liquidity pools and yield farming opportunities.</p>
+                
+                <div class="voting-section">
+                    <div class="voting-bars">
+                        <div class="vote-bar vote-for">
+                            <div class="vote-fill" style="width: 81%"></div>
+                        </div>
+                        <div class="vote-bar vote-against">
+                            <div class="vote-fill" style="width: 19%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="vote-stats">
+                        <span><strong>For:</strong> 3,847,921 STR (81.2%)</span>
+                        <span><strong>Against:</strong> 891,473 STR (18.8%)</span>
+                        <span><strong>Quorum:</strong> 47.4% / 67% required</span>
+                    </div>
+                    
+                    <div class="vote-buttons">
+                        <button class="vote-btn for" onclick="vote('proposal-3', 'for')">
+                            <i class="fas fa-thumbs-up"></i>
+                            Vote For
+                        </button>
+                        <button class="vote-btn against" onclick="vote('proposal-3', 'against')">
+                            <i class="fas fa-thumbs-down"></i>
+                            Vote Against
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Treasury & Statistics -->
+        <section class="treasury-section">
+            <div class="treasury-card">
+                <h3 class="treasury-title">
+                    <i class="fas fa-vault"></i>
+                    DAO Treasury
+                </h3>
+                <div class="treasury-amount" id="treasuryBalance">5,480,000 STR</div>
+                <p>Available for community proposals and development funding</p>
+            </div>
+
+            <div class="treasury-card">
+                <h3 class="treasury-title">
+                    <i class="fas fa-chart-pie"></i>
+                    Voting Power
+                </h3>
+                <div class="treasury-amount" id="votingPower">847,293 STR</div>
+                <p>Your current voting weight in governance decisions</p>
+            </div>
+
+            <div class="treasury-card">
+                <h3 class="treasury-title">
+                    <i class="fas fa-clock"></i>
+                    Next Proposal
+                </h3>
+                <div class="treasury-amount">2 days</div>
+                <p>Time until next scheduled proposal review</p>
+            </div>
+        </section>
+    </div>
+
+    <!-- Include SourceLess Core -->
+    <script src="js/production-classes.js"></script>
+    <script src="js/sourceless-ecosystem-core.js"></script>
+
+    <script>
+        // DAO Governance Functionality
+        let sourcelessCore = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🗳️ Initializing SourceLess DAO Portal...');
+            
+            // Initialize SourceLess Core
+            if (typeof SourceLessCore !== 'undefined') {
+                sourcelessCore = new SourceLessCore();
+                console.log('✅ SourceLess Core loaded for DAO');
+            }
+            
+            // Start real-time updates
+            setInterval(updateStats, 10000);
+            
+            // Initial stats update
+            updateStats();
+            
+            console.log('🎉 DAO Portal fully operational');
+        });
+
+        // Update statistics
+        function updateStats() {
+            try {
+                // Update proposal counts
+                const activeCount = document.querySelectorAll('.status-active').length;
+                document.getElementById('activeProposals').textContent = activeCount;
+                
+                // Update participation rate
+                const participationRate = (78.4 + Math.random() * 2 - 1).toFixed(1);
+                document.getElementById('participationRate').textContent = participationRate + '%';
+                
+                // Update treasury balance
+                const treasuryBase = 5480000;
+                const treasury = treasuryBase + Math.floor(Math.random() * 10000);
+                document.getElementById('treasuryBalance').textContent = treasury.toLocaleString() + ' STR';
+                
+                // Update voting power
+                const votingBase = 847293;
+                const voting = votingBase + Math.floor(Math.random() * 1000);
+                document.getElementById('votingPower').textContent = voting.toLocaleString() + ' STR';
+                
+            } catch (error) {
+                console.error('Stats update error:', error);
+            }
+        }
+
+        // Voting functionality
+        function vote(proposalId, voteType) {
+            const button = event.target;
+            const originalText = button.innerHTML;
+            
+            // Show loading state
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Voting...';
+            button.disabled = true;
+            
+            setTimeout(() => {
+                showNotification(`Vote ${voteType} submitted for ${proposalId}!`, 'success');
+                
+                // Simulate vote count update
+                updateVoteCount(proposalId, voteType);
+                
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }, 2000);
+        }
+
+        // Update vote counts after voting
+        function updateVoteCount(proposalId, voteType) {
+            // This would connect to real governance system
+            console.log(`Vote recorded: ${proposalId} - ${voteType}`);
+            
+            // Show success notification
+            if (sourcelessCore && sourcelessCore.notificationSystem) {
+                sourcelessCore.notificationSystem.success(`Your ${voteType} vote has been recorded!`);
+            }
+        }
+
+        // Create new proposal
+        function createProposal() {
+            const button = event.target;
+            const originalText = button.innerHTML;
+            
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+            button.disabled = true;
+            
+            setTimeout(() => {
+                showNotification('Proposal creation interface would open here', 'info');
+                
+                // In production, this would open a form
+                alert('📝 Create New Proposal\n\nFeatures:\n• Title & Description\n• Funding Request\n• Execution Parameters\n• Timeline Settings\n\nProposal creation interface coming soon!');
+                
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }, 1500);
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.innerHTML = `
+                <strong>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'} ${type.toUpperCase()}</strong><br>
+                ${message}
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => notification.remove(), 300);
+            }, 4000);
+        }
+
+        // Real-time proposal updates
+        setInterval(() => {
+            // Simulate real-time vote updates
+            const voteBars = document.querySelectorAll('.vote-fill');
+            voteBars.forEach(bar => {
+                const currentWidth = parseFloat(bar.style.width);
+                const variance = (Math.random() - 0.5) * 0.2; // ±0.1% change
+                const newWidth = Math.max(5, Math.min(95, currentWidth + variance));
+                bar.style.width = newWidth + '%';
+            });
+            
+            // Update vote statistics
+            const voteStats = document.querySelectorAll('.vote-stats');
+            voteStats.forEach(stat => {
+                // This would update with real blockchain data
+            });
+            
+        }, 30000); // Update every 30 seconds
+    </script>
+</body>
+</html>

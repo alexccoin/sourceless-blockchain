@@ -1392,10 +1392,18 @@ interface LedgerState {
    - Trigger: Financial public transactions ≥ 100 STR
    - Transferable: Yes
 
-3. **ARSS**:
+3. **CCOIN**:
+   - Supply: Dynamic (PoE post mining based)
+   - Generation: Proof of Existence validation
+   - Rate: 0.1-2.0% based on PoE strength
+   - Use: Financial core engine, gas optimization, premium features
+   - Integration: All ecosystem components
+   - Transferable: Yes
+
+4. **ARSS**:
    - Supply: Dynamic (reward-based)
    - Reward Rate: 10 ARSS per 10GB per day
-   - Use: Storage incentivization
+   - Use: Storage incentivization with CCOIN optimization
    - Transferable: Yes
 
 ### Wallet Rules
